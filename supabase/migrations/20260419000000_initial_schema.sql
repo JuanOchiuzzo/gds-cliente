@@ -2,8 +2,7 @@
 -- StandForge CRM — Initial Database Schema
 -- ============================================================
 
--- Enable necessary extensions
-create extension if not exists "uuid-ossp";
+-- Enable necessary extensions (pgcrypto already enabled by default on Supabase)
 
 -- ── ENUM TYPES ──────────────────────────────────────────────
 
@@ -37,7 +36,7 @@ create table profiles (
 -- ── STANDS ──────────────────────────────────────────────────
 
 create table stands (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   name text not null,
   address text,
   city text,
@@ -60,7 +59,7 @@ create table stands (
 -- ── STAND UNITS ─────────────────────────────────────────────
 
 create table stand_units (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   stand_id uuid not null references stands(id) on delete cascade,
   unit_name text not null,
   block text,
@@ -76,7 +75,7 @@ create table stand_units (
 -- ── LEADS ───────────────────────────────────────────────────
 
 create table leads (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   name text not null,
   email text,
   phone text,
@@ -96,7 +95,7 @@ create table leads (
 -- ── ACTIVITIES ──────────────────────────────────────────────
 
 create table activities (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   lead_id uuid references leads(id) on delete set null,
   stand_id uuid references stands(id) on delete set null,
   agent_id uuid references profiles(id),
@@ -108,7 +107,7 @@ create table activities (
 -- ── CALENDAR EVENTS ─────────────────────────────────────────
 
 create table calendar_events (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   title text not null,
   description text,
   type event_type not null default 'outro',
@@ -124,7 +123,7 @@ create table calendar_events (
 -- ── WALLET CLIENTS (private to each agent) ──────────────────
 
 create table wallet_clients (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   agent_id uuid not null references profiles(id) on delete cascade,
   name text not null,
   phone text,
@@ -141,7 +140,7 @@ create table wallet_clients (
 -- ── CLIENT TASKS ────────────────────────────────────────────
 
 create table client_tasks (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   client_id uuid not null references wallet_clients(id) on delete cascade,
   agent_id uuid not null references profiles(id) on delete cascade,
   type task_type not null default 'outro',
@@ -155,20 +154,22 @@ create table client_tasks (
 -- ── QUEUE (Plantão) ─────────────────────────────────────────
 
 create table queue (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   stand_id uuid not null references stands(id) on delete cascade,
   agent_id uuid not null references profiles(id) on delete cascade,
   position int not null,
   status queue_status not null default 'aguardando',
   entered_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique(stand_id, agent_id, entered_at::date)
+  shift_date date not null default current_date,
+  updated_at timestamptz not null default now()
 );
+
+create unique index idx_queue_unique_agent_day on queue (stand_id, agent_id, shift_date);
 
 -- ── APPOINTMENTS ────────────────────────────────────────────
 
 create table appointments (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   agent_id uuid not null references profiles(id) on delete cascade,
   client_name text not null,
   client_phone text,
@@ -189,7 +190,7 @@ create table appointments (
 -- ── CHAT MESSAGES ───────────────────────────────────────────
 
 create table chat_messages (
-  id uuid primary key default uuid_generate_v4(),
+  id uuid primary key default gen_random_uuid(),
   sender_id uuid not null references profiles(id) on delete cascade,
   content text not null,
   type text not null default 'text' check (type in ('text', 'image', 'file')),
