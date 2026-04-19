@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/lib/theme-context';
+import { useAuth } from '@/lib/auth-context';
+import { Avatar } from '@/components/ui/avatar';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -28,6 +30,7 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const { profile } = useAuth();
 
   return (
     <aside className="hidden lg:flex flex-col w-64 h-screen fixed left-0 top-0 z-40 bg-[var(--sf-bg-secondary)]/80 backdrop-blur-2xl border-r border-[var(--sf-border)]">
@@ -84,12 +87,10 @@ export function Sidebar() {
         </button>
 
         <div className="flex items-center gap-3 px-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/30 to-violet-500/30 dark:from-cyan-500/30 dark:to-violet-500/30 flex items-center justify-center text-xs font-bold text-blue-700 dark:text-cyan-200 border border-[var(--sf-border)]">
-            SF
-          </div>
+          <Avatar name={profile?.full_name || 'U'} size="sm" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[var(--sf-text-primary)] truncate">Admin</p>
-            <p className="text-xs text-[var(--sf-text-tertiary)] truncate">admin@standforge.com</p>
+            <p className="text-sm font-medium text-[var(--sf-text-primary)] truncate">{profile?.full_name || 'Usuário'}</p>
+            <p className="text-xs text-[var(--sf-text-tertiary)] truncate">{profile?.email}</p>
           </div>
         </div>
       </div>

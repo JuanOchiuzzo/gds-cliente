@@ -1,186 +1,128 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { BarChart3, Download, FileText, TrendingUp } from 'lucide-react';
+import { BarChart3 } from 'lucide-react';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Button } from '@/components/ui/button';
-import { SalesChart } from '@/components/dashboard/sales-chart';
-import { FunnelChart } from '@/components/dashboard/funnel-chart';
-import { funnelData, salesChartData, agents, stands } from '@/lib/mock-data';
-import { formatCurrency, formatPercent } from '@/lib/utils';
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie,
-} from 'recharts';
+import { useLeads } from '@/lib/hooks/use-leads';
+import { useStands } from '@/lib/hooks/use-stands';
+import { useAppointments } from '@/lib/hooks/use-appointments';
+import { useWallet } from '@/lib/hooks/use-wallet';
+import { formatCurrency } from '@/lib/utils';
 
-const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
 
-const standChartData = stands
-  .filter((s) => s.status === 'ativo')
-  .map((s) => ({
-    name: s.name.replace('Stand ', '').substring(0, 12),
-    vendas: s.monthly_sales,
-    meta: s.monthly_target,
-  }))
-  .sort((a, b) => b.vendas - a.vendas)
-  .slice(0, 8);
-
-const sourceData = [
-  { name: 'WhatsApp', value: 35, fill: '#22c55e' },
-  { name: 'Site', value: 22, fill: '#67e8f9' },
-  { name: 'Stand', value: 18, fill: '#a855f7' },
-  { name: 'Instagram', value: 15, fill: '#f472b6' },
-  { name: 'Indicação', value: 10, fill: '#fbbf24' },
-];
-
 export default function ReportsPage() {
+  const { leads, loading: leadsLoading } = useLeads();
+  const { stands, loading: standsLoading } = useStands();
+  const { appointments, loading: aptsLoading } = useAppointments();
+  const { clients, tasks } = useWallet();
+
+  const loading = leadsLoading || standsLoading || aptsLoading;
+
+  const totalLeads = leads.length;
+  const leadsByStage: Record<string, number> = {};
+  leads.forEach((l) => { leadsByStage[l.stage] = (leadsByStage[l.stage] || 0) + 1; });
+
+  const totalStands = stands.filter((s) => s.status === 'ativo').length;
+  const totalSold = stands.reduce((acc, s) => acc + s.sold_units, 0);
+  const totalRevenue = leads.filter((l) => l.stage === 'fechado').reduce((acc, l) => acc + l.estimated_value, 0);
+
+  const totalAppointments = appointments.length;
+  const completedVisits = appointments.filter((a) => a.status === 'realizado').length;
+  const pendingTasks = tasks.filter((t) => !t.completed).length;
+
+  const conversionRate = totalLeads > 0 ? ((leadsByStage['fechado'] || 0) / totalLeads * 100) : 0;
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--sf-accent)]/30 border-t-[var(--sf-accent)] rounded-full animate-spin" /></div>;
+  }
+
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
-      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--sf-text-primary)]">Relatórios & Analytics</h1>
-          <p className="text-sm text-[var(--sf-text-tertiary)] mt-1">Análise completa da operação</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="secondary" size="sm">
-            <Download className="w-4 h-4" /> Exportar PDF
-          </Button>
-          <Button variant="secondary" size="sm">
-            <FileText className="w-4 h-4" /> Exportar Excel
-          </Button>
-        </div>
+    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4">
+      <motion.div variants={fadeUp}>
+        <h1 className="text-xl lg:text-2xl font-bold text-[var(--sf-text-primary)]">Relatórios</h1>
+        <p className="text-xs text-[var(--sf-text-tertiary)] mt-0.5">Visão geral dos seus dados</p>
       </motion.div>
 
       {/* Summary Cards */}
       <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'Receita Total', value: formatCurrency(23500000), change: '+15.2%', color: 'text-emerald-400' },
-          { label: 'Ticket Médio', value: formatCurrency(500000), change: '+3.8%', color: 'text-emerald-400' },
-          { label: 'Ciclo Médio', value: '18 dias', change: '-2 dias', color: 'text-emerald-400' },
-          { label: 'Taxa Perda', value: '10.2%', change: '-1.5%', color: 'text-emerald-400' },
+          { label: 'Total Leads', value: totalLeads.toString() },
+          { label: 'Stands Ativos', value: totalStands.toString() },
+          { label: 'Unidades Vendidas', value: totalSold.toString() },
+          { label: 'Taxa Conversão', value: `${conversionRate.toFixed(1)}%` },
+          { label: 'Receita (Fechados)', value: formatCurrency(totalRevenue) },
+          { label: 'Agendamentos', value: totalAppointments.toString() },
+          { label: 'Visitas Realizadas', value: completedVisits.toString() },
+          { label: 'Tarefas Pendentes', value: pendingTasks.toString() },
         ].map((item) => (
-          <GlassCard key={item.label} glow="cyan" className="!p-4">
-            <p className="text-xs text-[var(--sf-text-tertiary)]">{item.label}</p>
-            <p className="text-xl font-bold text-[var(--sf-text-primary)] mt-1">{item.value}</p>
-            <p className={`text-xs font-medium mt-1 ${item.color}`}>{item.change}</p>
+          <GlassCard key={item.label} hover={false} className="!p-4">
+            <p className="text-lg font-bold text-[var(--sf-text-primary)]">{item.value}</p>
+            <p className="text-[10px] text-[var(--sf-text-tertiary)] mt-0.5">{item.label}</p>
           </GlassCard>
         ))}
       </motion.div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <motion.div variants={fadeUp}>
-          <GlassCard hover={false}>
-            <h3 className="text-sm font-semibold text-[var(--sf-text-secondary)] mb-4">Vendas vs Meta (Mensal)</h3>
-            <SalesChart data={salesChartData} />
-          </GlassCard>
-        </motion.div>
-
-        <motion.div variants={fadeUp}>
-          <GlassCard hover={false}>
-            <h3 className="text-sm font-semibold text-[var(--sf-text-secondary)] mb-4">Funil de Conversão</h3>
-            <FunnelChart data={funnelData} />
-          </GlassCard>
-        </motion.div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Vendas por Stand */}
-        <motion.div variants={fadeUp}>
-          <GlassCard hover={false}>
-            <h3 className="text-sm font-semibold text-[var(--sf-text-secondary)] mb-4">Vendas por Stand</h3>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={standChartData} margin={{ left: -20 }}>
-                <XAxis dataKey="name" tick={{ fill: 'var(--sf-text-tertiary)', fontSize: 10 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: 'var(--sf-text-tertiary)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    background: 'var(--sf-bg-secondary)', border: '1px solid var(--sf-border)',
-                    borderRadius: '16px', color: 'var(--sf-text-primary)', fontSize: '12px',
-                  }}
-                />
-                <Bar dataKey="vendas" fill="#67e8f9" radius={[6, 6, 0, 0]} fillOpacity={0.7} />
-                <Bar dataKey="meta" fill="#a855f7" radius={[6, 6, 0, 0]} fillOpacity={0.4} />
-              </BarChart>
-            </ResponsiveContainer>
-          </GlassCard>
-        </motion.div>
-
-        {/* Origem dos Leads */}
-        <motion.div variants={fadeUp}>
-          <GlassCard hover={false}>
-            <h3 className="text-sm font-semibold text-[var(--sf-text-secondary)] mb-4">Origem dos Leads</h3>
-            <div className="flex items-center gap-6">
-              <ResponsiveContainer width="50%" height={220}>
-                <PieChart>
-                  <Pie
-                    data={sourceData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={80}
-                    paddingAngle={3}
-                    dataKey="value"
-                    animationDuration={1200}
-                  >
-                    {sourceData.map((entry, i) => (
-                      <Cell key={i} fill={entry.fill} fillOpacity={0.8} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      background: 'var(--sf-bg-secondary)', border: '1px solid var(--sf-border)',
-                      borderRadius: '16px', color: 'var(--sf-text-primary)', fontSize: '12px',
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="space-y-2">
-                {sourceData.map((s) => (
-                  <div key={s.name} className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: s.fill }} />
-                    <span className="text-xs text-[var(--sf-text-secondary)]">{s.name}</span>
-                    <span className="text-xs font-medium text-[var(--sf-text-secondary)] ml-auto">{s.value}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </GlassCard>
-        </motion.div>
-      </div>
-
-      {/* Top Agents Table */}
+      {/* Leads by Stage */}
       <motion.div variants={fadeUp}>
         <GlassCard hover={false}>
-          <h3 className="text-sm font-semibold text-[var(--sf-text-secondary)] mb-4">Top Agentes por Receita</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[var(--sf-border)]">
-                  <th className="text-left py-2 px-3 text-xs text-[var(--sf-text-tertiary)] font-medium">#</th>
-                  <th className="text-left py-2 px-3 text-xs text-[var(--sf-text-tertiary)] font-medium">Agente</th>
-                  <th className="text-left py-2 px-3 text-xs text-[var(--sf-text-tertiary)] font-medium">Stand</th>
-                  <th className="text-right py-2 px-3 text-xs text-[var(--sf-text-tertiary)] font-medium">Vendas</th>
-                  <th className="text-right py-2 px-3 text-xs text-[var(--sf-text-tertiary)] font-medium">Conversão</th>
-                  <th className="text-right py-2 px-3 text-xs text-[var(--sf-text-tertiary)] font-medium">Receita</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[...agents].sort((a, b) => b.revenue - a.revenue).slice(0, 10).map((agent, i) => (
-                  <tr key={agent.id} className="border-b border-white/[0.03] hover:bg-[var(--sf-surface)]">
-                    <td className="py-2.5 px-3 text-[var(--sf-text-muted)]">{i + 1}</td>
-                    <td className="py-2.5 px-3 text-[var(--sf-text-primary)] font-medium">{agent.name}</td>
-                    <td className="py-2.5 px-3 text-[var(--sf-text-secondary)]">{agent.stand_name.replace('Stand ', '')}</td>
-                    <td className="py-2.5 px-3 text-right text-[var(--sf-text-secondary)]">{agent.total_sales}</td>
-                    <td className="py-2.5 px-3 text-right text-[var(--sf-text-secondary)]">{formatPercent(agent.conversion_rate)}</td>
-                    <td className="py-2.5 px-3 text-right text-blue-600 dark:text-cyan-300 font-medium">{formatCurrency(agent.revenue)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <h3 className="text-sm font-semibold text-[var(--sf-text-secondary)] mb-4">Leads por Etapa</h3>
+          {totalLeads === 0 ? (
+            <p className="text-sm text-[var(--sf-text-tertiary)] text-center py-8">Nenhum lead cadastrado</p>
+          ) : (
+            <div className="space-y-3">
+              {[
+                { key: 'novo', label: 'Novo', color: 'bg-blue-500 dark:bg-cyan-500' },
+                { key: 'qualificado', label: 'Qualificado', color: 'bg-violet-500' },
+                { key: 'visita_agendada', label: 'Visita Agendada', color: 'bg-amber-500' },
+                { key: 'proposta', label: 'Proposta', color: 'bg-indigo-500' },
+                { key: 'negociacao', label: 'Negociação', color: 'bg-orange-500' },
+                { key: 'fechado', label: 'Fechado', color: 'bg-emerald-500' },
+                { key: 'perdido', label: 'Perdido', color: 'bg-red-500' },
+              ].map((stage) => {
+                const count = leadsByStage[stage.key] || 0;
+                const pct = totalLeads > 0 ? (count / totalLeads) * 100 : 0;
+                return (
+                  <div key={stage.key} className="flex items-center gap-3">
+                    <span className="text-xs text-[var(--sf-text-secondary)] w-28">{stage.label}</span>
+                    <div className="flex-1 h-2 bg-[var(--sf-surface)] rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${stage.color}`} style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-xs font-semibold text-[var(--sf-text-primary)] w-8 text-right">{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </GlassCard>
+      </motion.div>
+
+      {/* Carteira Stats */}
+      <motion.div variants={fadeUp}>
+        <GlassCard hover={false}>
+          <h3 className="text-sm font-semibold text-[var(--sf-text-secondary)] mb-4">Minha Carteira</h3>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: '🔥 Quentes', value: clients.filter((c) => c.temperature === 'quente').length },
+              { label: '🌡️ Mornos', value: clients.filter((c) => c.temperature === 'morno').length },
+              { label: '❄️ Frios', value: clients.filter((c) => c.temperature === 'frio').length },
+            ].map((item) => (
+              <div key={item.label} className="text-center p-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl">
+                <p className="text-xl font-bold text-[var(--sf-text-primary)]">{item.value}</p>
+                <p className="text-[10px] text-[var(--sf-text-tertiary)]">{item.label}</p>
+              </div>
+            ))}
           </div>
         </GlassCard>
       </motion.div>
+
+      {totalLeads === 0 && totalStands === 0 && (
+        <GlassCard hover={false} className="!p-8 text-center">
+          <BarChart3 className="w-10 h-10 mx-auto text-[var(--sf-text-muted)] mb-3" />
+          <p className="text-sm text-[var(--sf-text-tertiary)]">Adicione dados para ver relatórios detalhados</p>
+        </GlassCard>
+      )}
     </motion.div>
   );
 }
