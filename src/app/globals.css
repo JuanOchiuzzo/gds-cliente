@@ -1,0 +1,198 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   StandForge CRM — Dual Theme System
+   Light (default): Apple Liquid Glass 2026 inspired
+   Dark: Neon glassmorphism
+   ============================================================ */
+
+:root {
+  /* ── Light Theme (default) — Liquid Glass ── */
+  --sf-bg: #f8f9fb;
+  --sf-bg-secondary: #ffffff;
+  --sf-bg-tertiary: #f1f3f6;
+  --sf-surface: rgba(255, 255, 255, 0.72);
+  --sf-surface-hover: rgba(255, 255, 255, 0.88);
+  --sf-surface-elevated: rgba(255, 255, 255, 0.85);
+  --sf-border: rgba(0, 0, 0, 0.06);
+  --sf-border-hover: rgba(0, 0, 0, 0.1);
+  --sf-border-active: rgba(59, 130, 246, 0.3);
+  --sf-text-primary: #0f172a;
+  --sf-text-secondary: #475569;
+  --sf-text-tertiary: #94a3b8;
+  --sf-text-muted: #cbd5e1;
+  --sf-accent: #2563eb;
+  --sf-accent-light: rgba(37, 99, 235, 0.08);
+  --sf-accent-medium: rgba(37, 99, 235, 0.15);
+  --sf-cyan: #0891b2;
+  --sf-violet: #7c3aed;
+  --sf-emerald: #059669;
+  --sf-amber: #d97706;
+  --sf-red: #dc2626;
+  --sf-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sf-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --sf-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --sf-shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --sf-blur: 20px;
+  --sf-radius: 20px;
+  --sf-gradient-accent: linear-gradient(135deg, #2563eb, #7c3aed);
+  --sf-gradient-surface: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
+}
+
+.dark {
+  /* ── Dark Theme — Neon Glassmorphism ── */
+  --sf-bg: #0a0a0f;
+  --sf-bg-secondary: #111118;
+  --sf-bg-tertiary: #18181f;
+  --sf-surface: rgba(9, 9, 14, 0.7);
+  --sf-surface-hover: rgba(9, 9, 14, 0.85);
+  --sf-surface-elevated: rgba(24, 24, 31, 0.8);
+  --sf-border: rgba(255, 255, 255, 0.08);
+  --sf-border-hover: rgba(255, 255, 255, 0.15);
+  --sf-border-active: rgba(103, 232, 249, 0.3);
+  --sf-text-primary: #e4e4e7;
+  --sf-text-secondary: #a1a1aa;
+  --sf-text-tertiary: #71717a;
+  --sf-text-muted: #3f3f46;
+  --sf-accent: #67e8f9;
+  --sf-accent-light: rgba(103, 232, 249, 0.08);
+  --sf-accent-medium: rgba(103, 232, 249, 0.15);
+  --sf-cyan: #67e8f9;
+  --sf-violet: #a855f7;
+  --sf-emerald: #34d399;
+  --sf-amber: #fbbf24;
+  --sf-red: #f87171;
+  --sf-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --sf-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --sf-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --sf-shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --sf-blur: 24px;
+  --sf-radius: 24px;
+  --sf-gradient-accent: linear-gradient(135deg, #67e8f9, #a855f7);
+  --sf-gradient-surface: linear-gradient(135deg, rgba(9,9,14,0.8), rgba(9,9,14,0.6));
+}
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--sf-bg);
+  color: var(--sf-text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--sf-border); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--sf-border-hover); }
+
+/* ── Leaflet dark overrides ── */
+.dark .leaflet-container { background: #0a0a0f !important; }
+.dark .leaflet-tile-pane {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+.leaflet-container { background: #f8f9fb !important; border-radius: var(--sf-radius); }
+.leaflet-control-zoom a {
+  background: var(--sf-surface) !important;
+  color: var(--sf-text-primary) !important;
+  border-color: var(--sf-border) !important;
+  backdrop-filter: blur(var(--sf-blur)) !important;
+}
+.leaflet-popup-content-wrapper {
+  background: var(--sf-surface-elevated) !important;
+  backdrop-filter: blur(var(--sf-blur)) !important;
+  border: 1px solid var(--sf-border) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--sf-shadow-lg) !important;
+  color: var(--sf-text-primary) !important;
+}
+.leaflet-popup-tip { background: var(--sf-surface-elevated) !important; }
+
+/* ── Sonner toast theming ── */
+.sf-toast {
+  background: var(--sf-surface-elevated) !important;
+  border: 1px solid var(--sf-border) !important;
+  backdrop-filter: blur(var(--sf-blur)) !important;
+  color: var(--sf-text-primary) !important;
+  border-radius: 16px !important;
+}
+
+/* ── Recharts tooltip ── */
+.recharts-default-tooltip {
+  background: var(--sf-surface-elevated) !important;
+  border: 1px solid var(--sf-border) !important;
+  border-radius: 16px !important;
+  backdrop-filter: blur(var(--sf-blur)) !important;
+}
+
+/* ── Animations ── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes glow-pulse {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-shimmer { animation: shimmer 2s linear infinite; }
+.animate-glow-pulse { animation: glow-pulse 2s ease-in-out infinite alternate; }
+.animate-float { animation: float 6s ease-in-out infinite; }
+
+/* ── Utility ── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── Glass Card Utility Classes ── */
+.sf-glass {
+  background: var(--sf-surface);
+  backdrop-filter: blur(var(--sf-blur));
+  -webkit-backdrop-filter: blur(var(--sf-blur));
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius);
+  box-shadow: var(--sf-shadow-glass);
+  transition: all 0.2s ease;
+}
+.sf-glass:hover {
+  background: var(--sf-surface-hover);
+  border-color: var(--sf-border-hover);
+  box-shadow: var(--sf-shadow-lg);
+}
+
+/* Light mode Liquid Glass shine overlay */
+.sf-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05));
+  pointer-events: none;
+  opacity: 1;
+}
+.dark .sf-glass::before {
+  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+}
+
+/* ── Neon glow (dark only) ── */
+.dark .neon-text {
+  text-shadow: 0 0 10px rgba(103, 232, 249, 0.5), 0 0 40px rgba(103, 232, 249, 0.2);
+}
