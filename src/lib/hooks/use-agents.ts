@@ -5,11 +5,19 @@ import { getSupabase } from '@/lib/supabase/client';
 
 export interface AgentRow {
   id: string;
-  email: string;
-  full_name: string;
-  avatar_url: string | null;
-  role: string;
+  name: string;
+  email: string | null;
   phone: string | null;
+  role: string;
+  avatar_url: string | null;
+  stand_name: string | null;
+  total_sales: number;
+  monthly_sales: number;
+  monthly_target: number;
+  total_leads: number;
+  conversion_rate: number;
+  revenue: number;
+  status: string;
   created_at: string;
 }
 
@@ -21,10 +29,9 @@ export function useAgents() {
   const fetch = useCallback(async () => {
     setLoading(true);
     const { data } = await supabase
-      .from('profiles')
+      .from('agent_stats')
       .select('*')
-      .in('role', ['corretor', 'gerente'])
-      .order('full_name');
+      .order('monthly_sales', { ascending: false });
     setAgents((data as AgentRow[]) || []);
     setLoading(false);
   }, [supabase]);
