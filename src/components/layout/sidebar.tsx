@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import {
   LayoutDashboard, Building2, Users, KanbanSquare, UserCog,
   Calendar, MessageSquare, BarChart3, Settings, Sparkles, Sun, Moon,
-  Wallet, CalendarCheck,
+  Wallet, CalendarCheck, ShieldCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/lib/theme-context';
@@ -20,7 +20,8 @@ const navItems = [
   { href: '/dashboard/stands', label: 'Stands', icon: Building2 },
   { href: '/dashboard/leads', label: 'Leads', icon: Users },
   { href: '/dashboard/pipeline', label: 'Pipeline', icon: KanbanSquare },
-  { href: '/dashboard/agents', label: 'Agentes', icon: UserCog },
+  { href: '/dashboard/agents', label: 'Equipe', icon: UserCog },
+  { href: '/dashboard/team', label: 'Gestão de Roles', icon: ShieldCheck },
   { href: '/dashboard/calendar', label: 'Calendário', icon: Calendar },
   { href: '/dashboard/chat', label: 'Chat', icon: MessageSquare },
   { href: '/dashboard/reports', label: 'Relatórios', icon: BarChart3 },
