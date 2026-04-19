@@ -39,11 +39,17 @@ export default function LoginPage() {
         toast.error(error);
       } else {
         toast.success('Conta criada! Verifique seu email para confirmar.');
+        setIsSignUp(false);
+        setPassword('');
       }
     } else {
       const { error } = await signIn(email, password);
       if (error) {
-        toast.error(error);
+        if (error.includes('Email not confirmed')) {
+          toast.error('Confirme seu email antes de entrar. Verifique sua caixa de entrada.');
+        } else {
+          toast.error(error);
+        }
       } else {
         router.push('/dashboard');
       }
