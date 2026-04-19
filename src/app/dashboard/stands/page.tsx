@@ -1,187 +1,169 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Building2, MapPin, Users, Search, Plus, Filter } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Building2, MapPin, Search, Plus } from 'lucide-react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Modal } from '@/components/ui/modal';
-import { Input } from '@/components/ui/input';
-import { stands } from '@/lib/mock-data';
-import { formatCurrency, getStandStatusLabel } from '@/lib/utils';
+import { useStands, type StandRow } from '@/lib/hooks/use-stands';
+import { toast } from 'sonner';
 
-const stagger = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.06 } },
-};
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 25 } },
-};
+const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
+
+const statusLabel: Record<string, string> = { ativo: 'Ativo', inativo: 'Inativo', em_montagem: 'Em Montagem' };
+const statusVariant: Record<string, 'emerald' | 'amber' | 'zinc'> = { ativo: 'emerald', em_montagem: 'amber', inativo: 'zinc' };
 
 export default function StandsPage() {
+  const { stands, loading, create } = useStands();
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<string>('all');
-  const [selectedStand, setSelectedStand] = useState<typeof stands[0] | null>(null);
+  const [filter, setFilter] = useState('all');
+  const [selected, setSelected] = useState<StandRow | null>(null);
+  const [showNew, setShowNew] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [newCity, setNewCity] = useState('');
+  const [newState, setNewState] = useState('');
+  const [newAddress, setNewAddress] = useState('');
 
   const filtered = stands.filter((s) => {
-    const matchSearch = s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.city.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = s.name.toLowerCase().includes(search.toLowerCase()) || (s.city || '').toLowerCase().includes(search.toLowerCase());
     const matchFilter = filter === 'all' || s.status === filter;
     return matchSearch && matchFilter;
   });
 
+  const handleCreate = async () => {
+    if (!newName) { toast.error('Nome é obrigatório'); return; }
+    await create({ name: newName, city: newCity || null, state: newState || null, address: newAddress || null });
+    toast.success('Stand criado!');
+    setShowNew(false);
+    setNewName(''); setNewCity(''); setNewState(''); setNewAddress('');
+  };
+
+  if (loading) {
+    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--sf-accent)]/30 border-t-[var(--sf-accent)] rounded-full animate-spin" /></div>;
+  }
+
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-6">
-      <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4">
+      <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--sf-text-primary)]">Stands</h1>
-          <p className="text-sm text-[var(--sf-text-tertiary)] mt-1">{stands.length} stands cadastrados</p>
+          <h1 className="text-xl lg:text-2xl font-bold text-[var(--sf-text-primary)]">Stands</h1>
+          <p className="text-xs text-[var(--sf-text-tertiary)] mt-0.5">{stands.length} stands cadastrados</p>
         </div>
-        <Button variant="neon" size="md">
+        <Button variant="neon" size="sm" onClick={() => setShowNew(true)}>
           <Plus className="w-4 h-4" /> Novo Stand
         </Button>
       </motion.div>
 
-      {/* Filters */}
       <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--sf-text-muted)]" />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar stands..."
-            className="w-full pl-10 pr-4 py-2.5 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] placeholder:text-[var(--sf-text-muted)] outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-cyan-500/20 focus:border-blue-500/30 dark:focus:border-blue-500/20 dark:border-cyan-500/30 transition-all"
-          />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar stands..."
+            className="w-full pl-10 pr-4 py-2.5 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] placeholder:text-[var(--sf-text-muted)] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" />
         </div>
         <div className="flex gap-2">
           {['all', 'ativo', 'em_montagem', 'inativo'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
+            <button key={f} onClick={() => setFilter(f)}
               className={`px-3 py-2 text-xs font-medium rounded-xl border transition-all ${
-                filter === f
-                  ? 'bg-blue-500/10 dark:bg-cyan-500/15 text-blue-600 dark:text-cyan-300 border-blue-500/20 dark:border-cyan-500/30'
-                  : 'bg-[var(--sf-accent-light)] text-[var(--sf-text-tertiary)] border-[var(--sf-border)] hover:text-[var(--sf-text-secondary)]'
-              }`}
-            >
-              {f === 'all' ? 'Todos' : getStandStatusLabel(f)}
+                filter === f ? 'bg-blue-50 dark:bg-cyan-500/10 border-blue-200 dark:border-cyan-500/20 text-blue-700 dark:text-cyan-300' : 'bg-[var(--sf-surface)] border-[var(--sf-border)] text-[var(--sf-text-tertiary)]'
+              }`}>
+              {f === 'all' ? 'Todos' : statusLabel[f]}
             </button>
           ))}
         </div>
       </motion.div>
 
-      {/* Grid */}
-      <motion.div variants={stagger} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filtered.map((stand) => {
-          const percent = stand.monthly_target > 0
-            ? Math.round((stand.monthly_sales / stand.monthly_target) * 100)
-            : 0;
-          const statusVariant = stand.status === 'ativo' ? 'emerald' : stand.status === 'em_montagem' ? 'amber' : 'zinc';
-          return (
-            <motion.div key={stand.id} variants={fadeUp}>
-              <GlassCard
-                glow="cyan"
-                className="cursor-pointer"
-                onClick={() => setSelectedStand(stand)}
-              >
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-[var(--sf-border)] flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-semibold text-[var(--sf-text-primary)]">{stand.name}</h3>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <MapPin className="w-3 h-3 text-[var(--sf-text-muted)]" />
-                        <span className="text-xs text-[var(--sf-text-tertiary)]">{stand.city}, {stand.state}</span>
+      {filtered.length === 0 ? (
+        <GlassCard hover={false} className="!p-8 text-center">
+          <Building2 className="w-10 h-10 mx-auto text-[var(--sf-text-muted)] mb-3" />
+          <p className="text-sm text-[var(--sf-text-tertiary)]">{stands.length === 0 ? 'Nenhum stand cadastrado' : 'Nenhum stand encontrado'}</p>
+        </GlassCard>
+      ) : (
+        <motion.div variants={stagger} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filtered.map((stand) => {
+            const percent = stand.monthly_target > 0 ? Math.round((stand.monthly_sales / stand.monthly_target) * 100) : 0;
+            return (
+              <motion.div key={stand.id} variants={fadeUp}>
+                <GlassCard className="cursor-pointer" onClick={() => setSelected(stand)}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500/20 to-violet-500/20 border border-[var(--sf-border)] flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-[var(--sf-text-primary)]">{stand.name}</h3>
+                        {stand.city && (
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <MapPin className="w-3 h-3 text-[var(--sf-text-muted)]" />
+                            <span className="text-xs text-[var(--sf-text-tertiary)]">{stand.city}, {stand.state}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
+                    <Badge variant={statusVariant[stand.status]}>{statusLabel[stand.status]}</Badge>
                   </div>
-                  <Badge variant={statusVariant as 'emerald' | 'amber' | 'zinc'}>{getStandStatusLabel(stand.status)}</Badge>
-                </div>
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div><p className="text-lg font-bold text-[var(--sf-text-primary)]">{stand.sold_units}</p><p className="text-[10px] text-[var(--sf-text-tertiary)]">Vendidas</p></div>
+                    <div><p className="text-lg font-bold text-[var(--sf-text-primary)]">{stand.reserved_units}</p><p className="text-[10px] text-[var(--sf-text-tertiary)]">Reservadas</p></div>
+                    <div><p className="text-lg font-bold text-[var(--sf-text-primary)]">{stand.total_units - stand.sold_units - stand.reserved_units}</p><p className="text-[10px] text-[var(--sf-text-tertiary)]">Disponíveis</p></div>
+                  </div>
+                  {stand.monthly_target > 0 && (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-[var(--sf-text-tertiary)]">Meta mensal</span>
+                        <span className="text-xs font-medium text-[var(--sf-text-secondary)]">{stand.monthly_sales}/{stand.monthly_target} ({percent}%)</span>
+                      </div>
+                      <ProgressBar value={stand.monthly_sales} max={stand.monthly_target} />
+                    </div>
+                  )}
+                </GlassCard>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      )}
 
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                  <div>
-                    <p className="text-lg font-bold text-[var(--sf-text-primary)]">{stand.sold_units}</p>
-                    <p className="text-[10px] text-[var(--sf-text-tertiary)]">Vendidas</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-[var(--sf-text-primary)]">{stand.reserved_units}</p>
-                    <p className="text-[10px] text-[var(--sf-text-tertiary)]">Reservadas</p>
-                  </div>
-                  <div>
-                    <p className="text-lg font-bold text-[var(--sf-text-primary)]">{stand.total_units - stand.sold_units - stand.reserved_units}</p>
-                    <p className="text-[10px] text-[var(--sf-text-tertiary)]">Disponíveis</p>
-                  </div>
-                </div>
-
-                {/* Progress */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-[var(--sf-text-tertiary)]">Meta mensal</span>
-                    <span className="text-xs font-medium text-[var(--sf-text-secondary)]">{stand.monthly_sales}/{stand.monthly_target} ({percent}%)</span>
-                  </div>
-                  <ProgressBar value={stand.monthly_sales} max={stand.monthly_target} />
-                </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between mt-4 pt-3 border-t border-[var(--sf-border)]">
-                  <div className="flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-[var(--sf-text-muted)]" />
-                    <span className="text-xs text-[var(--sf-text-tertiary)]">{stand.manager_name}</span>
-                  </div>
-                  <span className="text-[10px] text-[var(--sf-text-muted)] uppercase">{stand.type}</span>
-                </div>
-              </GlassCard>
-            </motion.div>
-          );
-        })}
-      </motion.div>
-
-      {/* Stand Detail Modal */}
-      <Modal
-        open={!!selectedStand}
-        onClose={() => setSelectedStand(null)}
-        title={selectedStand?.name || ''}
-        size="lg"
-      >
-        {selectedStand && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <Modal open={!!selected} onClose={() => setSelected(null)} title={selected?.name || ''} size="lg">
+        {selected && (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               {[
-                { label: 'Total Unidades', value: selectedStand.total_units },
-                { label: 'Vendidas', value: selectedStand.sold_units },
-                { label: 'Reservadas', value: selectedStand.reserved_units },
-                { label: 'Disponíveis', value: selectedStand.total_units - selectedStand.sold_units - selectedStand.reserved_units },
-              ].map((stat) => (
-                <div key={stat.label} className="p-4 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl">
-                  <p className="text-2xl font-bold text-[var(--sf-text-primary)]">{stat.value}</p>
-                  <p className="text-xs text-[var(--sf-text-tertiary)] mt-1">{stat.label}</p>
+                { label: 'Total', value: selected.total_units },
+                { label: 'Vendidas', value: selected.sold_units },
+                { label: 'Reservadas', value: selected.reserved_units },
+                { label: 'Disponíveis', value: selected.total_units - selected.sold_units - selected.reserved_units },
+              ].map((s) => (
+                <div key={s.label} className="p-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl">
+                  <p className="text-2xl font-bold text-[var(--sf-text-primary)]">{s.value}</p>
+                  <p className="text-xs text-[var(--sf-text-tertiary)]">{s.label}</p>
                 </div>
               ))}
             </div>
-
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[var(--sf-text-secondary)]">Informações</h4>
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div><span className="text-[var(--sf-text-tertiary)]">Endereço:</span> <span className="text-[var(--sf-text-secondary)]">{selectedStand.address}</span></div>
-                <div><span className="text-[var(--sf-text-tertiary)]">Cidade:</span> <span className="text-[var(--sf-text-secondary)]">{selectedStand.city}, {selectedStand.state}</span></div>
-                <div><span className="text-[var(--sf-text-tertiary)]">Tipo:</span> <span className="text-[var(--sf-text-secondary)] capitalize">{selectedStand.type}</span></div>
-                <div><span className="text-[var(--sf-text-tertiary)]">Gerente:</span> <span className="text-[var(--sf-text-secondary)]">{selectedStand.manager_name}</span></div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium text-[var(--sf-text-secondary)]">Meta Mensal</h4>
-              <ProgressBar value={selectedStand.monthly_sales} max={selectedStand.monthly_target} showLabel />
-            </div>
+            {selected.address && <p className="text-sm text-[var(--sf-text-secondary)]">📍 {selected.address} — {selected.city}, {selected.state}</p>}
           </div>
         )}
+      </Modal>
+
+      <Modal open={showNew} onClose={() => setShowNew(false)} title="Novo Stand" size="md">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Nome *</label>
+              <input value={newName} onChange={(e) => setNewName(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="Nome do stand" /></div>
+            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Cidade</label>
+              <input value={newCity} onChange={(e) => setNewCity(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="São Paulo" /></div>
+            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Estado</label>
+              <input value={newState} onChange={(e) => setNewState(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="SP" /></div>
+            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Endereço</label>
+              <input value={newAddress} onChange={(e) => setNewAddress(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="Av. Exemplo, 123" /></div>
+          </div>
+          <div className="flex gap-2 pt-2">
+            <Button variant="secondary" className="flex-1" onClick={() => setShowNew(false)}>Cancelar</Button>
+            <Button variant="neon" className="flex-1" onClick={handleCreate}>Criar Stand</Button>
+          </div>
+        </div>
       </Modal>
     </motion.div>
   );
