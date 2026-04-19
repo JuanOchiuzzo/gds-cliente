@@ -6,3 +6,13 @@ export function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 }
+
+// Singleton for client-side usage
+let client: ReturnType<typeof createBrowserClient> | null = null;
+
+export function getSupabase() {
+  if (!client) {
+    client = createClient();
+  }
+  return client;
+}

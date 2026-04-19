@@ -1,11 +1,29 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
 import { Sidebar } from '@/components/layout/sidebar';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { Topbar } from '@/components/layout/topbar';
 import { AIFab } from '@/components/ai-fab';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[var(--sf-bg)] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-[var(--sf-accent)]/30 border-t-[var(--sf-accent)] rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    router.push('/');
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-[var(--sf-bg)]">
       <Sidebar />
@@ -16,6 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </main>
       </div>
       <BottomNav />
+      <AIFab />
     </div>
   );
 }

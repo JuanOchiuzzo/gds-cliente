@@ -3,18 +3,53 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Sparkles, Mail, ArrowRight, Fingerprint } from 'lucide-react';
+import { Sparkles, Mail, ArrowRight, Lock, UserPlus, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/lib/auth-context';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { signIn, signUp, user, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
+  // If already logged in, redirect
+  if (authLoading) return null;
+  if (user) { router.push('/dashboard'); return null; }
+
+  const handleSubmit = async () => {
+    if (!email || !password) {
+      toast.error('Preencha email e senha');
+      return;
+    }
+    if (isSignUp && !fullName) {
+      toast.error('Preencha seu nome completo');
+      return;
+    }
+
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    router.push('/dashboard');
+
+    if (isSignUp) {
+      const { error } = await signUp(email, password, fullName);
+      if (error) {
+        toast.error(error);
+      } else {
+        toast.success('Conta criada! Verifique seu email para confirmar.');
+      }
+    } else {
+      const { error } = await signIn(email, password);
+      if (error) {
+        toast.error(error);
+      } else {
+        router.push('/dashboard');
+      }
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -23,7 +58,6 @@ export default function LoginPage() {
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/5 dark:bg-cyan-500/5 rounded-full blur-3xl animate-float" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '3s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-blue-500/3 dark:from-cyan-500/3 to-violet-500/3 rounded-full blur-3xl" />
       </div>
 
       <motion.div
@@ -32,7 +66,7 @@ export default function LoginPage() {
         transition={{ type: 'spring', stiffness: 300, damping: 25 }}
         className="relative w-full max-w-md"
       >
-        <div className="bg-[var(--sf-bg-secondary)]/80 backdrop-blur-3xl border border-[var(--sf-border)] rounded-3xl shadow-[var(--sf-shadow-lg)] p-8 space-y-8">
+        <div className="bg-[var(--sf-bg-secondary)]/80 backdrop-blur-3xl border border-[var(--sf-border)] rounded-3xl shadow-[var(--sf-shadow-lg)] p-8 space-y-6">
           {/* Logo */}
           <div className="text-center space-y-3">
             <motion.div
@@ -45,12 +79,27 @@ export default function LoginPage() {
             </motion.div>
             <div>
               <h1 className="text-2xl font-bold text-[var(--sf-text-primary)] tracking-tight">StandForge</h1>
-              <p className="text-sm text-[var(--sf-text-tertiary)] mt-1">O futuro da gestão de stands imobiliários</p>
+              <p className="text-sm text-[var(--sf-text-tertiary)] mt-1">
+                {isSignUp ? 'Crie sua conta' : 'Entre na sua conta'}
+              </p>
             </div>
           </div>
 
           {/* Form */}
-          <div className="space-y-4">
+          <div className="space-y-3">
+            {isSignUp && (
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-[var(--sf-text-secondary)]">Nome completo</label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Seu nome"
+                  className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] placeholder:text-[var(--sf-text-muted)] outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-cyan-500/20 transition-all"
+                />
+              </div>
+            )}
+
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-[var(--sf-text-secondary)]">Email</label>
               <div className="relative">
@@ -59,46 +108,52 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
                   placeholder="seu@email.com"
-                  className="w-full pl-10 pr-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] placeholder:text-[var(--sf-text-muted)] outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-cyan-500/20 focus:border-blue-500/30 dark:focus:border-cyan-500/30 transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] placeholder:text-[var(--sf-text-muted)] outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-cyan-500/20 transition-all"
                 />
               </div>
             </div>
 
-            <Button variant="neon" size="lg" className="w-full" onClick={handleLogin} disabled={loading}>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-[var(--sf-text-secondary)]">Senha</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--sf-text-tertiary)]" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] placeholder:text-[var(--sf-text-muted)] outline-none focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-cyan-500/20 transition-all"
+                />
+              </div>
+            </div>
+
+            <Button variant="neon" size="lg" className="w-full" onClick={handleSubmit} disabled={loading}>
               {loading ? (
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                   className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
                 />
+              ) : isSignUp ? (
+                <><UserPlus className="w-4 h-4" /> Criar Conta</>
               ) : (
-                <>
-                  Entrar com Magic Link
-                  <ArrowRight className="w-4 h-4" />
-                </>
+                <><LogIn className="w-4 h-4" /> Entrar</>
               )}
-            </Button>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-[var(--sf-border)]" />
-              </div>
-              <div className="relative flex justify-center text-xs">
-                <span className="px-3 bg-[var(--sf-bg-secondary)]/80 text-[var(--sf-text-tertiary)]">ou</span>
-              </div>
-            </div>
-
-            <Button variant="secondary" size="lg" className="w-full" onClick={handleLogin}>
-              <Fingerprint className="w-5 h-5" />
-              Entrar com Biometria
             </Button>
           </div>
 
-          <p className="text-center text-xs text-[var(--sf-text-tertiary)]">
-            Ao entrar, você concorda com os{' '}
-            <span className="text-[var(--sf-accent)] hover:underline cursor-pointer">Termos de Uso</span>
+          {/* Toggle sign up / sign in */}
+          <p className="text-center text-sm text-[var(--sf-text-tertiary)]">
+            {isSignUp ? 'Já tem conta?' : 'Não tem conta?'}{' '}
+            <button
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-[var(--sf-accent)] font-medium hover:underline"
+            >
+              {isSignUp ? 'Entrar' : 'Criar conta'}
+            </button>
           </p>
         </div>
       </motion.div>
