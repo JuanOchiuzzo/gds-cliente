@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { User, Bell, LogOut, Smartphone, Shield } from 'lucide-react';
+import { User, Shield, LogOut, Smartphone, Camera } from 'lucide-react';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
@@ -15,20 +15,80 @@ const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
 
 export default function SettingsPage() {
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, user } = useAuth();
   const router = useRouter();
   const supabase = getSupabase();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '');
 
   const handleSave = async () => {
     if (!profile) return;
     setSaving(true);
-    const { error } = await supabase.from('profiles').update({ full_name: fullName, phone: phone || null }).eq('id', profile.id);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ full_name: fullName, phone: phone || null })
+      .eq('id', profile.id);
     if (error) toast.error('Erro ao salvar');
     else toast.success('Perfil atualizado!');
     setSaving(false);
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    // Validate
+    if (!file.type.startsWith('image/')) {
+      toast.error('Selecione uma imagem');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Imagem deve ter no máximo 2MB');
+      return;
+    }
+
+    setUploading(true);
+
+    const ext = file.name.split('.').pop();
+    const filePath = `${user.id}/avatar.${ext}`;
+
+    // Upload to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, { upsert: true });
+
+    if (uploadError) {
+      toast.error('Erro ao enviar foto');
+      setUploading(false);
+      return;
+    }
+
+    // Get public URL
+    const { data: urlData } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    const publicUrl = urlData.publicUrl + '?t=' + Date.now(); // cache bust
+
+    // Update profile
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ avatar_url: publicUrl })
+      .eq('id', user.id);
+
+    if (updateError) {
+      toast.error('Erro ao atualizar perfil');
+    } else {
+      setAvatarUrl(publicUrl);
+      toast.success('Foto atualizada!');
+    }
+
+    setUploading(false);
   };
 
   const handleLogout = async () => {
@@ -60,24 +120,62 @@ export default function SettingsPage() {
             <h3 className="text-sm font-semibold text-[var(--sf-text-secondary)]">Perfil</h3>
           </div>
           <div className="space-y-4">
+            {/* Avatar with upload */}
             <div className="flex items-center gap-4">
-              <Avatar name={profile?.full_name || 'U'} size="lg" />
+              <div className="relative">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={profile?.full_name || ''}
+                    className="w-16 h-16 rounded-2xl object-cover border border-[var(--sf-border)]"
+                  />
+                ) : (
+                  <Avatar name={profile?.full_name || 'U'} size="lg" />
+                )}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[var(--sf-accent)] text-white flex items-center justify-center shadow-md hover:scale-110 transition-transform disabled:opacity-50"
+                >
+                  {uploading ? (
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="w-3.5 h-3.5" />
+                  )}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+              </div>
               <div>
                 <p className="text-sm font-semibold text-[var(--sf-text-primary)]">{profile?.full_name}</p>
                 <p className="text-xs text-[var(--sf-text-tertiary)]">{profile?.email}</p>
                 <p className="text-xs text-[var(--sf-text-tertiary)] capitalize">{profile?.role}</p>
               </div>
             </div>
+
+            {/* Form fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Nome</label>
-                <input value={fullName} onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none focus:ring-2 focus:ring-blue-500/20" />
+                <input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none focus:ring-2 focus:ring-blue-500/20"
+                />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Telefone</label>
-                <input value={phone} onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="(11) 99999-0000" />
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none focus:ring-2 focus:ring-blue-500/20"
+                  placeholder="(11) 99999-0000"
+                />
               </div>
             </div>
             <Button variant="neon" size="sm" onClick={handleSave} disabled={saving}>
@@ -122,8 +220,10 @@ export default function SettingsPage() {
 
       {/* Logout */}
       <motion.div variants={fadeUp}>
-        <button onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-2xl text-red-600 dark:text-red-400 font-medium text-sm hover:bg-red-100 dark:hover:bg-red-500/15 transition-colors">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-2xl text-red-600 dark:text-red-400 font-medium text-sm hover:bg-red-100 dark:hover:bg-red-500/15 transition-colors"
+        >
           <LogOut className="w-4 h-4" /> Sair da Conta
         </button>
       </motion.div>

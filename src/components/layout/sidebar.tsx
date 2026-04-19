@@ -87,7 +87,7 @@ export function Sidebar() {
         </button>
 
         <div className="flex items-center gap-3 px-2">
-          <Avatar name={profile?.full_name || 'U'} size="sm" />
+          <Avatar name={profile?.full_name || 'U'} src={profile?.avatar_url} size="sm" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-[var(--sf-text-primary)] truncate">{profile?.full_name || 'Usuário'}</p>
             <p className="text-xs text-[var(--sf-text-tertiary)] truncate">{profile?.email}</p>
