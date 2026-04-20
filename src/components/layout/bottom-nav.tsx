@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Building2, Users, KanbanSquare, Calendar,
   MessageSquare, BarChart3, Settings, Sparkles, UserCog, Menu, X,
-  Wallet, CalendarCheck, ShieldCheck,
+  Wallet, CalendarCheck, ShieldCheck, UserCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -22,6 +22,7 @@ const rightNav = [
 ];
 
 const moreNav = [
+  { href: '/dashboard/plantao', label: 'Plantão', icon: UserCircle },
   { href: '/dashboard/pipeline', label: 'Pipeline', icon: KanbanSquare },
   { href: '/dashboard/leads', label: 'Leads', icon: Users },
   { href: '/dashboard/stands', label: 'Stands', icon: Building2 },

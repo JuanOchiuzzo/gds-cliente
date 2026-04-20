@@ -13,7 +13,6 @@ export interface QueueRow {
   shift_date: string;
   entered_at: string;
   updated_at: string;
-  // joined
   agent_name?: string;
   stand_name?: string;
 }
@@ -32,6 +31,7 @@ export function useQueue(standId?: string) {
       .from('queue')
       .select('*, profiles(full_name), stands(name)')
       .eq('shift_date', today)
+      .neq('status', 'finalizado')
       .order('position');
 
     if (standId) query = query.eq('stand_id', standId);
@@ -63,5 +63,39 @@ export function useQueue(standId?: string) {
 
   const myPosition = queue.find((q) => q.agent_id === user?.id);
 
-  return { queue, loading, myPosition, refetch: fetch };
+  const addToQueue = async (agentId: string, sId: string, position: number, date?: string) => {
+    const { error } = await supabase.from('queue').insert({
+      agent_id: agentId,
+      stand_id: sId,
+      position,
+      shift_date: date || today,
+      status: 'aguardando',
+    });
+    if (!error) fetch();
+    return { error };
+  };
+
+  const updateStatus = async (id: string, status: QueueRow['status']) => {
+    const { error } = await supabase.from('queue').update({ status }).eq('id', id);
+    if (!error) fetch();
+    return { error };
+  };
+
+  const removeFromQueue = async (id: string) => {
+    const { error } = await supabase.from('queue').delete().eq('id', id);
+    if (!error) fetch();
+    return { error };
+  };
+
+  const advanceQueue = async (sId: string) => {
+    // Move current "atendendo" to "finalizado", next "aguardando" to "atendendo"
+    const standQueue = queue.filter((q) => q.stand_id === sId).sort((a, b) => a.position - b.position);
+    const current = standQueue.find((q) => q.status === 'atendendo');
+    const next = standQueue.find((q) => q.status === 'aguardando');
+
+    if (current) await updateStatus(current.id, 'finalizado');
+    if (next) await updateStatus(next.id, 'atendendo');
+  };
+
+  return { queue, loading, myPosition, refetch: fetch, addToQueue, updateStatus, removeFromQueue, advanceQueue };
 }
