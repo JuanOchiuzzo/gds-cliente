@@ -11,6 +11,7 @@ import { Modal } from '@/components/ui/modal';
 import { useQueue, type QueueRow } from '@/lib/hooks/use-queue';
 import { useStands } from '@/lib/hooks/use-stands';
 import { useAgents } from '@/lib/hooks/use-agents';
+import { useProfiles } from '@/lib/hooks/use-profiles';
 import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
 
@@ -27,6 +28,7 @@ const statusConfig: Record<string, { label: string; color: string; variant: 'cya
 export default function PlantaoPage() {
   const { stands } = useStands();
   const { agents } = useAgents();
+  const { profiles } = useProfiles();
   const { profile } = useAuth();
   const [selectedStandId, setSelectedStandId] = useState('');
   const { queue, loading, addToQueue, updateStatus, removeFromQueue, advanceQueue } = useQueue(selectedStandId || undefined);
@@ -199,10 +201,10 @@ export default function PlantaoPage() {
             <select value={addAgentName} onChange={(e) => setAddAgentName(e.target.value)}
               className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none">
               <option value="">Selecionar corretor...</option>
-              {/* Real users from profiles */}
-              {profile && <option value={profile.id}>{profile.full_name} (você)</option>}
+              {profiles.map((p) => (
+                <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>
+              ))}
             </select>
-            <p className="text-[10px] text-[var(--sf-text-muted)]">Corretores disponíveis são os usuários cadastrados no sistema</p>
           </div>
           <div className="space-y-1.5">
             <label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Data</label>
