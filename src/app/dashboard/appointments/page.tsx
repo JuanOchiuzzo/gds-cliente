@@ -71,15 +71,15 @@ export default function AppointmentsPage() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--sf-accent)]/30 border-t-[var(--sf-accent)] rounded-full animate-spin" /></div>;
+    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" /></div>;
   }
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4">
       <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-[var(--sf-text-primary)]">Agendamentos</h1>
-          <p className="text-xs text-[var(--sf-text-tertiary)] mt-0.5">{appointments.length} agendamentos</p>
+          <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">Agendamentos</h1>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">{appointments.length} agendamentos</p>
         </div>
         <Button variant="neon" size="sm" onClick={() => setShowNew(true)}>
           <Plus className="w-4 h-4" /> Agendar
@@ -88,8 +88,8 @@ export default function AppointmentsPage() {
 
       {appointments.length === 0 ? (
         <GlassCard hover={false} className="!p-8 text-center">
-          <CalendarCheck className="w-10 h-10 mx-auto text-[var(--sf-text-muted)] mb-3" />
-          <p className="text-sm text-[var(--sf-text-tertiary)]">Nenhum agendamento</p>
+          <CalendarCheck className="w-10 h-10 mx-auto text-[var(--text-faint)] mb-3" />
+          <p className="text-sm text-[var(--text-muted)]">Nenhum agendamento</p>
           <Button variant="neon" size="sm" className="mt-4" onClick={() => setShowNew(true)}><Plus className="w-4 h-4" /> Criar Agendamento</Button>
         </GlassCard>
       ) : (
@@ -97,18 +97,18 @@ export default function AppointmentsPage() {
           {appointments.map((apt) => (
             <motion.div key={apt.id} variants={fadeUp}>
               <motion.div whileTap={{ scale: 0.98 }} onClick={() => setSelected(apt)}
-                className="p-3.5 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl active:bg-[var(--sf-surface-hover)] cursor-pointer">
+                className="p-3.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl active:bg-[var(--bg-hover)] cursor-pointer">
                 <div className="flex items-center gap-3">
                   <div className="w-1 h-12 rounded-full bg-blue-500" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[var(--sf-text-primary)]">{apt.client_name}</p>
+                    <p className="text-sm font-semibold text-[var(--text)]">{apt.client_name}</p>
                     <div className="flex items-center gap-3 mt-0.5">
-                      <span className="flex items-center gap-1 text-[11px] text-[var(--sf-text-tertiary)]">
+                      <span className="flex items-center gap-1 text-[11px] text-[var(--text-muted)]">
                         <Clock className="w-3 h-3" /> {apt.date} {apt.time}
                       </span>
-                      {apt.product_name && <span className="text-[11px] text-[var(--sf-text-tertiary)]">{apt.product_name}</span>}
+                      {apt.product_name && <span className="text-[11px] text-[var(--text-muted)]">{apt.product_name}</span>}
                     </div>
-                    <p className="text-[10px] text-[var(--sf-text-muted)] mt-0.5">Voucher: {apt.voucher_code}</p>
+                    <p className="text-[10px] text-[var(--text-faint)] mt-0.5">Voucher: {apt.voucher_code}</p>
                   </div>
                   <Badge variant={statusVariant[apt.status]} className="!text-[9px]">{statusLabel[apt.status]}</Badge>
                 </div>
@@ -123,26 +123,26 @@ export default function AppointmentsPage() {
         {selected && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-2.5">
-              <div className="p-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl">
-                <p className="text-sm font-semibold text-[var(--sf-text-primary)]">{selected.date}</p>
-                <p className="text-[10px] text-[var(--sf-text-tertiary)]">Data</p>
+              <div className="p-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
+                <p className="text-sm font-semibold text-[var(--text)]">{selected.date}</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Data</p>
               </div>
-              <div className="p-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl">
-                <p className="text-sm font-semibold text-[var(--sf-text-primary)]">{selected.time}</p>
-                <p className="text-[10px] text-[var(--sf-text-tertiary)]">Horário</p>
+              <div className="p-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
+                <p className="text-sm font-semibold text-[var(--text)]">{selected.time}</p>
+                <p className="text-[10px] text-[var(--text-muted)]">Horário</p>
               </div>
             </div>
-            <div className="p-3 bg-blue-50 dark:bg-cyan-500/10 border border-blue-200 dark:border-cyan-500/20 rounded-2xl text-center">
-              <p className="text-xs text-[var(--sf-text-tertiary)]">Voucher</p>
-              <p className="text-xl font-bold text-blue-700 dark:text-cyan-300 tracking-wider">{selected.voucher_code}</p>
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-2xl text-center">
+              <p className="text-xs text-[var(--text-muted)]">Voucher</p>
+              <p className="text-xl font-bold text-blue-700 tracking-wider">{selected.voucher_code}</p>
             </div>
-            {selected.product_name && <p className="text-sm text-[var(--sf-text-secondary)]">Produto: {selected.product_name}</p>}
+            {selected.product_name && <p className="text-sm text-[var(--text-secondary)]">Produto: {selected.product_name}</p>}
             <Badge variant={statusVariant[selected.status]}>{statusLabel[selected.status]}</Badge>
 
             {selected.visit_result && (
-              <div className="p-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl">
-                <p className="text-xs font-semibold text-[var(--sf-text-primary)]">Resultado: {selected.visit_result}</p>
-                {selected.visit_notes && <p className="text-xs text-[var(--sf-text-tertiary)] mt-1">{selected.visit_notes}</p>}
+              <div className="p-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
+                <p className="text-xs font-semibold text-[var(--text)]">Resultado: {selected.visit_result}</p>
+                {selected.visit_notes && <p className="text-xs text-[var(--text-muted)] mt-1">{selected.visit_notes}</p>}
               </div>
             )}
 
@@ -176,14 +176,14 @@ export default function AppointmentsPage() {
             ].map((r) => (
               <button key={r.key} onClick={() => setResultType(r.key)}
                 className={`p-3 rounded-2xl border text-xs font-medium transition-all ${
-                  resultType === r.key ? 'bg-blue-50 dark:bg-cyan-500/10 border-blue-300 dark:border-cyan-500/30' : 'bg-[var(--sf-surface)] border-[var(--sf-border)]'
-                } text-[var(--sf-text-secondary)]`}>
+                  resultType === r.key ? 'bg-blue-50 border-blue-300' : 'bg-[var(--bg-card)] border-[var(--border)]'
+                } text-[var(--text-secondary)]`}>
                 {r.label}
               </button>
             ))}
           </div>
           <textarea rows={3} value={resultNotes} onChange={(e) => setResultNotes(e.target.value)}
-            className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none resize-none" placeholder="Observações da visita..." />
+            className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none resize-none" placeholder="Observações da visita..." />
           <div className="flex gap-2">
             <Button variant="secondary" className="flex-1" onClick={() => setShowResult(false)}>Cancelar</Button>
             <Button variant="neon" className="flex-1" onClick={handleRecordVisit}>Salvar</Button>
@@ -195,17 +195,17 @@ export default function AppointmentsPage() {
       <Modal open={showNew} onClose={() => setShowNew(false)} title="Novo Agendamento" size="md">
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Cliente *</label>
-              <input value={newClient} onChange={(e) => setNewClient(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="Nome do cliente" /></div>
-            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Telefone</label>
-              <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="(11) 99999-0000" /></div>
-            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Produto</label>
-              <input value={newProduct} onChange={(e) => setNewProduct(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="Residencial X" /></div>
+            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Cliente *</label>
+              <input value={newClient} onChange={(e) => setNewClient(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" placeholder="Nome do cliente" /></div>
+            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Telefone</label>
+              <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" placeholder="(11) 99999-0000" /></div>
+            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Produto</label>
+              <input value={newProduct} onChange={(e) => setNewProduct(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" placeholder="Residencial X" /></div>
             <Select label="Stand" value={newStandId} onChange={setNewStandId} placeholder="Selecionar..." options={stands.filter((s) => s.status === 'ativo').map((s) => ({ value: s.id, label: s.name }))} />
-            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Data *</label>
-              <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" /></div>
-            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Horário *</label>
-              <input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" /></div>
+            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Data *</label>
+              <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" /></div>
+            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Horário *</label>
+              <input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" /></div>
           </div>
           <div className="flex gap-2 pt-2">
             <Button variant="secondary" className="flex-1" onClick={() => setShowNew(false)}>Cancelar</Button>
@@ -215,7 +215,7 @@ export default function AppointmentsPage() {
       </Modal>
 
       <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowNew(true)}
-        className="lg:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 dark:from-cyan-500 dark:to-violet-500 flex items-center justify-center shadow-lg border border-white/20">
+        className="lg:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center shadow-lg border border-white/20">
         <Plus className="w-6 h-6 text-white" />
       </motion.button>
     </motion.div>

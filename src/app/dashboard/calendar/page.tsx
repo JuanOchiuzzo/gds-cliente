@@ -42,15 +42,15 @@ export default function CalendarPage() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--sf-accent)]/30 border-t-[var(--sf-accent)] rounded-full animate-spin" /></div>;
+    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" /></div>;
   }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
       <motion.div variants={fadeUp} initial="hidden" animate="show" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-[var(--sf-text-primary)]">Calendário</h1>
-          <p className="text-xs text-[var(--sf-text-tertiary)] mt-0.5">{format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}</p>
+          <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">Calendário</h1>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">{format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="secondary" size="icon" onClick={() => setCurrentDate((d) => addDays(d, -7))}><ChevronLeft className="w-4 h-4" /></Button>
@@ -68,16 +68,16 @@ export default function CalendarPage() {
             <GlassCard key={day.toISOString()} hover={false} className={`!p-3 min-h-[160px] ${isToday ? '!border-blue-500/30 dark:!border-cyan-500/30' : ''}`}>
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="text-[10px] text-[var(--sf-text-tertiary)] uppercase">{format(day, 'EEE', { locale: ptBR })}</p>
-                  <p className={`text-lg font-bold ${isToday ? 'text-blue-600 dark:text-cyan-400' : 'text-[var(--sf-text-secondary)]'}`}>{format(day, 'dd')}</p>
+                  <p className="text-[10px] text-[var(--text-muted)] uppercase">{format(day, 'EEE', { locale: ptBR })}</p>
+                  <p className={`text-lg font-bold ${isToday ? 'text-blue-600' : 'text-[var(--text-secondary)]'}`}>{format(day, 'dd')}</p>
                 </div>
-                {dayEvents.length > 0 && <span className="text-[10px] text-[var(--sf-text-muted)] bg-[var(--sf-surface)] px-1.5 py-0.5 rounded">{dayEvents.length}</span>}
+                {dayEvents.length > 0 && <span className="text-[10px] text-[var(--text-faint)] bg-[var(--bg-card)] px-1.5 py-0.5 rounded">{dayEvents.length}</span>}
               </div>
               <div className="space-y-1.5">
                 {dayEvents.map((event) => (
-                  <div key={event.id} className="p-2 rounded-xl border border-[var(--sf-border)] bg-[var(--sf-surface)]">
-                    <p className="text-xs font-medium text-[var(--sf-text-primary)] truncate">{event.title}</p>
-                    <p className="text-[10px] text-[var(--sf-text-tertiary)] mt-0.5">
+                  <div key={event.id} className="p-2 rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
+                    <p className="text-xs font-medium text-[var(--text)] truncate">{event.title}</p>
+                    <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
                       {format(new Date(event.start_time), 'HH:mm')} - {format(new Date(event.end_time), 'HH:mm')}
                     </p>
                   </div>
@@ -90,22 +90,22 @@ export default function CalendarPage() {
 
       {events.length === 0 && (
         <GlassCard hover={false} className="!p-8 text-center">
-          <CalendarDays className="w-10 h-10 mx-auto text-[var(--sf-text-muted)] mb-3" />
-          <p className="text-sm text-[var(--sf-text-tertiary)]">Nenhum evento no calendário</p>
+          <CalendarDays className="w-10 h-10 mx-auto text-[var(--text-faint)] mb-3" />
+          <p className="text-sm text-[var(--text-muted)]">Nenhum evento no calendário</p>
           <Button variant="neon" size="sm" className="mt-4" onClick={() => setShowNew(true)}><Plus className="w-4 h-4" /> Criar Evento</Button>
         </GlassCard>
       )}
 
       <Modal open={showNew} onClose={() => setShowNew(false)} title="Novo Evento" size="md">
         <div className="space-y-4">
-          <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Título *</label>
-            <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="Título do evento" /></div>
+          <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Título *</label>
+            <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" placeholder="Título do evento" /></div>
           <Select label="Tipo" value={newType} onChange={setNewType} options={[{value:'visita',label:'Visita'},{value:'reuniao',label:'Reunião'},{value:'plantao',label:'Plantão'},{value:'follow_up',label:'Follow-up'}]} />
           <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Início *</label>
-              <input type="datetime-local" value={newStart} onChange={(e) => setNewStart(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" /></div>
-            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Fim *</label>
-              <input type="datetime-local" value={newEnd} onChange={(e) => setNewEnd(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" /></div>
+            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Início *</label>
+              <input type="datetime-local" value={newStart} onChange={(e) => setNewStart(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" /></div>
+            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Fim *</label>
+              <input type="datetime-local" value={newEnd} onChange={(e) => setNewEnd(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" /></div>
           </div>
           <div className="flex gap-2 pt-2">
             <Button variant="secondary" className="flex-1" onClick={() => setShowNew(false)}>Cancelar</Button>

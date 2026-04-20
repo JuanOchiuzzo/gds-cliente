@@ -20,9 +20,9 @@ const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { stag
 const fadeUp = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
 
 const statusConfig: Record<string, { label: string; color: string; variant: 'cyan' | 'emerald' | 'amber' | 'red' | 'zinc' }> = {
-  aguardando: { label: 'Aguardando', color: 'text-blue-600 dark:text-cyan-400', variant: 'cyan' },
-  atendendo: { label: 'Atendendo', color: 'text-amber-600 dark:text-amber-400', variant: 'amber' },
-  ausente: { label: 'Ausente', color: 'text-red-600 dark:text-red-400', variant: 'red' },
+  aguardando: { label: 'Aguardando', color: 'text-blue-600', variant: 'cyan' },
+  atendendo: { label: 'Atendendo', color: 'text-amber-600', variant: 'amber' },
+  ausente: { label: 'Ausente', color: 'text-red-600', variant: 'red' },
   finalizado: { label: 'Finalizado', color: 'text-zinc-500', variant: 'zinc' },
 };
 
@@ -104,15 +104,15 @@ export default function PlantaoPage() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--sf-accent)]/30 border-t-[var(--sf-accent)] rounded-full animate-spin" /></div>;
+    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" /></div>;
   }
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4">
       <motion.div variants={fadeUp} className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-[var(--sf-text-primary)]">Plantão</h1>
-          <p className="text-xs text-[var(--sf-text-tertiary)] mt-0.5">Fila de atendimento por stand</p>
+          <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">Plantão</h1>
+          <p className="text-xs text-[var(--text-muted)] mt-0.5">Fila de atendimento por stand</p>
         </div>
         {isAdmin && (
           <Button variant="neon" size="sm" onClick={() => setShowAdd(true)}>
@@ -126,14 +126,14 @@ export default function PlantaoPage() {
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
           <button onClick={() => setSelectedStandId('')}
             className={`px-3 py-2 text-xs font-medium rounded-xl border whitespace-nowrap transition-all ${
-              !selectedStandId ? 'bg-blue-50 dark:bg-cyan-500/10 border-blue-200 dark:border-cyan-500/20 text-blue-700 dark:text-cyan-300' : 'bg-[var(--sf-surface)] border-[var(--sf-border)] text-[var(--sf-text-tertiary)]'
+              !selectedStandId ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-muted)]'
             }`}>
             Todos
           </button>
           {activeStands.map((s) => (
             <button key={s.id} onClick={() => setSelectedStandId(s.id)}
               className={`px-3 py-2 text-xs font-medium rounded-xl border whitespace-nowrap transition-all ${
-                selectedStandId === s.id ? 'bg-blue-50 dark:bg-cyan-500/10 border-blue-200 dark:border-cyan-500/20 text-blue-700 dark:text-cyan-300' : 'bg-[var(--sf-surface)] border-[var(--sf-border)] text-[var(--sf-text-tertiary)]'
+                selectedStandId === s.id ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-muted)]'
               }`}>
               {s.name}
             </button>
@@ -144,8 +144,8 @@ export default function PlantaoPage() {
       {/* Queue display */}
       {queue.length === 0 ? (
         <GlassCard hover={false} className="!p-8 text-center">
-          <UserCircle className="w-10 h-10 mx-auto text-[var(--sf-text-muted)] mb-3" />
-          <p className="text-sm text-[var(--sf-text-tertiary)]">Nenhum plantão escalado para hoje</p>
+          <UserCircle className="w-10 h-10 mx-auto text-[var(--text-faint)] mb-3" />
+          <p className="text-sm text-[var(--text-muted)]">Nenhum plantão escalado para hoje</p>
           {isAdmin && (
             <Button variant="neon" size="sm" className="mt-4" onClick={() => setShowAdd(true)}>
               <Plus className="w-4 h-4" /> Escalar Corretores
@@ -204,9 +204,9 @@ export default function PlantaoPage() {
             options={profiles.map((p) => ({ value: p.id, label: `${p.full_name} (${p.role})` }))}
           />
           <div className="space-y-1.5">
-            <label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Data</label>
+            <label className="text-xs text-[var(--text-muted)] font-medium">Data</label>
             <input type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)}
-              className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" />
+              className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" />
           </div>
           <div className="flex gap-2 pt-2">
             <Button variant="secondary" className="flex-1" onClick={() => setShowAdd(false)}>Cancelar</Button>
@@ -247,9 +247,9 @@ function StandQueue({
     <GlassCard hover={false} className="!p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <UserCircle className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
-          <h3 className="text-sm font-semibold text-[var(--sf-text-primary)]">{standName}</h3>
-          <span className="text-[10px] bg-[var(--sf-surface)] text-[var(--sf-text-muted)] px-2 py-0.5 rounded-lg border border-[var(--sf-border)]">
+          <UserCircle className="w-5 h-5 text-blue-600" />
+          <h3 className="text-sm font-semibold text-[var(--text)]">{standName}</h3>
+          <span className="text-[10px] bg-[var(--bg-card)] text-[var(--text-faint)] px-2 py-0.5 rounded-lg border border-[var(--border)]">
             {activeItems.length} na fila
           </span>
         </div>
@@ -276,15 +276,15 @@ function StandQueue({
           return (
             <div key={item.id} className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
               item.status === 'atendendo'
-                ? 'bg-amber-50 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20'
+                ? 'bg-amber-50 border-amber-200'
                 : item.status === 'ausente'
-                ? 'bg-red-50 dark:bg-red-500/5 border-red-200 dark:border-red-500/20 opacity-60'
-                : 'bg-[var(--sf-surface)] border-[var(--sf-border)]'
+                ? 'bg-red-50 border-red-200 opacity-60'
+                : 'bg-[var(--bg-card)] border-[var(--border)]'
             }`}>
-              <span className="text-sm font-bold text-[var(--sf-text-muted)] w-6 text-center">{dPos ? `${dPos}º` : '—'}</span>
+              <span className="text-sm font-bold text-[var(--text-faint)] w-6 text-center">{dPos ? `${dPos}º` : '—'}</span>
               <Avatar name={item.agent_name || 'Corretor'} size="sm" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-[var(--sf-text-primary)] truncate">{item.agent_name || 'Corretor'}</p>
+                <p className="text-sm font-semibold text-[var(--text)] truncate">{item.agent_name || 'Corretor'}</p>
                 <Badge variant={cfg.variant} className="!text-[9px] mt-0.5">{cfg.label}</Badge>
               </div>
               {item.status === 'atendendo' && (
@@ -293,7 +293,7 @@ function StandQueue({
               {isAdmin && (
                 <div className="flex gap-1">
                   <button onClick={() => onToggleAusente(item)}
-                    className="p-1.5 rounded-lg text-[var(--sf-text-muted)] hover:text-[var(--sf-text-secondary)] hover:bg-[var(--sf-accent-light)] text-[10px]">
+                    className="p-1.5 rounded-lg text-[var(--text-faint)] hover:text-[var(--text-secondary)] hover:bg-[var(--accent-soft)] text-[10px]">
                     {item.status === 'ausente' ? '✅' : '🚫'}
                   </button>
                   <button onClick={() => onRemove(item.id, item.agent_name || '')}

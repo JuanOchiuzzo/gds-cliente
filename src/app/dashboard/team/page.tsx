@@ -66,23 +66,23 @@ export default function TeamPage() {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--sf-accent)]/30 border-t-[var(--sf-accent)] rounded-full animate-spin" /></div>;
+    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" /></div>;
   }
 
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4">
       <motion.div variants={fadeUp}>
-        <h1 className="text-xl lg:text-2xl font-bold text-[var(--sf-text-primary)]">Gestão de Equipe</h1>
-        <p className="text-xs text-[var(--sf-text-tertiary)] mt-0.5">{users.length} usuário{users.length !== 1 ? 's' : ''} cadastrado{users.length !== 1 ? 's' : ''}</p>
+        <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">Gestão de Equipe</h1>
+        <p className="text-xs text-[var(--text-muted)] mt-0.5">{users.length} usuário{users.length !== 1 ? 's' : ''} cadastrado{users.length !== 1 ? 's' : ''}</p>
       </motion.div>
 
       {/* Roles legend */}
       <motion.div variants={fadeUp}>
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
           {roles.map((r) => (
-            <div key={r.value} className="flex items-center gap-2 px-3 py-2 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-xl whitespace-nowrap">
+            <div key={r.value} className="flex items-center gap-2 px-3 py-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl whitespace-nowrap">
               <Badge variant={r.variant} className="!text-[9px]">{r.label}</Badge>
-              <span className="text-[10px] text-[var(--sf-text-tertiary)]">{r.desc}</span>
+              <span className="text-[10px] text-[var(--text-muted)]">{r.desc}</span>
             </div>
           ))}
         </div>
@@ -96,18 +96,18 @@ export default function TeamPage() {
 
           return (
             <motion.div key={user.id} variants={fadeUp}>
-              <div className="p-4 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl">
+              <div className="p-4 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
                 <div className="flex items-center gap-3">
                   <Avatar name={user.full_name} src={user.avatar_url} size="md" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-[var(--sf-text-primary)] truncate">
+                      <h3 className="text-sm font-semibold text-[var(--text)] truncate">
                         {user.full_name}
-                        {isMe && <span className="text-[10px] text-[var(--sf-text-muted)] ml-1">(você)</span>}
+                        {isMe && <span className="text-[10px] text-[var(--text-faint)] ml-1">(você)</span>}
                       </h3>
                     </div>
-                    <p className="text-[10px] text-[var(--sf-text-tertiary)] mt-0.5">{user.email}</p>
-                    {user.phone && <p className="text-[10px] text-[var(--sf-text-muted)]">{user.phone}</p>}
+                    <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{user.email}</p>
+                    {user.phone && <p className="text-[10px] text-[var(--text-faint)]">{user.phone}</p>}
                   </div>
 
                   {/* Role selector */}
@@ -118,23 +118,23 @@ export default function TeamPage() {
                         className="flex items-center gap-1.5"
                       >
                         <Badge variant={roleConfig.variant}>{roleConfig.label}</Badge>
-                        <ChevronDown className="w-3 h-3 text-[var(--sf-text-muted)]" />
+                        <ChevronDown className="w-3 h-3 text-[var(--text-faint)]" />
                       </button>
 
                       {editingId === user.id && (
-                        <div className="absolute right-0 top-full mt-1 z-10 w-48 bg-[var(--sf-bg-secondary)] border border-[var(--sf-border)] rounded-2xl shadow-[var(--sf-shadow-lg)] overflow-hidden">
+                        <div className="absolute right-0 top-full mt-1 z-10 w-48 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl shadow-[var(--shadow-lg)] overflow-hidden">
                           {roles.map((r) => (
                             <button
                               key={r.value}
                               onClick={() => changeRole(user.id, r.value)}
                               className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs text-left transition-colors ${
                                 user.role === r.value
-                                  ? 'bg-[var(--sf-accent-light)] text-[var(--sf-accent)] font-medium'
-                                  : 'text-[var(--sf-text-secondary)] hover:bg-[var(--sf-accent-light)]'
+                                  ? 'bg-[var(--accent-soft)] text-[var(--accent)] font-medium'
+                                  : 'text-[var(--text-secondary)] hover:bg-[var(--accent-soft)]'
                               }`}
                             >
                               <Badge variant={r.variant} className="!text-[8px]">{r.label}</Badge>
-                              <span className="text-[10px] text-[var(--sf-text-muted)]">{r.desc}</span>
+                              <span className="text-[10px] text-[var(--text-faint)]">{r.desc}</span>
                             </button>
                           ))}
                         </div>
@@ -152,8 +152,8 @@ export default function TeamPage() {
 
       {!isAdmin && (
         <GlassCard hover={false} className="!p-4 text-center">
-          <Shield className="w-6 h-6 mx-auto text-[var(--sf-text-muted)] mb-2" />
-          <p className="text-xs text-[var(--sf-text-tertiary)]">Apenas administradores podem alterar roles de usuários</p>
+          <Shield className="w-6 h-6 mx-auto text-[var(--text-faint)] mb-2" />
+          <p className="text-xs text-[var(--text-muted)]">Apenas administradores podem alterar roles de usuários</p>
         </GlassCard>
       )}
     </motion.div>
