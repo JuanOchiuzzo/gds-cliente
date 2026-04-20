@@ -3,83 +3,87 @@
 @tailwind utilities;
 
 /* ============================================================
-   StandForge CRM — Dual Theme System
-   Light (default): Apple Liquid Glass 2026 inspired
-   Dark: Neon glassmorphism
+   StandForge CRM — Premium Theme System
+   Light: Apple Liquid Glass iOS 26 + Aurora Mesh
+   Dark: Deep space neon glassmorphism
    ============================================================ */
 
 :root {
-  /* ── Light Theme (default) — Liquid Glass ── */
-  --sf-bg: #f8f9fb;
+  /* ── Light Theme — Liquid Glass + Aurora ── */
+  --sf-bg: #f0f2f8;
   --sf-bg-secondary: #ffffff;
-  --sf-bg-tertiary: #f1f3f6;
-  --sf-surface: rgba(255, 255, 255, 0.72);
-  --sf-surface-hover: rgba(255, 255, 255, 0.88);
-  --sf-surface-elevated: rgba(255, 255, 255, 0.85);
-  --sf-border: rgba(0, 0, 0, 0.06);
-  --sf-border-hover: rgba(0, 0, 0, 0.1);
-  --sf-border-active: rgba(59, 130, 246, 0.3);
-  --sf-text-primary: #0f172a;
-  --sf-text-secondary: #475569;
-  --sf-text-tertiary: #94a3b8;
-  --sf-text-muted: #cbd5e1;
-  --sf-accent: #2563eb;
-  --sf-accent-light: rgba(37, 99, 235, 0.08);
-  --sf-accent-medium: rgba(37, 99, 235, 0.15);
-  --sf-cyan: #0891b2;
-  --sf-violet: #7c3aed;
-  --sf-emerald: #059669;
-  --sf-amber: #d97706;
-  --sf-red: #dc2626;
-  --sf-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --sf-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
-  --sf-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08);
-  --sf-shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  --sf-blur: 20px;
-  --sf-radius: 20px;
-  --sf-gradient-accent: linear-gradient(135deg, #2563eb, #7c3aed);
-  --sf-gradient-surface: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.5));
+  --sf-bg-tertiary: #e8ebf2;
+  --sf-surface: rgba(255, 255, 255, 0.55);
+  --sf-surface-hover: rgba(255, 255, 255, 0.75);
+  --sf-surface-elevated: rgba(255, 255, 255, 0.82);
+  --sf-border: rgba(255, 255, 255, 0.6);
+  --sf-border-hover: rgba(255, 255, 255, 0.85);
+  --sf-border-active: rgba(99, 102, 241, 0.4);
+  --sf-border-outer: rgba(0, 0, 0, 0.06);
+  --sf-text-primary: #0c0e1a;
+  --sf-text-secondary: #3b3f5c;
+  --sf-text-tertiary: #7c82a1;
+  --sf-text-muted: #b0b5cc;
+  --sf-accent: #6366f1;
+  --sf-accent-rgb: 99, 102, 241;
+  --sf-accent-light: rgba(99, 102, 241, 0.07);
+  --sf-accent-medium: rgba(99, 102, 241, 0.14);
+  --sf-cyan: #06b6d4;
+  --sf-violet: #8b5cf6;
+  --sf-emerald: #10b981;
+  --sf-amber: #f59e0b;
+  --sf-red: #ef4444;
+  --sf-shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+  --sf-shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+  --sf-shadow-lg: 0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+  --sf-shadow-glass: 0 8px 32px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 0 rgba(0,0,0,0.02);
+  --sf-shadow-glow: 0 0 0 1px rgba(255,255,255,0.5), 0 8px 32px rgba(0,0,0,0.06);
+  --sf-blur: 24px;
+  --sf-radius: 22px;
+  --sf-gradient-accent: linear-gradient(135deg, #6366f1, #8b5cf6, #a78bfa);
+  --sf-gradient-surface: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.4));
+  --sf-picker-filter: none;
 }
 
 .dark {
-  /* ── Dark Theme — Neon Glassmorphism ── */
-  --sf-bg: #0a0a0f;
-  --sf-bg-secondary: #111118;
-  --sf-bg-tertiary: #18181f;
-  --sf-surface: rgba(9, 9, 14, 0.7);
-  --sf-surface-hover: rgba(9, 9, 14, 0.85);
-  --sf-surface-elevated: rgba(24, 24, 31, 0.8);
-  --sf-border: rgba(255, 255, 255, 0.08);
-  --sf-border-hover: rgba(255, 255, 255, 0.15);
-  --sf-border-active: rgba(103, 232, 249, 0.3);
-  --sf-text-primary: #e4e4e7;
-  --sf-text-secondary: #a1a1aa;
-  --sf-text-tertiary: #71717a;
-  --sf-text-muted: #3f3f46;
-  --sf-accent: #67e8f9;
-  --sf-accent-light: rgba(103, 232, 249, 0.08);
-  --sf-accent-medium: rgba(103, 232, 249, 0.15);
+  /* ── Dark Theme — Deep Space Neon ── */
+  --sf-bg: #08080e;
+  --sf-bg-secondary: #0e0e18;
+  --sf-bg-tertiary: #151520;
+  --sf-surface: rgba(14, 14, 24, 0.65);
+  --sf-surface-hover: rgba(14, 14, 24, 0.8);
+  --sf-surface-elevated: rgba(21, 21, 32, 0.75);
+  --sf-border: rgba(255, 255, 255, 0.07);
+  --sf-border-hover: rgba(255, 255, 255, 0.12);
+  --sf-border-active: rgba(129, 140, 248, 0.4);
+  --sf-border-outer: rgba(255, 255, 255, 0.04);
+  --sf-text-primary: #eef0ff;
+  --sf-text-secondary: #a5a8c6;
+  --sf-text-tertiary: #6b6f8d;
+  --sf-text-muted: #3d4060;
+  --sf-accent: #818cf8;
+  --sf-accent-rgb: 129, 140, 248;
+  --sf-accent-light: rgba(129, 140, 248, 0.08);
+  --sf-accent-medium: rgba(129, 140, 248, 0.16);
   --sf-cyan: #67e8f9;
-  --sf-violet: #a855f7;
+  --sf-violet: #a78bfa;
   --sf-emerald: #34d399;
   --sf-amber: #fbbf24;
   --sf-red: #f87171;
-  --sf-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-  --sf-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-  --sf-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --sf-shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --sf-blur: 24px;
-  --sf-radius: 24px;
-  --sf-gradient-accent: linear-gradient(135deg, #67e8f9, #a855f7);
-  --sf-gradient-surface: linear-gradient(135deg, rgba(9,9,14,0.8), rgba(9,9,14,0.6));
+  --sf-shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --sf-shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --sf-shadow-lg: 0 12px 40px rgba(0,0,0,0.5);
+  --sf-shadow-glass: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+  --sf-shadow-glow: 0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.4);
+  --sf-blur: 28px;
+  --sf-radius: 22px;
+  --sf-gradient-accent: linear-gradient(135deg, #818cf8, #a78bfa, #c4b5fd);
+  --sf-gradient-surface: linear-gradient(135deg, rgba(14,14,24,0.7), rgba(14,14,24,0.5));
+  --sf-picker-filter: invert(1);
 }
 
-html {
-  color-scheme: light;
-}
-html.dark {
-  color-scheme: dark;
-}
+html { color-scheme: light; }
+html.dark { color-scheme: dark; }
 
 body {
   background: var(--sf-bg);
@@ -88,53 +92,41 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.4s ease, color 0.3s ease;
+}
+
+/* ── Aurora Mesh Background (light only) ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(99,102,241,0.08), transparent 60%),
+    radial-gradient(ellipse 60% 80% at 85% 30%, rgba(139,92,246,0.06), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 50% 80%, rgba(6,182,212,0.05), transparent 50%),
+    radial-gradient(ellipse 50% 40% at 30% 60%, rgba(16,185,129,0.04), transparent 45%);
+  animation: aurora-drift 20s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.dark body::before {
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 20%, rgba(129,140,248,0.06), transparent 60%),
+    radial-gradient(ellipse 60% 80% at 85% 30%, rgba(167,139,250,0.04), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 50% 80%, rgba(103,232,249,0.03), transparent 50%);
+}
+
+@keyframes aurora-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-2%, 1%) scale(1.02); }
+  100% { transform: translate(1%, -1%) scale(1); }
 }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--sf-border); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: var(--sf-border-hover); }
-
-/* ── Leaflet dark overrides ── */
-.dark .leaflet-container { background: #0a0a0f !important; }
-.dark .leaflet-tile-pane {
-  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
-}
-.leaflet-container { background: #f8f9fb !important; border-radius: var(--sf-radius); }
-.leaflet-control-zoom a {
-  background: var(--sf-surface) !important;
-  color: var(--sf-text-primary) !important;
-  border-color: var(--sf-border) !important;
-  backdrop-filter: blur(var(--sf-blur)) !important;
-}
-.leaflet-popup-content-wrapper {
-  background: var(--sf-surface-elevated) !important;
-  backdrop-filter: blur(var(--sf-blur)) !important;
-  border: 1px solid var(--sf-border) !important;
-  border-radius: 16px !important;
-  box-shadow: var(--sf-shadow-lg) !important;
-  color: var(--sf-text-primary) !important;
-}
-.leaflet-popup-tip { background: var(--sf-surface-elevated) !important; }
-
-/* ── Sonner toast theming ── */
-.sf-toast {
-  background: var(--sf-surface-elevated) !important;
-  border: 1px solid var(--sf-border) !important;
-  backdrop-filter: blur(var(--sf-blur)) !important;
-  color: var(--sf-text-primary) !important;
-  border-radius: 16px !important;
-}
-
-/* ── Recharts tooltip ── */
-.recharts-default-tooltip {
-  background: var(--sf-surface-elevated) !important;
-  border: 1px solid var(--sf-border) !important;
-  border-radius: 16px !important;
-  backdrop-filter: blur(var(--sf-blur)) !important;
-}
+::-webkit-scrollbar-thumb { background: var(--sf-text-muted); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--sf-text-tertiary); }
 
 /* ── Animations ── */
 @keyframes shimmer {
@@ -147,11 +139,7 @@ body {
 }
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-@keyframes pageIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 .animate-shimmer { animation: shimmer 2s linear infinite; }
@@ -162,110 +150,45 @@ body {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ── Glass Card Utility Classes ── */
-.sf-glass {
-  background: var(--sf-surface);
-  backdrop-filter: blur(var(--sf-blur));
-  -webkit-backdrop-filter: blur(var(--sf-blur));
-  border: 1px solid var(--sf-border);
-  border-radius: var(--sf-radius);
-  box-shadow: var(--sf-shadow-glass);
-  transition: all 0.2s ease;
-}
-.sf-glass:hover {
-  background: var(--sf-surface-hover);
-  border-color: var(--sf-border-hover);
-  box-shadow: var(--sf-shadow-lg);
+/* ── Leaflet ── */
+.dark .leaflet-container { background: #08080e !important; }
+.dark .leaflet-tile-pane { filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7); }
+.leaflet-container { background: var(--sf-bg) !important; border-radius: var(--sf-radius); }
+
+/* ── Sonner toast ── */
+.sf-toast {
+  background: var(--sf-surface-elevated) !important;
+  border: 1px solid var(--sf-border) !important;
+  backdrop-filter: blur(var(--sf-blur)) !important;
+  color: var(--sf-text-primary) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--sf-shadow-lg) !important;
 }
 
-/* Light mode Liquid Glass shine overlay */
-.sf-glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05));
-  pointer-events: none;
-  opacity: 1;
-}
-.dark .sf-glass::before {
-  background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
-}
-
-/* ── Neon glow (dark only) ── */
-.dark .neon-text {
-  text-shadow: 0 0 10px rgba(103, 232, 249, 0.5), 0 0 40px rgba(103, 232, 249, 0.2);
-}
-
-/* ── Custom form controls — override native browser styles ── */
-
-/* Select native fallback styling */
+/* ── Form controls ── */
 select {
   appearance: none;
   -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237c82a1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 16px;
   padding-right: 36px;
 }
+select option { background: var(--sf-bg-secondary); color: var(--sf-text-primary); }
 
-select option {
-  background: var(--sf-bg-secondary);
-  color: var(--sf-text-primary);
-  padding: 8px 12px;
-}
-
-/* Date and time inputs */
 input[type="date"],
 input[type="time"],
-input[type="datetime-local"] {
-  appearance: none;
-  -webkit-appearance: none;
-  position: relative;
-}
+input[type="datetime-local"] { appearance: none; -webkit-appearance: none; }
 
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-  opacity: 0.5;
-  cursor: pointer;
-  filter: var(--sf-picker-filter, none);
+  opacity: 0.5; cursor: pointer; filter: var(--sf-picker-filter);
 }
 
-.dark input[type="date"]::-webkit-calendar-picker-indicator,
-.dark input[type="time"]::-webkit-calendar-picker-indicator,
-.dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-}
-
-/* Confirm dialogs — style via Sonner */
-[data-sonner-toast] {
-  font-family: 'Inter', system-ui, sans-serif !important;
-}
-
-/* Remove default focus outlines, use our own */
-*:focus {
-  outline: none;
-}
-
-/* Textarea styling */
-textarea {
-  appearance: none;
-  -webkit-appearance: none;
-}
-
-/* Number input — hide spinners */
+*:focus { outline: none; }
 input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-/* File input */
-input[type="file"] {
-  display: none;
-}
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+input[type="file"] { display: none; }

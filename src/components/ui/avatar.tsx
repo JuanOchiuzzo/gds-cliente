@@ -9,15 +9,15 @@ interface AvatarProps {
 }
 
 const sizeMap = {
-  sm: 'w-8 h-8 text-xs',
-  md: 'w-10 h-10 text-sm',
-  lg: 'w-14 h-14 text-lg',
+  sm: 'w-8 h-8 text-[10px]',
+  md: 'w-10 h-10 text-xs',
+  lg: 'w-14 h-14 text-base',
 };
 
 const statusColors = {
-  online: 'bg-emerald-500',
-  offline: 'bg-zinc-400 dark:bg-zinc-500',
-  em_atendimento: 'bg-amber-500',
+  online: 'bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.5)]',
+  offline: 'bg-zinc-300 dark:bg-zinc-600',
+  em_atendimento: 'bg-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.5)]',
 };
 
 export function Avatar({ name, src, size = 'md', status, className }: AvatarProps) {
@@ -27,14 +27,15 @@ export function Avatar({ name, src, size = 'md', status, className }: AvatarProp
         <img
           src={src}
           alt={name}
-          className={cn('rounded-full object-cover border border-[var(--sf-border)]', sizeMap[size])}
+          className={cn('rounded-2xl object-cover border border-[var(--sf-border-outer)]', sizeMap[size])}
         />
       ) : (
         <div
           className={cn(
-            'rounded-full flex items-center justify-center font-semibold',
-            'bg-gradient-to-br from-blue-100 to-violet-100 text-blue-700 border border-blue-200/50',
-            'dark:from-cyan-500/30 dark:to-violet-500/30 dark:text-cyan-200 dark:border-white/10',
+            'rounded-2xl flex items-center justify-center font-bold tracking-tight',
+            'bg-gradient-to-br from-indigo-100 to-violet-100 text-indigo-600',
+            'dark:from-indigo-500/20 dark:to-violet-500/20 dark:text-indigo-300',
+            'border border-[var(--sf-border-outer)]',
             sizeMap[size]
           )}
         >

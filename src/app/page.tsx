@@ -79,7 +79,7 @@ export default function LoginPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20, delay: 0.2 }}
-              className="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-br from-blue-600 to-violet-600 dark:from-cyan-500 dark:to-violet-500 flex items-center justify-center shadow-lg"
+              className="w-16 h-16 mx-auto rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-[0_4px_20px_rgba(99,102,241,0.35)]"
             >
               <Sparkles className="w-8 h-8 text-white" />
             </motion.div>

@@ -35,28 +35,29 @@ export function Sidebar() {
   const { profile } = useAuth();
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-screen fixed left-0 top-0 z-40 bg-[var(--sf-bg-secondary)]/80 backdrop-blur-2xl border-r border-[var(--sf-border)]">
+    <aside className="hidden lg:flex flex-col w-[260px] h-screen fixed left-0 top-0 z-40 bg-[var(--sf-bg-secondary)]/60 backdrop-blur-2xl border-r border-[var(--sf-border-outer)]">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-[var(--sf-border)]">
-        <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 dark:from-cyan-500 dark:to-violet-500 flex items-center justify-center shadow-md">
-          <Sparkles className="w-5 h-5 text-white" />
+      <div className="flex items-center gap-3 px-5 py-5">
+        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-[0_2px_8px_rgba(99,102,241,0.3)]">
+          <Sparkles className="w-4 h-4 text-white" />
         </div>
         <div>
-          <h1 className="text-base font-bold text-[var(--sf-text-primary)] tracking-tight">StandForge</h1>
-          <p className="text-[10px] text-[var(--sf-text-tertiary)] uppercase tracking-widest">CRM Premium</p>
+          <h1 className="text-[15px] font-bold text-[var(--sf-text-primary)] tracking-tight leading-none">StandForge</h1>
+          <p className="text-[9px] text-[var(--sf-text-muted)] uppercase tracking-[0.2em] mt-0.5">CRM</p>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-2 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
           return (
             <Link key={item.href} href={item.href}>
               <motion.div
-                whileHover={{ x: 4 }}
+                whileHover={{ x: 2 }}
+                transition={{ duration: 0.15 }}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-all duration-200 relative',
+                  'flex items-center gap-2.5 px-3 py-[7px] rounded-xl text-[13px] font-medium transition-all duration-150 relative',
                   isActive
                     ? 'text-[var(--sf-accent)] bg-[var(--sf-accent-light)]'
                     : 'text-[var(--sf-text-tertiary)] hover:text-[var(--sf-text-secondary)] hover:bg-[var(--sf-accent-light)]'
@@ -65,11 +66,11 @@ export function Sidebar() {
                 {isActive && (
                   <motion.div
                     layoutId="sidebar-active"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-[var(--sf-accent)]"
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-full bg-[var(--sf-accent)]"
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                   />
                 )}
-                <item.icon className="w-5 h-5 flex-shrink-0" />
+                <item.icon className="w-[18px] h-[18px] flex-shrink-0" />
                 <span>{item.label}</span>
               </motion.div>
             </Link>
@@ -77,22 +78,21 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Footer with theme toggle */}
-      <div className="px-4 py-4 border-t border-[var(--sf-border)] space-y-3">
-        {/* Theme toggle */}
+      {/* Footer */}
+      <div className="px-3 py-3 border-t border-[var(--sf-border-outer)] space-y-2">
         <button
           onClick={toggleTheme}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-2xl text-sm text-[var(--sf-text-tertiary)] hover:text-[var(--sf-text-secondary)] hover:bg-[var(--sf-accent-light)] transition-all"
+          className="w-full flex items-center gap-2.5 px-3 py-[7px] rounded-xl text-[13px] text-[var(--sf-text-tertiary)] hover:text-[var(--sf-text-secondary)] hover:bg-[var(--sf-accent-light)] transition-all"
         >
-          {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          {theme === 'light' ? <Moon className="w-[18px] h-[18px]" /> : <Sun className="w-[18px] h-[18px]" />}
           <span>{theme === 'light' ? 'Modo Escuro' : 'Modo Claro'}</span>
         </button>
 
-        <div className="flex items-center gap-3 px-2">
+        <div className="flex items-center gap-2.5 px-3 py-1">
           <Avatar name={profile?.full_name || 'U'} src={profile?.avatar_url} size="sm" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-[var(--sf-text-primary)] truncate">{profile?.full_name || 'Usuário'}</p>
-            <p className="text-xs text-[var(--sf-text-tertiary)] truncate">{profile?.email}</p>
+            <p className="text-[13px] font-medium text-[var(--sf-text-primary)] truncate">{profile?.full_name || 'Usuário'}</p>
+            <p className="text-[10px] text-[var(--sf-text-muted)] truncate">{profile?.email}</p>
           </div>
         </div>
       </div>

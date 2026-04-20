@@ -32,7 +32,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-[100dvh] bg-[var(--sf-bg)]">
       <Sidebar />
-      <div className="lg:ml-64">
+      <div className="lg:ml-[260px]">
         <Topbar />
         <main className="px-4 lg:px-6 py-4 pb-24 lg:pb-6">
           {children}
