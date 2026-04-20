@@ -36,16 +36,6 @@ export default function DashboardPage() {
   const today = new Date().toISOString().split('T')[0];
   const todayApts = appointments.filter((a) => a.date === today);
 
-  const loading = walletLoading || aptsLoading || queueLoading;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[var(--sf-accent)]/30 border-t-[var(--sf-accent)] rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4 lg:space-y-6">
       {/* Greeting */}

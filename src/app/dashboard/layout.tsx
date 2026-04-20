@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Sidebar } from '@/components/layout/sidebar';
@@ -11,21 +12,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, loading } = useAuth();
   const router = useRouter();
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/');
+    }
+  }, [loading, user, router]);
+
+  // Only show full-screen spinner on very first load
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--sf-bg)] flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-[var(--sf-bg)] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-[var(--sf-accent)]/30 border-t-[var(--sf-accent)] rounded-full animate-spin" />
       </div>
     );
   }
 
-  if (!user) {
-    router.push('/');
-    return null;
-  }
+  if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-[var(--sf-bg)]">
+    <div className="min-h-[100dvh] bg-[var(--sf-bg)]">
       <Sidebar />
       <div className="lg:ml-64">
         <Topbar />
