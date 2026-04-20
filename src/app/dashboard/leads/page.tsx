@@ -37,6 +37,7 @@ import {
   getLeadStageLabel,
   getLeadSourceLabel,
   generateWhatsAppLink,
+  getFirstName,
   timeAgo,
   cn,
 } from '@/lib/utils';
@@ -89,7 +90,7 @@ export default function LeadsPage() {
     () =>
       leads.filter((l) => {
         const matchSearch =
-          l.name.toLowerCase().includes(search.toLowerCase()) ||
+          (l.name || '').toLowerCase().includes(search.toLowerCase()) ||
           (l.phone || '').includes(search);
         const matchStage = stageFilter === 'all' || l.stage === stageFilter;
         return matchSearch && matchStage;
@@ -282,7 +283,7 @@ export default function LeadsPage() {
                       <a
                         href={generateWhatsAppLink(
                           lead.phone,
-                          `Olá ${lead.name.split(' ')[0]}!`
+                          `Olá ${getFirstName(lead.name)}!`
                         )}
                         target="_blank"
                         rel="noopener"
@@ -351,7 +352,7 @@ export default function LeadsPage() {
                     <a
                       href={generateWhatsAppLink(
                         selected.phone,
-                        `Olá ${selected.name.split(' ')[0]}!`
+                        `Olá ${getFirstName(selected.name)}!`
                       )}
                       target="_blank"
                       rel="noopener"

@@ -33,7 +33,7 @@ import {
 import { EmptyState } from '@/components/ui/empty-state';
 import { useWallet, type WalletClientRow } from '@/lib/hooks/use-wallet';
 import { useStands } from '@/lib/hooks/use-stands';
-import { generateWhatsAppLink, cn } from '@/lib/utils';
+import { generateWhatsAppLink, cn, getFirstName, toDateOrNull } from '@/lib/utils';
 import { format } from 'date-fns';
 import { staggerParent, slideUp } from '@/lib/motion';
 
@@ -105,7 +105,7 @@ export default function WalletPage() {
     () =>
       clients.filter((c) => {
         const matchSearch =
-          c.name.toLowerCase().includes(search.toLowerCase()) ||
+          (c.name || '').toLowerCase().includes(search.toLowerCase()) ||
           (c.phone || '').includes(search);
         const matchTemp = tempFilter === 'all' || c.temperature === tempFilter;
         return matchSearch && matchTemp;
@@ -149,11 +149,18 @@ export default function WalletPage() {
       toast.error('Preencha todos os campos');
       return;
     }
+
+    const dueDate = toDateOrNull(taskForm.due_date);
+    if (!dueDate) {
+      toast.error('Data da tarefa inválida');
+      return;
+    }
+
     await createTask({
       client_id: selectedClient.id,
       type: taskForm.type as 'ligar',
       description: taskForm.description,
-      due_date: new Date(taskForm.due_date).toISOString(),
+      due_date: dueDate.toISOString(),
     });
     toast.success('Tarefa criada');
     setShowNewTask(false);
@@ -305,7 +312,7 @@ export default function WalletPage() {
                                   <a
                                     href={generateWhatsAppLink(
                                       client.phone,
-                                      `Olá ${client.name.split(' ')[0]}!`
+                                      `Olá ${getFirstName(client.name)}!`
                                     )}
                                     target="_blank"
                                     rel="noopener"
@@ -347,7 +354,8 @@ export default function WalletPage() {
           ) : (
             <>
               {pendingTasks.map((task) => {
-                const isOverdue = new Date(task.due_date) < new Date();
+                const dueDate = toDateOrNull(task.due_date);
+                const isOverdue = !!dueDate && dueDate.getTime() < Date.now();
                 const cfg = TASK_TYPES.find((t) => t.key === task.type) || TASK_TYPES[3];
                 return (
                   <motion.div
@@ -371,7 +379,7 @@ export default function WalletPage() {
                           <div className="flex items-center gap-2 mt-0.5 text-[11px] text-text-faint">
                             <span>{task.client_name}</span>
                             <span className={isOverdue ? 'text-danger' : ''}>
-                              · {format(new Date(task.due_date), 'dd/MM HH:mm')}
+                              · {dueDate ? format(dueDate, 'dd/MM HH:mm') : 'data inválida'}
                               {isOverdue && ' · atrasada'}
                             </span>
                           </div>
@@ -458,7 +466,7 @@ export default function WalletPage() {
                     <a
                       href={generateWhatsAppLink(
                         selectedClient.phone,
-                        `Olá ${selectedClient.name.split(' ')[0]}!`
+                        `Olá ${getFirstName(selectedClient.name)}!`
                       )}
                       target="_blank"
                       rel="noopener"

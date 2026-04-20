@@ -9,7 +9,7 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { EmptyState } from '@/components/ui/empty-state';
 import { NumberFlow } from '@/components/ui/number-flow';
 import { useAgents } from '@/lib/hooks/use-agents';
-import { formatCurrency, formatPercent, generateWhatsAppLink } from '@/lib/utils';
+import { formatCurrency, formatPercent, generateWhatsAppLink, getDisplayName } from '@/lib/utils';
 import { staggerParent, slideUp } from '@/lib/motion';
 import { cn } from '@/lib/utils';
 
@@ -79,14 +79,14 @@ export default function AgentsPage() {
                   )}
                   <span className="text-2xl">{medals[i]}</span>
                   <Avatar
-                    name={agent.name}
+                    name={getDisplayName(agent.name, 'Agente')}
                     src={agent.avatar_url}
                     size="lg"
                     ring={i === 0 ? 'solar' : 'subtle'}
                     className="mx-auto mt-2"
                   />
                   <p className="text-sm font-medium text-text mt-2 truncate">
-                    {agent.name.split(' ').slice(0, 2).join(' ')}
+                    {getDisplayName(agent.name, 'Agente').split(' ').slice(0, 2).join(' ')}
                   </p>
                   <p className="text-[11px] text-text-faint">
                     {(agent.stand_name || '').replace('Stand ', '')}
@@ -120,14 +120,16 @@ export default function AgentsPage() {
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <Avatar
-                  name={agent.name}
+                  name={getDisplayName(agent.name, 'Agente')}
                   src={agent.avatar_url}
                   size="md"
                   status={agent.status === 'online' ? 'online' : agent.status === 'em_atendimento' ? 'busy' : 'offline'}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-text truncate">{agent.name}</h3>
+                    <h3 className="text-sm font-medium text-text truncate">
+                      {getDisplayName(agent.name, 'Agente')}
+                    </h3>
                     <Badge
                       variant={agent.role === 'gerente' ? 'aurora' : 'info'}
                       size="xs"

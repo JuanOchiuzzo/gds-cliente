@@ -27,7 +27,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useWallet } from '@/lib/hooks/use-wallet';
 import { useAppointments } from '@/lib/hooks/use-appointments';
 import { useQueue } from '@/lib/hooks/use-queue';
-import { generateWhatsAppLink } from '@/lib/utils';
+import { generateWhatsAppLink, getFirstName } from '@/lib/utils';
 import { staggerParent, slideUp, spring } from '@/lib/motion';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -38,7 +38,7 @@ export default function DashboardPage() {
   const { appointments } = useAppointments();
   const { queue, myPosition } = useQueue();
 
-  const firstName = profile?.full_name?.split(' ')[0] || 'Guerreiro';
+  const firstName = getFirstName(profile?.full_name, 'Guerreiro');
   const pendingTasks = tasks.filter((t) => !t.completed);
   const hotClients = clients.filter((c) => c.temperature === 'quente');
 
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                           }`}
                         >
                           <span className="font-mono">{q.position}º</span>
-                          <span>{(q.agent_name || '').split(' ')[0]}</span>
+                          <span>{getFirstName(q.agent_name, 'Corretor')}</span>
                           {me && <span className="w-1.5 h-1.5 rounded-full bg-solar animate-pulse" />}
                         </div>
                       );
@@ -321,13 +321,13 @@ export default function DashboardPage() {
                     )}
                     {client.phone && (
                       <div className="mt-3 flex gap-2">
-                        <a
-                          href={generateWhatsAppLink(
-                            client.phone,
-                            `Olá ${client.name.split(' ')[0]}!`
-                          )}
-                          target="_blank"
-                          rel="noopener"
+                          <a
+                            href={generateWhatsAppLink(
+                              client.phone,
+                              `Olá ${getFirstName(client.name)}!`
+                            )}
+                            target="_blank"
+                            rel="noopener"
                           className="flex-1 flex items-center justify-center gap-1 h-8 rounded-md text-[11px] font-medium bg-success/10 text-success border border-success/25 hover:bg-success/15 transition-colors"
                         >
                           <MessageCircle className="w-3 h-3" /> WhatsApp

@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { cn, normalizeNumber } from '@/lib/utils';
 
 interface ProgressBarProps {
   value: number;
@@ -17,7 +17,9 @@ export function ProgressBar({
   showLabel,
   variant,
 }: ProgressBarProps) {
-  const pct = Math.min((value / Math.max(max, 1)) * 100, 100);
+  const safeValue = normalizeNumber(value);
+  const safeMax = Math.max(normalizeNumber(max, 100), 1);
+  const pct = Math.max(0, Math.min((safeValue / safeMax) * 100, 100));
   const autoVariant: ProgressBarProps['variant'] =
     variant ??
     (pct >= 100 ? 'success' : pct >= 70 ? 'solar' : pct >= 40 ? 'aurora' : 'danger');

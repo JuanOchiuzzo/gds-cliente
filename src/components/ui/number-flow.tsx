@@ -1,7 +1,7 @@
 'use client';
 
 import NumberFlowPrimitive, { type Format } from '@number-flow/react';
-import { cn } from '@/lib/utils';
+import { cn, normalizeNumber } from '@/lib/utils';
 
 interface NumberFlowProps {
   value: number;
@@ -20,9 +20,11 @@ export function NumberFlow({
   className,
   locales = 'pt-BR',
 }: NumberFlowProps) {
+  const safeValue = normalizeNumber(value);
+
   return (
     <NumberFlowPrimitive
-      value={value}
+      value={safeValue}
       prefix={prefix}
       suffix={suffix}
       format={format}

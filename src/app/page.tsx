@@ -54,6 +54,11 @@ export default function LoginPage() {
     setLoading(false);
   };
 
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    handleSubmit();
+  };
+
   return (
     <div className="min-h-[100dvh] bg-canvas text-text relative overflow-hidden flex">
       {/* Animated aurora backdrop + grid pattern */}
@@ -180,10 +185,11 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <div className="space-y-4">
+            <form className="space-y-4" onSubmit={handleFormSubmit}>
               {isSignUp && (
                 <Input
                   icon={<User className="w-4 h-4" />}
+                  autoComplete="name"
                   placeholder="Nome completo"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
@@ -191,6 +197,7 @@ export default function LoginPage() {
               )}
               <Input
                 icon={<Mail className="w-4 h-4" />}
+                autoComplete="email"
                 type="email"
                 placeholder="seu@email.com"
                 value={email}
@@ -199,6 +206,7 @@ export default function LoginPage() {
               />
               <Input
                 icon={<Lock className="w-4 h-4" />}
+                autoComplete={isSignUp ? 'new-password' : 'current-password'}
                 type="password"
                 placeholder="••••••••"
                 value={password}
@@ -211,12 +219,12 @@ export default function LoginPage() {
                 size="lg"
                 className="w-full group"
                 loading={loading}
-                onClick={handleSubmit}
+                type="submit"
               >
                 {isSignUp ? 'Criar conta' : 'Entrar'}
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
               </Button>
-            </div>
+            </form>
 
             <div className="mt-6 pt-6 border-t border-border text-center">
               <p className="text-sm text-text-soft">

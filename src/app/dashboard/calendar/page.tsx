@@ -14,7 +14,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { useCalendarEvents } from '@/lib/hooks/use-calendar';
 import { format, addDays, startOfWeek, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { cn, toDateOrNull } from '@/lib/utils';
 import { staggerParent, slideUp } from '@/lib/motion';
 
 const TYPE_VARIANT: Record<string, BadgeProps['variant']> = {
@@ -40,18 +40,35 @@ export default function CalendarPage() {
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   const getEventsForDay = (date: Date) =>
-    events.filter((e) => isSameDay(new Date(e.start_time), date));
+    events.filter((e) => {
+      const startTime = toDateOrNull(e.start_time);
+      return startTime ? isSameDay(startTime, date) : false;
+    });
 
   const handleCreate = async () => {
     if (!form.title || !form.start || !form.end) {
       toast.error('Preencha todos os campos');
       return;
     }
+
+    const startTime = toDateOrNull(form.start);
+    const endTime = toDateOrNull(form.end);
+
+    if (!startTime || !endTime) {
+      toast.error('Data ou horário inválido');
+      return;
+    }
+
+    if (endTime <= startTime) {
+      toast.error('O horário final precisa ser depois do inicial');
+      return;
+    }
+
     await create({
       title: form.title,
       type: form.type,
-      start_time: new Date(form.start).toISOString(),
-      end_time: new Date(form.end).toISOString(),
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
       color: '#F59E0B',
     });
     toast.success('Evento criado');
@@ -135,29 +152,34 @@ export default function CalendarPage() {
                 )}
               </div>
               <div className="space-y-1.5">
-                {dayEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className="p-2 rounded-sm border border-border bg-surface-1 hover:border-border-glow transition-colors"
-                  >
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <span
-                        className={cn(
-                          'w-1.5 h-1.5 rounded-full',
-                          event.type === 'visita' && 'bg-info',
-                          event.type === 'reuniao' && 'bg-aurora-1',
-                          event.type === 'plantao' && 'bg-solar',
-                          event.type === 'follow_up' && 'bg-success'
-                        )}
-                      />
-                      <p className="text-xs font-medium text-text truncate">{event.title}</p>
+                {dayEvents.map((event) => {
+                  const startTime = toDateOrNull(event.start_time);
+                  const endTime = toDateOrNull(event.end_time);
+
+                  return (
+                    <div
+                      key={event.id}
+                      className="p-2 rounded-sm border border-border bg-surface-1 hover:border-border-glow transition-colors"
+                    >
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span
+                          className={cn(
+                            'w-1.5 h-1.5 rounded-full',
+                            event.type === 'visita' && 'bg-info',
+                            event.type === 'reuniao' && 'bg-aurora-1',
+                            event.type === 'plantao' && 'bg-solar',
+                            event.type === 'follow_up' && 'bg-success'
+                          )}
+                        />
+                        <p className="text-xs font-medium text-text truncate">{event.title}</p>
+                      </div>
+                      <p className="text-[10px] text-text-faint font-mono">
+                        {startTime ? format(startTime, 'HH:mm') : '--:--'} –{' '}
+                        {endTime ? format(endTime, 'HH:mm') : '--:--'}
+                      </p>
                     </div>
-                    <p className="text-[10px] text-text-faint font-mono">
-                      {format(new Date(event.start_time), 'HH:mm')} –{' '}
-                      {format(new Date(event.end_time), 'HH:mm')}
-                    </p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </Surface>
           );

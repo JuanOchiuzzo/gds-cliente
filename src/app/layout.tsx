@@ -10,6 +10,14 @@ export const metadata: Metadata = {
   title: 'StandForge CRM',
   description: 'CRM premium para gestão de stands imobiliários.',
   manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: '/icon-192.png',
+    apple: '/icon-192.png',
+  },
 };
 
 export const viewport: Viewport = {

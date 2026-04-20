@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { cn, normalizeNumber } from '@/lib/utils';
 
 interface RingProps {
   value: number; // 0-100
@@ -22,9 +22,10 @@ export function Ring({
   label,
   variant = 'solar',
 }: RingProps) {
+  const safeValue = Math.min(Math.max(normalizeNumber(value), 0), 100);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (value / 100) * circumference;
+  const offset = circumference - (safeValue / 100) * circumference;
 
   const gradientId = `ring-grad-${variant}`;
   const colors = {
@@ -68,7 +69,7 @@ export function Ring({
       {showLabel && (
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="text-[11px] font-mono font-medium text-text tabular-nums">
-            {label ?? Math.round(value)}
+            {label ?? Math.round(safeValue)}
           </span>
         </div>
       )}

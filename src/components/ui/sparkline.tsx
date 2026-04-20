@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { cn } from '@/lib/utils';
+import { cn, normalizeNumber } from '@/lib/utils';
 
 interface SparklineProps {
   data: number[];
@@ -20,14 +20,18 @@ export function Sparkline({
   variant = 'solar',
   showFill = true,
 }: SparklineProps) {
-  if (data.length < 2) return null;
+  const safeData = data
+    .map((value) => normalizeNumber(value, Number.NaN))
+    .filter((value) => Number.isFinite(value));
 
-  const min = Math.min(...data);
-  const max = Math.max(...data);
+  if (safeData.length < 2) return null;
+
+  const min = Math.min(...safeData);
+  const max = Math.max(...safeData);
   const range = max - min || 1;
-  const stepX = width / (data.length - 1);
+  const stepX = width / (safeData.length - 1);
 
-  const points = data.map((v, i) => {
+  const points = safeData.map((v, i) => {
     const x = i * stepX;
     const y = height - ((v - min) / range) * height;
     return [x, y];

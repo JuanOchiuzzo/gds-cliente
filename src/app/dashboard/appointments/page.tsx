@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { EmptyState } from '@/components/ui/empty-state';
 import { useAppointments, type AppointmentRow } from '@/lib/hooks/use-appointments';
 import { useStands } from '@/lib/hooks/use-stands';
-import { generateWhatsAppLink, cn } from '@/lib/utils';
+import { generateWhatsAppLink, getFirstName, cn } from '@/lib/utils';
 import { staggerParent, slideUp } from '@/lib/motion';
 
 const STATUS_VARIANT: Record<string, BadgeProps['variant']> = {
@@ -78,7 +78,7 @@ export default function AppointmentsPage() {
 
   const handleShare = async (apt: AppointmentRow) => {
     const stand = stands.find((s) => s.id === apt.stand_id);
-    const msg = `Olá ${apt.client_name.split(' ')[0]}! Sua visita está confirmada:\n\n📅 ${apt.date} às ${apt.time}\n📍 ${stand?.name || ''} — ${stand?.address || ''}\n🎫 Voucher: ${apt.voucher_code}\n\nApresente o voucher à recepcionista ao chegar.`;
+    const msg = `Olá ${getFirstName(apt.client_name)}! Sua visita está confirmada:\n\n📅 ${apt.date} às ${apt.time}\n📍 ${stand?.name || ''} — ${stand?.address || ''}\n🎫 Voucher: ${apt.voucher_code}\n\nApresente o voucher à recepcionista ao chegar.`;
     const link = generateWhatsAppLink(apt.client_phone || '', msg);
     window.open(link, '_blank');
     await shareVoucher(apt.id);

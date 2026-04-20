@@ -37,7 +37,7 @@ export default function StandsPage() {
 
   const filtered = stands.filter((s) => {
     const ms =
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
+      (s.name || '').toLowerCase().includes(search.toLowerCase()) ||
       (s.city || '').toLowerCase().includes(search.toLowerCase());
     const mf = filter === 'all' || s.status === filter;
     return ms && mf;

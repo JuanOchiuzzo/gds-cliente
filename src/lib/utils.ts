@@ -5,25 +5,55 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function normalizeNumber(value: unknown, fallback = 0): number {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : fallback;
+  }
+
+  if (typeof value === 'string' && value.trim() !== '') {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+  return fallback;
+}
+
+export function getDisplayName(name: string | null | undefined, fallback = 'Usuário'): string {
+  const normalized = name?.trim();
+  return normalized || fallback;
+}
+
+export function getFirstName(name: string | null | undefined, fallback = 'Cliente'): string {
+  return getDisplayName(name, fallback).split(/\s+/)[0] || fallback;
+}
+
+export function toDateOrNull(value: string | number | Date | null | undefined): Date | null {
+  if (!value) return null;
+
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export function formatCurrency(value: number): string {
+  const amount = normalizeNumber(value);
   return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(amount);
 }
 
 export function formatNumber(value: number): string {
-  return new Intl.NumberFormat('pt-BR').format(value);
+  return new Intl.NumberFormat('pt-BR').format(normalizeNumber(value));
 }
 
 export function formatPercent(value: number): string {
-  return `${value.toFixed(1)}%`;
+  return `${normalizeNumber(value).toFixed(1)}%`;
 }
 
 export function getInitials(name: string): string {
-  return name
+  return getDisplayName(name, 'U')
     .split(' ')
     .map((n) => n[0])
     .join('')
@@ -67,14 +97,15 @@ export function getStandStatusLabel(status: string): string {
 }
 
 export function generateWhatsAppLink(phone: string, message: string): string {
-  const cleanPhone = phone.replace(/\D/g, '');
+  const cleanPhone = `${phone || ''}`.replace(/\D/g, '');
   const encodedMessage = encodeURIComponent(message);
   return `https://wa.me/55${cleanPhone}?text=${encodedMessage}`;
 }
 
 export function timeAgo(dateStr: string): string {
   const now = new Date();
-  const date = new Date(dateStr);
+  const date = toDateOrNull(dateStr);
+  if (!date) return 'data indisponível';
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (seconds < 60) return 'agora';
@@ -118,6 +149,6 @@ export function generateVoucherMessage(appointment: {
   client_name: string; voucher_code: string; date: string;
   time: string; stand_name: string; stand_address: string; product_name: string;
 }): string {
-  const firstName = appointment.client_name.split(' ')[0];
+  const firstName = getFirstName(appointment.client_name);
   return `Olá ${firstName}! 😊\n\nSua visita está confirmada:\n\n📍 ${appointment.stand_name}\n📌 ${appointment.stand_address}\n🏠 ${appointment.product_name}\n📅 ${appointment.date} às ${appointment.time}\n\n🎫 Seu voucher: *${appointment.voucher_code}*\nApresente à recepcionista ao chegar.\n\n📍 Google Maps: https://maps.google.com/?q=${encodeURIComponent(appointment.stand_address)}\n\nTe esperamos! — StandForge`;
 }

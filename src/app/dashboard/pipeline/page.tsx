@@ -28,6 +28,7 @@ import {
   formatCurrency,
   getLeadStageLabel,
   generateWhatsAppLink,
+  getFirstName,
   timeAgo,
 } from '@/lib/utils';
 import { staggerParent, slideUp, spring } from '@/lib/motion';
@@ -327,7 +328,7 @@ export default function PipelinePage() {
                   <a
                     href={generateWhatsAppLink(
                       selectedLead.phone,
-                      `Olá ${selectedLead.name.split(' ')[0]}!`
+                      `Olá ${getFirstName(selectedLead.name)}!`
                     )}
                     target="_blank"
                     rel="noopener"

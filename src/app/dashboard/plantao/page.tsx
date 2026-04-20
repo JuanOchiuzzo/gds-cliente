@@ -170,7 +170,7 @@ export default function PlantaoPage() {
         <motion.div variants={slideUp}>
           <StandQueue
             standName={stands.find((s) => s.id === selectedStandId)?.name || 'Stand'}
-            items={queue.sort((a, b) => a.position - b.position)}
+            items={[...queue].sort((a, b) => a.position - b.position)}
             isAdmin={isAdmin}
             onAdvance={() => handleAdvance(selectedStandId)}
             onStartFirst={() => handleStartFirst(selectedStandId)}
@@ -183,7 +183,7 @@ export default function PlantaoPage() {
           <motion.div key={standId} variants={slideUp}>
             <StandQueue
               standName={items[0]?.stand_name || 'Stand'}
-              items={items.sort((a, b) => a.position - b.position)}
+              items={[...items].sort((a, b) => a.position - b.position)}
               isAdmin={isAdmin}
               onAdvance={() => handleAdvance(standId)}
               onStartFirst={() => handleStartFirst(standId)}
