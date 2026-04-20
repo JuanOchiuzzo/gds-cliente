@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/modal';
 import { useCalendarEvents } from '@/lib/hooks/use-calendar';
 import { format, addDays, startOfWeek, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Select } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
@@ -99,10 +100,7 @@ export default function CalendarPage() {
         <div className="space-y-4">
           <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Título *</label>
             <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="Título do evento" /></div>
-          <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Tipo</label>
-            <select value={newType} onChange={(e) => setNewType(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none">
-              <option value="visita">Visita</option><option value="reuniao">Reunião</option><option value="plantao">Plantão</option><option value="follow_up">Follow-up</option>
-            </select></div>
+          <Select label="Tipo" value={newType} onChange={setNewType} options={[{value:'visita',label:'Visita'},{value:'reuniao',label:'Reunião'},{value:'plantao',label:'Plantão'},{value:'follow_up',label:'Follow-up'}]} />
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Início *</label>
               <input type="datetime-local" value={newStart} onChange={(e) => setNewStart(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" /></div>

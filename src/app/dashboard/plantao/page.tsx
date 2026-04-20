@@ -13,6 +13,7 @@ import { useStands } from '@/lib/hooks/use-stands';
 import { useAgents } from '@/lib/hooks/use-agents';
 import { useProfiles } from '@/lib/hooks/use-profiles';
 import { useAuth } from '@/lib/auth-context';
+import { Select } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
@@ -188,24 +189,20 @@ export default function PlantaoPage() {
       {/* Add to queue modal */}
       <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Escalar Corretor" size="sm">
         <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Stand *</label>
-            <select value={selectedStandId} onChange={(e) => setSelectedStandId(e.target.value)}
-              className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none">
-              <option value="">Selecionar stand...</option>
-              {activeStands.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-            </select>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Corretor *</label>
-            <select value={addAgentName} onChange={(e) => setAddAgentName(e.target.value)}
-              className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none">
-              <option value="">Selecionar corretor...</option>
-              {profiles.map((p) => (
-                <option key={p.id} value={p.id}>{p.full_name} ({p.role})</option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="Stand *"
+            value={selectedStandId}
+            onChange={setSelectedStandId}
+            placeholder="Selecionar stand..."
+            options={activeStands.map((s) => ({ value: s.id, label: s.name }))}
+          />
+          <Select
+            label="Corretor *"
+            value={addAgentName}
+            onChange={setAddAgentName}
+            placeholder="Selecionar corretor..."
+            options={profiles.map((p) => ({ value: p.id, label: `${p.full_name} (${p.role})` }))}
+          />
           <div className="space-y-1.5">
             <label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Data</label>
             <input type="date" value={shiftDate} onChange={(e) => setShiftDate(e.target.value)}

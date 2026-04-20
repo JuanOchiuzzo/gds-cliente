@@ -12,6 +12,7 @@ import { useLeads, type LeadRow } from '@/lib/hooks/use-leads';
 import { useStands } from '@/lib/hooks/use-stands';
 import { useAuth } from '@/lib/auth-context';
 import { formatCurrency, getLeadStageLabel, getLeadSourceLabel, generateWhatsAppLink, timeAgo } from '@/lib/utils';
+import { Select } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.03 } } };
@@ -313,12 +314,7 @@ export default function LeadsPage() {
             <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Valor estimado</label>
               <input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" /></div>
           </div>
-          <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Origem</label>
-            <select value={editSource} onChange={(e) => setEditSource(e.target.value)}
-              className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none">
-              {sourceOptions.map((s) => <option key={s} value={s}>{getLeadSourceLabel(s)}</option>)}
-            </select>
-          </div>
+          <Select label="Origem" value={editSource} onChange={setEditSource} options={sourceOptions.map((s) => ({ value: s, label: getLeadSourceLabel(s) }))} />
           <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Notas</label>
             <textarea rows={3} value={editNotes} onChange={(e) => setEditNotes(e.target.value)}
               className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none resize-none" placeholder="Observações sobre o lead..." />
@@ -344,11 +340,7 @@ export default function LeadsPage() {
               <input type="number" value={newValue} onChange={(e) => setNewValue(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="500000" /></div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Origem</label>
-              <select value={newSource} onChange={(e) => setNewSource(e.target.value)}
-                className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none">
-                {sourceOptions.map((s) => <option key={s} value={s}>{getLeadSourceLabel(s)}</option>)}
-              </select></div>
+            <Select label="Origem" value={newSource} onChange={setNewSource} options={sourceOptions.map((s) => ({ value: s, label: getLeadSourceLabel(s) }))} />
             {stands.length > 0 && (
               <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Stand</label>
                 <select value={newStandId} onChange={(e) => setNewStandId(e.target.value)}

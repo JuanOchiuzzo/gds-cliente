@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/modal';
 import { useAppointments, type AppointmentRow } from '@/lib/hooks/use-appointments';
 import { useStands } from '@/lib/hooks/use-stands';
 import { generateWhatsAppLink } from '@/lib/utils';
+import { Select } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
@@ -200,12 +201,7 @@ export default function AppointmentsPage() {
               <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="(11) 99999-0000" /></div>
             <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Produto</label>
               <input value={newProduct} onChange={(e) => setNewProduct(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" placeholder="Residencial X" /></div>
-            <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Stand</label>
-              <select value={newStandId} onChange={(e) => setNewStandId(e.target.value)}
-                className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none">
-                <option value="">Selecionar...</option>
-                {stands.filter((s) => s.status === 'ativo').map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select></div>
+            <Select label="Stand" value={newStandId} onChange={setNewStandId} placeholder="Selecionar..." options={stands.filter((s) => s.status === 'ativo').map((s) => ({ value: s.id, label: s.name }))} />
             <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Data *</label>
               <input type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="w-full px-4 py-3 bg-[var(--sf-surface)] border border-[var(--sf-border)] rounded-2xl text-sm text-[var(--sf-text-primary)] outline-none" /></div>
             <div className="space-y-1.5"><label className="text-xs text-[var(--sf-text-tertiary)] font-medium">Horário *</label>

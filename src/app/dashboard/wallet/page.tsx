@@ -15,6 +15,7 @@ import { useWallet, type WalletClientRow } from '@/lib/hooks/use-wallet';
 import { useStands } from '@/lib/hooks/use-stands';
 import { generateWhatsAppLink } from '@/lib/utils';
 import { format } from 'date-fns';
+import { Select } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
