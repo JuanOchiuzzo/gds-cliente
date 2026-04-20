@@ -232,6 +232,16 @@ function StandQueue({
 }) {
   const hasAtendendo = items.some((q) => q.status === 'atendendo');
   const nextUp = items.find((q) => q.status === 'aguardando');
+  
+  // Calculate display positions: atendendo = 1, then aguardando in order, ausente at end
+  const activeItems = items.filter((q) => q.status === 'atendendo' || q.status === 'aguardando');
+  const ausenteItems = items.filter((q) => q.status === 'ausente');
+  const orderedItems = [...activeItems, ...ausenteItems];
+  const displayPosition = new Map<string, number>();
+  let pos = 1;
+  for (const item of activeItems) {
+    displayPosition.set(item.id, pos++);
+  }
 
   return (
     <GlassCard hover={false} className="!p-4">
@@ -240,7 +250,7 @@ function StandQueue({
           <UserCircle className="w-5 h-5 text-blue-600 dark:text-cyan-400" />
           <h3 className="text-sm font-semibold text-[var(--sf-text-primary)]">{standName}</h3>
           <span className="text-[10px] bg-[var(--sf-surface)] text-[var(--sf-text-muted)] px-2 py-0.5 rounded-lg border border-[var(--sf-border)]">
-            {items.length} na fila
+            {activeItems.length} na fila
           </span>
         </div>
         {isAdmin && (
@@ -260,8 +270,9 @@ function StandQueue({
       </div>
 
       <div className="space-y-2">
-        {items.map((item) => {
+        {orderedItems.map((item) => {
           const cfg = statusConfig[item.status] || statusConfig.aguardando;
+          const dPos = displayPosition.get(item.id);
           return (
             <div key={item.id} className={`flex items-center gap-3 p-3 rounded-2xl border transition-all ${
               item.status === 'atendendo'
@@ -270,7 +281,7 @@ function StandQueue({
                 ? 'bg-red-50 dark:bg-red-500/5 border-red-200 dark:border-red-500/20 opacity-60'
                 : 'bg-[var(--sf-surface)] border-[var(--sf-border)]'
             }`}>
-              <span className="text-sm font-bold text-[var(--sf-text-muted)] w-6 text-center">{item.position}º</span>
+              <span className="text-sm font-bold text-[var(--sf-text-muted)] w-6 text-center">{dPos ? `${dPos}º` : '—'}</span>
               <Avatar name={item.agent_name || 'Corretor'} size="sm" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-[var(--sf-text-primary)] truncate">{item.agent_name || 'Corretor'}</p>

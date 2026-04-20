@@ -88,13 +88,25 @@ export function useQueue(standId?: string) {
   };
 
   const advanceQueue = async (sId: string) => {
-    // Move current "atendendo" to "finalizado", next "aguardando" to "atendendo"
     const standQueue = queue.filter((q) => q.stand_id === sId).sort((a, b) => a.position - b.position);
     const current = standQueue.find((q) => q.status === 'atendendo');
     const next = standQueue.find((q) => q.status === 'aguardando');
 
-    if (current) await updateStatus(current.id, 'finalizado');
-    if (next) await updateStatus(next.id, 'atendendo');
+    // Finalize current
+    if (current) await supabase.from('queue').update({ status: 'finalizado' }).eq('id', current.id);
+
+    // Promote next to atendendo
+    if (next) await supabase.from('queue').update({ status: 'atendendo' }).eq('id', next.id);
+
+    // Recalculate positions: only active (aguardando/atendendo) get sequential positions
+    const remaining = standQueue.filter((q) =>
+      q.id !== current?.id && (q.status === 'aguardando' || q.id === next?.id)
+    );
+    for (let i = 0; i < remaining.length; i++) {
+      await supabase.from('queue').update({ position: i + 1 }).eq('id', remaining[i].id);
+    }
+
+    fetch();
   };
 
   return { queue, loading, myPosition, refetch: fetch, addToQueue, updateStatus, removeFromQueue, advanceQueue };
