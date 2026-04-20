@@ -1,27 +1,67 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Search, Plus, Phone, MessageCircle, SlidersHorizontal, Trash2, Edit3, ArrowRight, FileText, Clock } from 'lucide-react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Search,
+  Plus,
+  Phone,
+  MessageCircle,
+  Trash2,
+  Edit3,
+  ArrowRight,
+  FileText,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { Surface } from '@/components/ui/surface';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
-import { Modal } from '@/components/ui/modal';
+import { Input, Textarea } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Chip } from '@/components/ui/chip';
+import { Ring } from '@/components/ui/ring';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useLeads, type LeadRow } from '@/lib/hooks/use-leads';
 import { useStands } from '@/lib/hooks/use-stands';
 import { useAuth } from '@/lib/auth-context';
-import { formatCurrency, getLeadStageLabel, getLeadSourceLabel, generateWhatsAppLink, timeAgo } from '@/lib/utils';
-import { Select } from '@/components/ui/select';
-import { toast } from 'sonner';
+import { fireConfetti } from '@/components/effects/confetti';
+import {
+  formatCurrency,
+  getLeadStageLabel,
+  getLeadSourceLabel,
+  generateWhatsAppLink,
+  timeAgo,
+  cn,
+} from '@/lib/utils';
+import { staggerParent, slideUp } from '@/lib/motion';
 
-const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.03 } } };
-const fadeUp = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
-const stageVariant: Record<string, 'cyan' | 'violet' | 'emerald' | 'amber' | 'red' | 'zinc'> = {
-  novo: 'cyan', qualificado: 'violet', visita_agendada: 'amber', proposta: 'violet', negociacao: 'amber', fechado: 'emerald', perdido: 'red',
+const STAGE_VARIANT: Record<string, BadgeProps['variant']> = {
+  novo: 'info',
+  qualificado: 'aurora',
+  visita_agendada: 'warning',
+  proposta: 'aurora',
+  negociacao: 'solar',
+  fechado: 'success',
+  perdido: 'danger',
 };
-const stageOrder = ['novo', 'qualificado', 'visita_agendada', 'proposta', 'negociacao', 'fechado', 'perdido'];
-const sourceOptions = ['whatsapp', 'site', 'evento', 'stand', 'indicacao', 'instagram', 'telefone'];
+
+const STAGE_ORDER = [
+  'novo',
+  'qualificado',
+  'visita_agendada',
+  'proposta',
+  'negociacao',
+  'fechado',
+  'perdido',
+];
+const SOURCE_OPTIONS = ['whatsapp', 'site', 'evento', 'stand', 'indicacao', 'instagram', 'telefone'];
 
 export default function LeadsPage() {
   const { leads, loading, create, update, remove } = useLeads();
@@ -31,341 +71,529 @@ export default function LeadsPage() {
   const [stageFilter, setStageFilter] = useState('all');
   const [selected, setSelected] = useState<LeadRow | null>(null);
   const [showNew, setShowNew] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [showStageChange, setShowStageChange] = useState(false);
 
-  // New lead form
-  const [newName, setNewName] = useState('');
-  const [newPhone, setNewPhone] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [newSource, setNewSource] = useState('stand');
-  const [newStandId, setNewStandId] = useState('');
-  const [newValue, setNewValue] = useState('');
-  const [newNotes, setNewNotes] = useState('');
+  // Forms
+  const [form, setForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    source: 'stand',
+    stand_id: '',
+    value: '',
+    notes: '',
+  });
 
-  // Edit form
-  const [editName, setEditName] = useState('');
-  const [editPhone, setEditPhone] = useState('');
-  const [editEmail, setEditEmail] = useState('');
-  const [editSource, setEditSource] = useState('');
-  const [editValue, setEditValue] = useState('');
-  const [editNotes, setEditNotes] = useState('');
-
-  const filtered = useMemo(() => leads.filter((l) => {
-    const matchSearch = l.name.toLowerCase().includes(search.toLowerCase()) || (l.phone || '').includes(search);
-    const matchStage = stageFilter === 'all' || l.stage === stageFilter;
-    return matchSearch && matchStage;
-  }), [leads, search, stageFilter]);
+  const filtered = useMemo(
+    () =>
+      leads.filter((l) => {
+        const matchSearch =
+          l.name.toLowerCase().includes(search.toLowerCase()) ||
+          (l.phone || '').includes(search);
+        const matchStage = stageFilter === 'all' || l.stage === stageFilter;
+        return matchSearch && matchStage;
+      }),
+    [leads, search, stageFilter]
+  );
 
   const handleCreate = async () => {
-    if (!newName) { toast.error('Nome é obrigatório'); return; }
+    if (!form.name) {
+      toast.error('Nome é obrigatório');
+      return;
+    }
     await create({
-      name: newName, phone: newPhone || null, email: newEmail || null,
-      source: newSource as LeadRow['source'], stand_id: newStandId || null,
-      agent_id: user?.id || null, estimated_value: Number(newValue) || 0,
-      notes: newNotes || null,
+      name: form.name,
+      phone: form.phone || null,
+      email: form.email || null,
+      source: form.source as LeadRow['source'],
+      stand_id: form.stand_id || null,
+      agent_id: user?.id || null,
+      estimated_value: Number(form.value) || 0,
+      notes: form.notes || null,
     });
-    toast.success('Lead criado!');
+    toast.success('Lead criado');
     setShowNew(false);
-    setNewName(''); setNewPhone(''); setNewEmail(''); setNewValue(''); setNewNotes(''); setNewSource('stand');
+    setForm({ name: '', phone: '', email: '', source: 'stand', stand_id: '', value: '', notes: '' });
   };
 
   const openEdit = (lead: LeadRow) => {
-    setEditName(lead.name);
-    setEditPhone(lead.phone || '');
-    setEditEmail(lead.email || '');
-    setEditSource(lead.source || 'stand');
-    setEditValue(String(lead.estimated_value || ''));
-    setEditNotes(lead.notes || '');
+    setForm({
+      name: lead.name,
+      phone: lead.phone || '',
+      email: lead.email || '',
+      source: lead.source || 'stand',
+      stand_id: lead.stand_id || '',
+      value: String(lead.estimated_value || ''),
+      notes: lead.notes || '',
+    });
     setShowEdit(true);
   };
 
   const handleEdit = async () => {
-    if (!selected || !editName) return;
+    if (!selected || !form.name) return;
     await update(selected.id, {
-      name: editName, phone: editPhone || null, email: editEmail || null,
-      source: editSource, estimated_value: Number(editValue) || 0,
-      notes: editNotes || null,
+      name: form.name,
+      phone: form.phone || null,
+      email: form.email || null,
+      source: form.source,
+      estimated_value: Number(form.value) || 0,
+      notes: form.notes || null,
     });
-    toast.success('Lead atualizado!');
+    toast.success('Lead atualizado');
     setShowEdit(false);
     setSelected(null);
   };
 
   const handleStageChange = async (newStage: string) => {
     if (!selected) return;
+    const wasNotClosed = selected.stage !== 'fechado';
     await update(selected.id, { stage: newStage });
-    toast.success(`Movido para ${getLeadStageLabel(newStage)}`);
+    if (newStage === 'fechado' && wasNotClosed) {
+      fireConfetti();
+      toast.success(`🎉 Venda fechada: ${selected.name}`);
+    } else {
+      toast.success(`Movido para ${getLeadStageLabel(newStage)}`);
+    }
     setShowStageChange(false);
     setSelected(null);
   };
 
   const handleDelete = async () => {
     if (!selected) return;
-    if (!confirm(`Tem certeza que deseja excluir ${selected.name}?`)) return;
+    if (!confirm(`Excluir ${selected.name}?`)) return;
     await remove(selected.id);
     toast.success('Lead excluído');
     setSelected(null);
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" /></div>;
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-8 h-8 border-2 border-border-strong border-t-solar rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4">
-      <motion.div variants={fadeUp} className="flex items-center justify-between">
+    <motion.div
+      variants={staggerParent(0.04)}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      {/* Header */}
+      <motion.div variants={slideUp} className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">Leads</h1>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">{filtered.length} de {leads.length} leads</p>
+          <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Leads</h1>
+          <p className="mt-1 text-sm text-text-soft">
+            {filtered.length} de {leads.length} total
+          </p>
         </div>
-        <Button variant="neon" size="sm" onClick={() => setShowNew(true)}>
-          <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Novo Lead</span>
+        <Button variant="solar" size="md" onClick={() => setShowNew(true)}>
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Novo lead</span>
         </Button>
       </motion.div>
 
-      {/* Search + Filter */}
-      <motion.div variants={fadeUp} className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-faint)]" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar nome, telefone..."
-            className="w-full pl-10 pr-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] placeholder:text-[var(--text-faint)] outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" />
-        </div>
-        <button onClick={() => setShowFilters(!showFilters)}
-          className={`p-2.5 rounded-2xl border transition-all ${stageFilter !== 'all' ? 'bg-blue-50 border-blue-200 text-blue-600' : 'bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-muted)]'}`}>
-          <SlidersHorizontal className="w-5 h-5" />
-        </button>
-      </motion.div>
-
-      {showFilters && (
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          {['all', ...stageOrder].map((s) => (
-            <button key={s} onClick={() => setStageFilter(s)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-xl border whitespace-nowrap transition-all ${
-                stageFilter === s ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-muted)]'
-              }`}>
-              {s === 'all' ? 'Todos' : getLeadStageLabel(s)}
-            </button>
+      {/* Filters */}
+      <motion.div variants={slideUp} className="space-y-3">
+        <Input
+          icon={<Search className="w-4 h-4" />}
+          placeholder="Buscar por nome ou telefone…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
+          <Chip active={stageFilter === 'all'} onClick={() => setStageFilter('all')}>
+            Todos
+          </Chip>
+          {STAGE_ORDER.map((s) => (
+            <Chip
+              key={s}
+              active={stageFilter === s}
+              onClick={() => setStageFilter(s)}
+            >
+              {getLeadStageLabel(s)}
+            </Chip>
           ))}
         </div>
-      )}
+      </motion.div>
 
-      {/* Lead List */}
+      {/* Lead list */}
       {filtered.length === 0 ? (
-        <GlassCard hover={false} className="!p-8 text-center">
-          <p className="text-sm text-[var(--text-muted)]">{leads.length === 0 ? 'Nenhum lead cadastrado' : 'Nenhum lead encontrado'}</p>
-          <Button variant="neon" size="sm" className="mt-4" onClick={() => setShowNew(true)}><Plus className="w-4 h-4" /> Novo Lead</Button>
-        </GlassCard>
+        <Surface variant="elevated" padding="xl">
+          <EmptyState
+            icon={<FileText className="w-6 h-6" />}
+            title={leads.length === 0 ? 'Nenhum lead ainda' : 'Nada encontrado'}
+            description={
+              leads.length === 0
+                ? 'Comece adicionando seu primeiro lead.'
+                : 'Tente ajustar filtros ou busca.'
+            }
+            action={
+              leads.length === 0 ? (
+                <Button variant="solar" onClick={() => setShowNew(true)}>
+                  <Plus className="w-4 h-4" />
+                  Novo lead
+                </Button>
+              ) : null
+            }
+          />
+        </Surface>
       ) : (
-        <motion.div variants={stagger} className="space-y-2">
+        <motion.div variants={staggerParent(0.02)} className="space-y-2">
           {filtered.map((lead) => (
-            <motion.div key={lead.id} variants={fadeUp}>
-              <motion.div whileTap={{ scale: 0.98 }} onClick={() => setSelected(lead)}
-                className="p-3.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl active:bg-[var(--bg-hover)] cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <Avatar name={lead.name} size="md" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-[var(--text)] truncate">{lead.name}</h3>
-                      <div className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
-                        lead.ai_score >= 70 ? 'bg-emerald-100 text-emerald-700' :
-                        lead.ai_score >= 40 ? 'bg-amber-100 text-amber-700' :
-                        'bg-red-100 text-red-700'
-                      }`}>{lead.ai_score}</div>
-                    </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <Badge variant={stageVariant[lead.stage] || 'zinc'} className="!text-[9px]">{getLeadStageLabel(lead.stage)}</Badge>
-                      <span className="text-[10px] text-[var(--text-muted)]">{formatCurrency(lead.estimated_value)}</span>
-                    </div>
-                    {lead.notes && <p className="text-[10px] text-[var(--text-faint)] mt-0.5 truncate">{lead.notes}</p>}
+            <motion.div key={lead.id} variants={slideUp}>
+              <div
+                onClick={() => setSelected(lead)}
+                className="group flex items-center gap-3 p-3 bg-surface-0 border border-border rounded-md hover:border-border-glow hover:bg-surface-1 transition-colors cursor-pointer"
+              >
+                <Avatar name={lead.name} size="md" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-medium text-text truncate">{lead.name}</h3>
+                    <Badge
+                      variant={STAGE_VARIANT[lead.stage] || 'neutral'}
+                      size="xs"
+                    >
+                      {getLeadStageLabel(lead.stage)}
+                    </Badge>
                   </div>
-                  <div className="flex flex-col gap-1">
-                    {lead.phone && (
-                      <>
-                        <a href={generateWhatsAppLink(lead.phone, `Olá ${lead.name.split(' ')[0]}!`)} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}
-                          className="p-2 rounded-xl text-green-600 active:bg-green-500/10"><MessageCircle className="w-4 h-4" /></a>
-                        <a href={`tel:${lead.phone}`} onClick={(e) => e.stopPropagation()}
-                          className="p-2 rounded-xl text-blue-600 active:bg-blue-500/10"><Phone className="w-4 h-4" /></a>
-                      </>
-                    )}
+                  <div className="flex items-center gap-2 mt-0.5 text-[11px] text-text-faint">
+                    <span className="font-mono">{formatCurrency(lead.estimated_value)}</span>
+                    {lead.stand_name && <span>· {lead.stand_name}</span>}
+                    <span>· {timeAgo(lead.updated_at)}</span>
                   </div>
                 </div>
-              </motion.div>
+
+                {lead.ai_score > 0 && (
+                  <Ring
+                    value={lead.ai_score}
+                    size={36}
+                    strokeWidth={3}
+                    variant={lead.ai_score >= 70 ? 'solar' : 'aurora'}
+                  />
+                )}
+
+                <div className="hidden sm:flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {lead.phone && (
+                    <>
+                      <a
+                        href={generateWhatsAppLink(
+                          lead.phone,
+                          `Olá ${lead.name.split(' ')[0]}!`
+                        )}
+                        target="_blank"
+                        rel="noopener"
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-8 h-8 rounded-md flex items-center justify-center text-success hover:bg-success/10 transition-colors"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                      </a>
+                      <a
+                        href={`tel:${lead.phone}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-8 h-8 rounded-md flex items-center justify-center text-info hover:bg-info/10 transition-colors"
+                      >
+                        <Phone className="w-4 h-4" />
+                      </a>
+                    </>
+                  )}
+                </div>
+              </div>
             </motion.div>
           ))}
         </motion.div>
       )}
 
-      {/* ── LEAD DETAIL MODAL ── */}
-      <Modal open={!!selected && !showEdit && !showStageChange} onClose={() => setSelected(null)} title={selected?.name || ''} size="lg">
-        {selected && (
-          <div className="space-y-5">
-            {/* Header */}
-            <div className="flex items-center gap-4">
-              <Avatar name={selected.name} size="lg" />
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-[var(--text)]">{selected.name}</h3>
-                {selected.email && <p className="text-sm text-[var(--text-muted)]">{selected.email}</p>}
-                {selected.phone && <p className="text-sm text-[var(--text-muted)]">{selected.phone}</p>}
-              </div>
-              <Badge variant={stageVariant[selected.stage] || 'zinc'}>{getLeadStageLabel(selected.stage)}</Badge>
-            </div>
+      {/* Detail dialog */}
+      <Dialog
+        open={!!selected && !showEdit && !showStageChange}
+        onOpenChange={(v) => !v && setSelected(null)}
+      >
+        <DialogContent size="lg">
+          {selected && (
+            <div className="space-y-5">
+              <DialogHeader>
+                <DialogTitle className="flex items-start gap-3">
+                  <Avatar name={selected.name} size="lg" ring="solar" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display italic text-2xl text-text">{selected.name}</p>
+                    <div className="flex flex-wrap gap-2 mt-1.5 text-[11px] text-text-soft">
+                      {selected.email && <span>{selected.email}</span>}
+                      {selected.phone && <span>· {selected.phone}</span>}
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      <Badge variant={STAGE_VARIANT[selected.stage]} size="sm">
+                        {getLeadStageLabel(selected.stage)}
+                      </Badge>
+                      {selected.source && (
+                        <Badge variant="neutral" size="sm">
+                          {getLeadSourceLabel(selected.source)}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </DialogTitle>
+              </DialogHeader>
 
-            {/* Quick Actions — large touch targets */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {selected.phone && (
-                <>
-                  <a href={`tel:${selected.phone}`} className="block">
-                    <div className="flex flex-col items-center gap-1.5 p-3 bg-blue-50 border border-blue-200 rounded-2xl">
-                      <Phone className="w-5 h-5 text-blue-600" />
-                      <span className="text-[11px] font-medium text-blue-700">Ligar</span>
-                    </div>
-                  </a>
-                  <a href={generateWhatsAppLink(selected.phone, `Olá ${selected.name.split(' ')[0]}!`)} target="_blank" rel="noopener" className="block">
-                    <div className="flex flex-col items-center gap-1.5 p-3 bg-green-50 border border-green-200 rounded-2xl">
-                      <MessageCircle className="w-5 h-5 text-green-600" />
-                      <span className="text-[11px] font-medium text-green-700">WhatsApp</span>
-                    </div>
-                  </a>
-                </>
+              {/* Quick actions */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {selected.phone && (
+                  <>
+                    <a href={`tel:${selected.phone}`}>
+                      <Button variant="outline" className="w-full flex-col h-auto py-3 border-info/30 text-info hover:bg-info/10">
+                        <Phone className="w-4 h-4 mb-0.5" />
+                        <span className="text-[11px]">Ligar</span>
+                      </Button>
+                    </a>
+                    <a
+                      href={generateWhatsAppLink(
+                        selected.phone,
+                        `Olá ${selected.name.split(' ')[0]}!`
+                      )}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <Button variant="outline" className="w-full flex-col h-auto py-3 border-success/30 text-success hover:bg-success/10">
+                        <MessageCircle className="w-4 h-4 mb-0.5" />
+                        <span className="text-[11px]">WhatsApp</span>
+                      </Button>
+                    </a>
+                  </>
+                )}
+                <Button
+                  variant="outline"
+                  className="w-full flex-col h-auto py-3 border-aurora-1/30 text-aurora-1 hover:bg-aurora-1/10"
+                  onClick={() => setShowStageChange(true)}
+                >
+                  <ArrowRight className="w-4 h-4 mb-0.5" />
+                  <span className="text-[11px]">Mover</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full flex-col h-auto py-3"
+                  onClick={() => openEdit(selected)}
+                >
+                  <Edit3 className="w-4 h-4 mb-0.5" />
+                  <span className="text-[11px]">Editar</span>
+                </Button>
+              </div>
+
+              {/* Info grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {[
+                  { label: 'Valor', value: formatCurrency(selected.estimated_value) },
+                  { label: 'Score IA', value: `${selected.ai_score}/100` },
+                  { label: 'Origem', value: getLeadSourceLabel(selected.source || '—') },
+                  { label: 'Stand', value: selected.stand_name || '—' },
+                  { label: 'Agente', value: selected.agent_name || '—' },
+                  { label: 'Atualizado', value: timeAgo(selected.updated_at) },
+                ].map((i) => (
+                  <Surface key={i.label} variant="flat" padding="sm">
+                    <p className="text-[10px] text-text-faint uppercase tracking-wider mb-1">
+                      {i.label}
+                    </p>
+                    <p className="text-sm font-medium text-text truncate">{i.value}</p>
+                  </Surface>
+                ))}
+              </div>
+
+              {selected.notes && (
+                <Surface variant="flat" padding="md">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <FileText className="w-3.5 h-3.5 text-text-faint" />
+                    <span className="text-[10px] text-text-faint uppercase tracking-wider font-medium">
+                      Notas
+                    </span>
+                  </div>
+                  <p className="text-sm text-text-soft">{selected.notes}</p>
+                </Surface>
               )}
-              <button onClick={() => setShowStageChange(true)} className="block w-full">
-                <div className="flex flex-col items-center gap-1.5 p-3 bg-violet-50 border border-violet-200 rounded-2xl">
-                  <ArrowRight className="w-5 h-5 text-violet-600" />
-                  <span className="text-[11px] font-medium text-violet-700">Mover Etapa</span>
-                </div>
-              </button>
-              <button onClick={() => openEdit(selected)} className="block w-full">
-                <div className="flex flex-col items-center gap-1.5 p-3 bg-amber-50 border border-amber-200 rounded-2xl">
-                  <Edit3 className="w-5 h-5 text-amber-600" />
-                  <span className="text-[11px] font-medium text-amber-700">Editar</span>
-                </div>
+
+              <button
+                onClick={handleDelete}
+                className="w-full flex items-center justify-center gap-2 h-10 rounded-md bg-danger/10 border border-danger/25 text-danger text-xs font-medium hover:bg-danger/15 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Excluir lead
               </button>
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
-            {/* Info grid */}
-            <div className="grid grid-cols-2 gap-2.5">
-              {[
-                { label: 'Valor Estimado', value: formatCurrency(selected.estimated_value) },
-                { label: 'Score IA', value: `${selected.ai_score}/100` },
-                { label: 'Origem', value: getLeadSourceLabel(selected.source || '') },
-                { label: 'Stand', value: selected.stand_name || '—' },
-                { label: 'Agente', value: selected.agent_name || '—' },
-                { label: 'Atualizado', value: timeAgo(selected.updated_at) },
-              ].map((i) => (
-                <div key={i.label} className="p-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
-                  <p className="text-sm font-semibold text-[var(--text)]">{i.value}</p>
-                  <p className="text-[10px] text-[var(--text-muted)]">{i.label}</p>
-                </div>
-              ))}
-            </div>
+      {/* Change stage */}
+      <Dialog open={showStageChange} onOpenChange={setShowStageChange}>
+        <DialogContent size="sm">
+          <DialogHeader>
+            <DialogTitle>Mover para…</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {STAGE_ORDER.map((stage) => {
+              const isCurrent = selected?.stage === stage;
+              return (
+                <button
+                  key={stage}
+                  onClick={() => !isCurrent && handleStageChange(stage)}
+                  disabled={isCurrent}
+                  className={cn(
+                    'w-full flex items-center gap-3 p-3 rounded-md border text-left transition-colors',
+                    isCurrent
+                      ? 'bg-solar/10 border-solar/30'
+                      : 'bg-surface-1 border-border hover:border-border-glow hover:bg-surface-2'
+                  )}
+                >
+                  <Badge variant={STAGE_VARIANT[stage]} size="sm">
+                    {getLeadStageLabel(stage)}
+                  </Badge>
+                  {isCurrent && (
+                    <span className="text-[10px] text-text-faint ml-auto">atual</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
 
-            {/* Notes */}
-            {selected.notes && (
-              <div className="p-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <FileText className="w-3.5 h-3.5 text-[var(--text-faint)]" />
-                  <span className="text-[10px] text-[var(--text-muted)] font-medium">Notas</span>
-                </div>
-                <p className="text-xs text-[var(--text-secondary)]">{selected.notes}</p>
-              </div>
-            )}
+      {/* Edit */}
+      <Dialog open={showEdit} onOpenChange={setShowEdit}>
+        <DialogContent size="md">
+          <DialogHeader>
+            <DialogTitle>Editar lead</DialogTitle>
+          </DialogHeader>
+          <LeadForm
+            form={form}
+            setForm={setForm}
+            stands={stands}
+            onCancel={() => setShowEdit(false)}
+            onSubmit={handleEdit}
+            submitLabel="Salvar"
+          />
+        </DialogContent>
+      </Dialog>
 
-            {/* Delete */}
-            <button onClick={handleDelete}
-              className="w-full flex items-center justify-center gap-2 p-3 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-xs font-medium">
-              <Trash2 className="w-3.5 h-3.5" /> Excluir Lead
-            </button>
-          </div>
-        )}
-      </Modal>
+      {/* New */}
+      <Dialog open={showNew} onOpenChange={setShowNew}>
+        <DialogContent size="md">
+          <DialogHeader>
+            <DialogTitle>Novo lead</DialogTitle>
+          </DialogHeader>
+          <LeadForm
+            form={form}
+            setForm={setForm}
+            stands={stands}
+            onCancel={() => setShowNew(false)}
+            onSubmit={handleCreate}
+            submitLabel="Salvar lead"
+          />
+        </DialogContent>
+      </Dialog>
 
-      {/* ── CHANGE STAGE MODAL ── */}
-      <Modal open={showStageChange} onClose={() => setShowStageChange(false)} title="Mover para..." size="sm">
-        <div className="space-y-2">
-          {stageOrder.map((stage) => {
-            const isCurrent = selected?.stage === stage;
-            return (
-              <button key={stage} onClick={() => !isCurrent && handleStageChange(stage)} disabled={isCurrent}
-                className={`w-full flex items-center gap-3 p-3 rounded-2xl border text-left transition-all ${
-                  isCurrent
-                    ? 'bg-[var(--accent-soft)] border-[var(--accent)]/20 text-[var(--accent)] font-semibold'
-                    : 'bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-secondary)] active:bg-[var(--bg-hover)]'
-                }`}>
-                <Badge variant={stageVariant[stage] || 'zinc'}>{getLeadStageLabel(stage)}</Badge>
-                {isCurrent && <span className="text-[10px] text-[var(--text-faint)] ml-auto">atual</span>}
-              </button>
-            );
-          })}
-        </div>
-      </Modal>
-
-      {/* ── EDIT LEAD MODAL ── */}
-      <Modal open={showEdit} onClose={() => setShowEdit(false)} title="Editar Lead" size="md">
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Nome *</label>
-              <input value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" /></div>
-            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Telefone</label>
-              <input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" /></div>
-            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Email</label>
-              <input value={editEmail} onChange={(e) => setEditEmail(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" /></div>
-            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Valor estimado</label>
-              <input type="number" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" /></div>
-          </div>
-          <Select label="Origem" value={editSource} onChange={setEditSource} options={sourceOptions.map((s) => ({ value: s, label: getLeadSourceLabel(s) }))} />
-          <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Notas</label>
-            <textarea rows={3} value={editNotes} onChange={(e) => setEditNotes(e.target.value)}
-              className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none resize-none" placeholder="Observações sobre o lead..." />
-          </div>
-          <div className="flex gap-2 pt-2">
-            <Button variant="secondary" className="flex-1" onClick={() => setShowEdit(false)}>Cancelar</Button>
-            <Button variant="neon" className="flex-1" onClick={handleEdit}>Salvar</Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* ── NEW LEAD MODAL ── */}
-      <Modal open={showNew} onClose={() => setShowNew(false)} title="Novo Lead" size="md">
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Nome *</label>
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" placeholder="Nome" /></div>
-            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Telefone</label>
-              <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" placeholder="(11) 99999-0000" /></div>
-            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Email</label>
-              <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" placeholder="email@exemplo.com" /></div>
-            <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Valor estimado</label>
-              <input type="number" value={newValue} onChange={(e) => setNewValue(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" placeholder="500000" /></div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Select label="Origem" value={newSource} onChange={setNewSource} options={sourceOptions.map((s) => ({ value: s, label: getLeadSourceLabel(s) }))} />
-            {stands.length > 0 && (
-              <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Stand</label>
-                <select value={newStandId} onChange={(e) => setNewStandId(e.target.value)}
-                  className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none">
-                  <option value="">Selecionar...</option>
-                  {stands.filter((s) => s.status === 'ativo').map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select></div>
-            )}
-          </div>
-          <div className="space-y-1.5"><label className="text-xs text-[var(--text-muted)] font-medium">Notas</label>
-            <textarea rows={3} value={newNotes} onChange={(e) => setNewNotes(e.target.value)}
-              className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none resize-none" placeholder="Observações..." />
-          </div>
-          <div className="flex gap-2 pt-2">
-            <Button variant="secondary" className="flex-1" onClick={() => setShowNew(false)}>Cancelar</Button>
-            <Button variant="neon" className="flex-1" onClick={handleCreate}>Salvar Lead</Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* FAB */}
-      <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowNew(true)}
-        className="lg:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center shadow-lg border border-white/20">
-        <Plus className="w-6 h-6 text-white" />
+      {/* Mobile FAB */}
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setShowNew(true)}
+        className="lg:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <Plus className="w-6 h-6 text-canvas" />
       </motion.button>
     </motion.div>
+  );
+}
+
+interface FormShape {
+  name: string;
+  phone: string;
+  email: string;
+  source: string;
+  stand_id: string;
+  value: string;
+  notes: string;
+}
+
+function LeadForm({
+  form,
+  setForm,
+  stands,
+  onCancel,
+  onSubmit,
+  submitLabel,
+}: {
+  form: FormShape;
+  setForm: (f: FormShape) => void;
+  stands: Array<{ id: string; name: string; status: string }>;
+  onCancel: () => void;
+  onSubmit: () => void;
+  submitLabel: string;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Input
+          label="Nome"
+          placeholder="Nome completo"
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
+        <Input
+          label="Telefone"
+          placeholder="(11) 99999-0000"
+          value={form.phone}
+          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+        />
+        <Input
+          label="Email"
+          placeholder="email@exemplo.com"
+          value={form.email}
+          onChange={(e) => setForm({ ...form, email: e.target.value })}
+        />
+        <Input
+          label="Valor estimado"
+          type="number"
+          placeholder="500000"
+          value={form.value}
+          onChange={(e) => setForm({ ...form, value: e.target.value })}
+        />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Select
+          label="Origem"
+          value={form.source}
+          onChange={(v) => setForm({ ...form, source: v })}
+          options={SOURCE_OPTIONS.map((s) => ({ value: s, label: getLeadSourceLabel(s) }))}
+        />
+        {stands.length > 0 && (
+          <Select
+            label="Stand"
+            value={form.stand_id}
+            onChange={(v) => setForm({ ...form, stand_id: v })}
+            options={[
+              { value: '', label: '—' },
+              ...stands
+                .filter((s) => s.status === 'ativo')
+                .map((s) => ({ value: s.id, label: s.name })),
+            ]}
+          />
+        )}
+      </div>
+      <Textarea
+        label="Notas"
+        rows={3}
+        placeholder="Observações…"
+        value={form.notes}
+        onChange={(e) => setForm({ ...form, notes: e.target.value })}
+      />
+      <div className="flex gap-2 pt-2">
+        <Button variant="outline" className="flex-1" onClick={onCancel}>
+          Cancelar
+        </Button>
+        <Button variant="solar" className="flex-1" onClick={onSubmit}>
+          {submitLabel}
+        </Button>
+      </div>
+    </div>
   );
 }

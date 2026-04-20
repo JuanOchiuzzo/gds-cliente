@@ -2,182 +2,189 @@
 
 import { motion } from 'framer-motion';
 import { Trophy, Crown, Phone, MessageCircle, Users } from 'lucide-react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { Surface } from '@/components/ui/surface';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ProgressBar } from '@/components/ui/progress-bar';
+import { EmptyState } from '@/components/ui/empty-state';
+import { NumberFlow } from '@/components/ui/number-flow';
 import { useAgents } from '@/lib/hooks/use-agents';
 import { formatCurrency, formatPercent, generateWhatsAppLink } from '@/lib/utils';
-
-const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.05 } } };
-const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 25 } } };
+import { staggerParent, slideUp } from '@/lib/motion';
+import { cn } from '@/lib/utils';
 
 export default function AgentsPage() {
   const { agents, loading } = useAgents();
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" /></div>;
-  }
-
-  if (agents.length === 0) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">Equipe</h1>
-        <GlassCard hover={false} className="!p-8 text-center">
-          <Users className="w-10 h-10 mx-auto text-[var(--text-faint)] mb-3" />
-          <p className="text-sm text-[var(--text-muted)]">Nenhum agente cadastrado</p>
-        </GlassCard>
+      <div className="flex items-center justify-center py-20">
+        <div className="w-8 h-8 border-2 border-border-strong border-t-solar rounded-full animate-spin" />
       </div>
     );
   }
 
-  const sorted = agents;
+  if (agents.length === 0) {
+    return (
+      <div className="space-y-6">
+        <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Equipe</h1>
+        <Surface variant="elevated" padding="xl">
+          <EmptyState
+            icon={<Users className="w-6 h-6" />}
+            title="Nenhum agente cadastrado"
+            description="Agentes aparecem automaticamente ao se inscreverem."
+          />
+        </Surface>
+      </div>
+    );
+  }
+
+  const sorted = [...agents].sort((a, b) => (b.monthly_sales || 0) - (a.monthly_sales || 0));
+  const top3 = sorted.slice(0, 3);
+  const medals = ['🥇', '🥈', '🥉'];
+  const podiumBorders = ['border-solar/40 shadow-glow', 'border-aurora-1/30', 'border-aurora-2/30'];
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4 lg:space-y-6">
-      <motion.div variants={fadeUp}>
-        <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">Equipe</h1>
-        <p className="text-xs text-[var(--text-muted)] mt-0.5">{agents.length} agente{agents.length !== 1 ? 's' : ''}</p>
+    <motion.div
+      variants={staggerParent(0.04)}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      <motion.div variants={slideUp}>
+        <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Ranking</h1>
+        <p className="mt-1 text-sm text-text-soft">
+          {agents.length} agente{agents.length !== 1 ? 's' : ''} · ordenado por vendas do mês
+        </p>
       </motion.div>
 
-      {/* ── MOBILE: Top 3 Podium ── */}
-      {sorted.length >= 3 && (
-        <motion.div variants={fadeUp} className="lg:hidden">
-          <div className="flex items-center gap-2 mb-3 px-0.5">
-            <Trophy className="w-4 h-4 text-amber-400" />
-            <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Leaderboard</h3>
-          </div>
-          <div className="flex items-end justify-center gap-2 mb-4">
-            {/* 2nd */}
-            <div className="flex-1 max-w-[110px]">
-              <div className="p-3 bg-[var(--bg-card)] border border-zinc-300 rounded-2xl text-center">
-                <span className="text-lg">🥈</span>
-                <Avatar name={sorted[1].name} size="md" className="mx-auto mt-1" />
-                <p className="text-[11px] font-semibold text-[var(--text)] mt-1.5 truncate">{sorted[1].name.split(' ')[0]}</p>
-                <p className="text-lg font-bold text-[var(--text)] mt-0.5">{sorted[1].monthly_sales}</p>
-                <p className="text-[9px] text-[var(--text-muted)]">vendas</p>
-              </div>
-            </div>
-            {/* 1st */}
-            <div className="flex-1 max-w-[120px]">
-              <div className="p-3 bg-[var(--bg-card)] border border-amber-300 rounded-2xl text-center shadow-md relative">
-                <Crown className="absolute -top-2 left-1/2 -translate-x-1/2 w-5 h-5 text-amber-400" />
-                <span className="text-xl mt-1 block">🥇</span>
-                <Avatar name={sorted[0].name} size="lg" className="mx-auto mt-1" />
-                <p className="text-xs font-semibold text-[var(--text)] mt-1.5 truncate">{sorted[0].name.split(' ')[0]}</p>
-                <p className="text-2xl font-bold text-[var(--text)] mt-0.5">{sorted[0].monthly_sales}</p>
-                <p className="text-[9px] text-[var(--text-muted)]">vendas</p>
-                <ProgressBar value={sorted[0].monthly_sales} max={sorted[0].monthly_target} className="mt-2" />
-              </div>
-            </div>
-            {/* 3rd */}
-            <div className="flex-1 max-w-[110px]">
-              <div className="p-3 bg-[var(--bg-card)] border border-orange-300 rounded-2xl text-center">
-                <span className="text-lg">🥉</span>
-                <Avatar name={sorted[2].name} size="md" className="mx-auto mt-1" />
-                <p className="text-[11px] font-semibold text-[var(--text)] mt-1.5 truncate">{sorted[2].name.split(' ')[0]}</p>
-                <p className="text-lg font-bold text-[var(--text)] mt-0.5">{sorted[2].monthly_sales}</p>
-                <p className="text-[9px] text-[var(--text-muted)]">vendas</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* ── DESKTOP: Top 3 cards ── */}
-      {sorted.length >= 3 && (
-        <motion.div variants={fadeUp} className="hidden lg:block">
-          <GlassCard hover={false}>
-            <div className="flex items-center gap-2 mb-4">
-              <Trophy className="w-5 h-5 text-amber-400" />
-              <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Leaderboard</h3>
+      {top3.length >= 3 && (
+        <motion.div variants={slideUp}>
+          <Surface variant="elevated" padding="lg">
+            <div className="flex items-center gap-2 mb-5">
+              <Trophy className="w-4 h-4 text-solar" />
+              <h3 className="text-sm font-medium text-text">Leaderboard</h3>
             </div>
             <div className="grid grid-cols-3 gap-4">
-              {sorted.slice(0, 3).map((agent, i) => {
-                const medals = ['🥇', '🥈', '🥉'];
-                const borders = [
-                  'border-amber-300 shadow-md',
-                  'border-zinc-300',
-                  'border-orange-300',
-                ];
-                return (
-                  <div key={agent.id} className={`relative p-4 bg-[var(--bg-card)] border rounded-2xl text-center ${borders[i]}`}>
-                    <span className="text-2xl">{medals[i]}</span>
-                    {i === 0 && <Crown className="absolute top-2 right-2 w-4 h-4 text-amber-400" />}
-                    <Avatar name={agent.name} src={agent.avatar_url} size="lg" className="mx-auto mt-2" />
-                    <p className="text-sm font-semibold text-[var(--text)] mt-2">{agent.name}</p>
-                    <p className="text-xs text-[var(--text-muted)]">{(agent.stand_name || '').replace('Stand ', '')}</p>
-                    <div className="mt-3 space-y-1">
-                      <p className="text-xl font-bold text-[var(--text)]">{agent.monthly_sales}</p>
-                      <p className="text-[10px] text-[var(--text-muted)]">vendas este mês</p>
-                    </div>
-                    <ProgressBar value={agent.monthly_sales} max={agent.monthly_target} className="mt-3" />
+              {top3.map((agent, i) => (
+                <div
+                  key={agent.id}
+                  className={cn(
+                    'relative p-4 bg-surface-1 border rounded-md text-center transition-transform hover:scale-[1.02]',
+                    podiumBorders[i]
+                  )}
+                >
+                  {i === 0 && (
+                    <Crown className="absolute -top-3 left-1/2 -translate-x-1/2 w-5 h-5 text-solar" />
+                  )}
+                  <span className="text-2xl">{medals[i]}</span>
+                  <Avatar
+                    name={agent.name}
+                    src={agent.avatar_url}
+                    size="lg"
+                    ring={i === 0 ? 'solar' : 'subtle'}
+                    className="mx-auto mt-2"
+                  />
+                  <p className="text-sm font-medium text-text mt-2 truncate">
+                    {agent.name.split(' ').slice(0, 2).join(' ')}
+                  </p>
+                  <p className="text-[11px] text-text-faint">
+                    {(agent.stand_name || '').replace('Stand ', '')}
+                  </p>
+                  <div className="mt-3">
+                    <p className="text-2xl font-medium text-solar-gradient">
+                      <NumberFlow value={agent.monthly_sales} />
+                    </p>
+                    <p className="text-[10px] text-text-faint uppercase tracking-wider">vendas</p>
                   </div>
-                );
-              })}
+                  {agent.monthly_target > 0 && (
+                    <ProgressBar
+                      value={agent.monthly_sales}
+                      max={agent.monthly_target}
+                      className="mt-3"
+                    />
+                  )}
+                </div>
+              ))}
             </div>
-          </GlassCard>
+          </Surface>
         </motion.div>
       )}
 
-      {/* ── Full Agent List ── */}
-      <motion.div variants={stagger} className="space-y-2">
+      <motion.div variants={staggerParent(0.03)} className="space-y-2">
         {sorted.map((agent, i) => (
-          <motion.div key={agent.id} variants={fadeUp}>
-            <div className="p-3.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
+          <motion.div key={agent.id} variants={slideUp}>
+            <Surface variant="flat" padding="md" interactive>
               <div className="flex items-center gap-3">
-                <span className="text-sm font-bold text-[var(--text-faint)] w-5 text-center">{i + 1}</span>
-                <Avatar name={agent.name} src={agent.avatar_url} size="md" />
+                <span className="text-sm font-mono text-text-faint w-6 text-center">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <Avatar
+                  name={agent.name}
+                  src={agent.avatar_url}
+                  size="md"
+                  status={agent.status === 'online' ? 'online' : agent.status === 'em_atendimento' ? 'busy' : 'offline'}
+                />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-[var(--text)] truncate">{agent.name}</h3>
-                    <Badge variant={agent.role === 'gerente' ? 'violet' : 'cyan'} className="!text-[9px]">
+                    <h3 className="text-sm font-medium text-text truncate">{agent.name}</h3>
+                    <Badge
+                      variant={agent.role === 'gerente' ? 'aurora' : 'info'}
+                      size="xs"
+                    >
                       {agent.role === 'gerente' ? 'Gerente' : 'Corretor'}
                     </Badge>
                   </div>
-                  <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{(agent.stand_name || '').replace('Stand ', '')}</p>
-                  {/* Mobile stats */}
-                  <div className="flex items-center gap-3 mt-1.5 lg:hidden">
-                    <span className="text-[10px] text-[var(--text-secondary)]">
-                      <span className="font-semibold">{agent.monthly_sales}</span>/{agent.monthly_target} vendas
-                    </span>
-                    <span className="text-[10px] text-[var(--text-secondary)]">
-                      <span className="font-semibold">{formatPercent(agent.conversion_rate)}</span> conv.
-                    </span>
-                  </div>
+                  <p className="text-[11px] text-text-faint truncate">
+                    {(agent.stand_name || '').replace('Stand ', '')}
+                  </p>
                 </div>
-                {/* Desktop stats */}
+
                 <div className="hidden lg:grid grid-cols-4 gap-6 text-center">
                   <div>
-                    <p className="text-sm font-bold text-[var(--text)]">{agent.monthly_sales}/{agent.monthly_target}</p>
-                    <p className="text-[10px] text-[var(--text-muted)]">Vendas/Meta</p>
+                    <p className="text-sm font-mono text-text">
+                      {agent.monthly_sales}/{agent.monthly_target}
+                    </p>
+                    <p className="text-[10px] text-text-faint">Vendas</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[var(--text)]">{agent.total_leads}</p>
-                    <p className="text-[10px] text-[var(--text-muted)]">Leads</p>
+                    <p className="text-sm font-mono text-text">
+                      <NumberFlow value={agent.total_leads} />
+                    </p>
+                    <p className="text-[10px] text-text-faint">Leads</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[var(--text)]">{formatPercent(agent.conversion_rate)}</p>
-                    <p className="text-[10px] text-[var(--text-muted)]">Conversão</p>
+                    <p className="text-sm font-mono text-solar">
+                      {formatPercent(agent.conversion_rate)}
+                    </p>
+                    <p className="text-[10px] text-text-faint">Conv.</p>
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-[var(--text)]">{formatCurrency(agent.revenue)}</p>
-                    <p className="text-[10px] text-[var(--text-muted)]">Receita</p>
+                    <p className="text-sm font-mono text-text">{formatCurrency(agent.revenue)}</p>
+                    <p className="text-[10px] text-text-faint">Receita</p>
                   </div>
                 </div>
-                {/* Quick actions */}
+
                 {agent.phone && (
-                  <div className="flex flex-col gap-1 lg:hidden">
-                    <a href={generateWhatsAppLink(agent.phone, 'Oi!')} target="_blank" rel="noopener" className="p-1.5 rounded-lg text-green-600 active:bg-green-500/10">
+                  <div className="flex gap-1">
+                    <a
+                      href={generateWhatsAppLink(agent.phone, 'Oi!')}
+                      target="_blank"
+                      rel="noopener"
+                      className="w-8 h-8 rounded-md flex items-center justify-center text-success hover:bg-success/10"
+                    >
                       <MessageCircle className="w-4 h-4" />
                     </a>
-                    <a href={`tel:${agent.phone}`} className="p-1.5 rounded-lg text-blue-600 active:bg-blue-500/10">
+                    <a
+                      href={`tel:${agent.phone}`}
+                      className="w-8 h-8 rounded-md flex items-center justify-center text-info hover:bg-info/10"
+                    >
                       <Phone className="w-4 h-4" />
                     </a>
                   </div>
                 )}
               </div>
-            </div>
+            </Surface>
           </motion.div>
         ))}
       </motion.div>

@@ -2,18 +2,58 @@
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-interface ProgressBarProps { value: number; max?: number; className?: string; showLabel?: boolean; }
+interface ProgressBarProps {
+  value: number;
+  max?: number;
+  className?: string;
+  showLabel?: boolean;
+  variant?: 'solar' | 'aurora' | 'success' | 'danger';
+}
 
-export function ProgressBar({ value, max = 100, className, showLabel }: ProgressBarProps) {
-  const pct = Math.min((value / max) * 100, 100);
-  const color = pct >= 100 ? 'from-emerald-400 to-emerald-500' : pct >= 70 ? 'from-indigo-400 to-violet-500' : pct >= 40 ? 'from-amber-400 to-amber-500' : 'from-red-400 to-red-500';
+export function ProgressBar({
+  value,
+  max = 100,
+  className,
+  showLabel,
+  variant,
+}: ProgressBarProps) {
+  const pct = Math.min((value / Math.max(max, 1)) * 100, 100);
+  const autoVariant: ProgressBarProps['variant'] =
+    variant ??
+    (pct >= 100 ? 'success' : pct >= 70 ? 'solar' : pct >= 40 ? 'aurora' : 'danger');
+
+  const gradients = {
+    solar: 'from-solar to-solar-hot',
+    aurora: 'from-aurora-1 via-aurora-2 to-aurora-3',
+    success: 'from-success to-success',
+    danger: 'from-danger to-danger',
+  };
+
   return (
     <div className={cn('w-full', className)}>
-      <div className="h-1.5 bg-[var(--bg-inset)] rounded-full overflow-hidden">
-        <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, ease: 'easeOut' }}
-          className={cn('h-full rounded-full bg-gradient-to-r', color)} />
+      <div className="relative h-1.5 bg-surface-2 rounded-full overflow-hidden">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          className={cn(
+            'absolute inset-y-0 left-0 rounded-full bg-gradient-to-r',
+            gradients[autoVariant]
+          )}
+        />
+        <div
+          className={cn(
+            'absolute inset-y-0 left-0 rounded-full opacity-40',
+            'bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer'
+          )}
+          style={{ width: `${pct}%`, backgroundSize: '200% 100%' }}
+        />
       </div>
-      {showLabel && <span className="text-[10px] text-[var(--text-muted)] mt-1 block">{Math.round(pct)}%</span>}
+      {showLabel && (
+        <span className="text-[10px] text-text-faint mt-1 block font-mono">
+          {Math.round(pct)}%
+        </span>
+      )}
     </div>
   );
 }

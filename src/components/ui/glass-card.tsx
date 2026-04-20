@@ -1,36 +1,36 @@
 'use client';
 
+// Backwards-compatible shim — delegates to Surface.
+// Prefer importing Surface directly in new code.
+import { forwardRef, type ReactNode } from 'react';
 import { motion, type HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { forwardRef } from 'react';
+import { spring } from '@/lib/motion';
 
 interface GlassCardProps extends Omit<HTMLMotionProps<'div'>, 'children'> {
   hover?: boolean;
   padding?: boolean;
   glow?: boolean;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export const GlassCard = forwardRef<HTMLDivElement, GlassCardProps>(
-  ({ className, hover = true, padding = true, glow, children, ...props }, ref) => {
-    return (
-      <motion.div
-        ref={ref}
-        whileHover={hover ? { y: -2, boxShadow: 'var(--shadow-card-hover)' } : undefined}
-        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        className={cn(
-          'bg-[var(--bg-card)] rounded-[var(--radius-lg)] border border-[var(--border)]',
-          'shadow-[var(--shadow-card)] transition-shadow duration-300',
-          glow && 'ring-1 ring-[var(--accent-soft)]',
-          padding && 'p-5',
-          className
-        )}
-        {...props}
-      >
-        {children}
-      </motion.div>
-    );
-  }
+  ({ className, hover = true, padding = true, glow, children, ...props }, ref) => (
+    <motion.div
+      ref={ref}
+      whileHover={hover ? { y: -2 } : undefined}
+      transition={spring}
+      className={cn(
+        'bg-surface-0 border border-border-strong rounded-lg shadow-md transition-colors',
+        hover && 'hover:border-border-glow',
+        glow && 'shadow-glow',
+        padding && 'p-5',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </motion.div>
+  )
 );
-
 GlassCard.displayName = 'GlassCard';

@@ -1,14 +1,17 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Sparkles, Send, Lightbulb, BarChart3, Users, Target, ArrowUp } from 'lucide-react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Lightbulb, BarChart3, Users, Target, ArrowUp } from 'lucide-react';
+import { Surface } from '@/components/ui/surface';
+import { Chip } from '@/components/ui/chip';
 import { useWallet } from '@/lib/hooks/use-wallet';
 import { useLeads } from '@/lib/hooks/use-leads';
 import { useAppointments } from '@/lib/hooks/use-appointments';
+import { cn } from '@/lib/utils';
+import { spring } from '@/lib/motion';
 
-const suggestedPrompts = [
+const SUGGESTED = [
   { icon: BarChart3, text: 'Resumo da minha carteira' },
   { icon: Target, text: 'Quais clientes quentes preciso contatar?' },
   { icon: Users, text: 'Tarefas pendentes para hoje' },
@@ -16,7 +19,9 @@ const suggestedPrompts = [
 ];
 
 export default function AIPage() {
-  const [messages, setMessages] = useState<{ role: 'user' | 'ai'; content: string }[]>([]);
+  const [messages, setMessages] = useState<
+    { role: 'user' | 'ai'; content: string }[]
+  >([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -37,24 +42,40 @@ export default function AIPage() {
     const todayApts = appointments.filter((a) => a.date === today);
 
     if (q.includes('carteira') || q.includes('resumo')) {
-      return `📊 Sua Carteira:\n\n• ${clients.length} clientes no total\n• 🔥 ${hotClients.length} quentes\n• 🌡️ ${clients.filter(c => c.temperature === 'morno').length} mornos\n• ❄️ ${clients.filter(c => c.temperature === 'frio').length} frios\n• ${pendingTasks.length} tarefas pendentes\n\n${hotClients.length > 0 ? `Clientes quentes: ${hotClients.map(c => c.name).join(', ')}` : 'Nenhum cliente quente no momento.'}`;
+      return `📊 Sua Carteira:\n\n• ${clients.length} clientes no total\n• 🔥 ${hotClients.length} quentes\n• 🌡️ ${clients.filter((c) => c.temperature === 'morno').length} mornos\n• ❄️ ${clients.filter((c) => c.temperature === 'frio').length} frios\n• ${pendingTasks.length} tarefas pendentes\n\n${
+        hotClients.length > 0
+          ? `Clientes quentes: ${hotClients.map((c) => c.name).join(', ')}`
+          : 'Nenhum cliente quente no momento.'
+      }`;
     }
     if (q.includes('quente') || q.includes('contatar')) {
-      if (hotClients.length === 0) return '✅ Nenhum cliente quente no momento. Adicione clientes à sua carteira!';
-      return `🔥 Clientes Quentes (${hotClients.length}):\n\n${hotClients.map((c, i) => `${i + 1}. ${c.name}${c.interested_product ? ` — ${c.interested_product}` : ''}${c.notes ? `\n   📝 ${c.notes}` : ''}`).join('\n\n')}`;
+      if (hotClients.length === 0)
+        return '✅ Nenhum cliente quente. Adicione clientes à carteira!';
+      return `🔥 Clientes Quentes (${hotClients.length}):\n\n${hotClients
+        .map(
+          (c, i) =>
+            `${i + 1}. ${c.name}${c.interested_product ? ` — ${c.interested_product}` : ''}${
+              c.notes ? `\n   📝 ${c.notes}` : ''
+            }`
+        )
+        .join('\n\n')}`;
     }
     if (q.includes('tarefa') || q.includes('pendente')) {
-      if (pendingTasks.length === 0) return '✅ Nenhuma tarefa pendente! Tudo em dia.';
-      return `📋 Tarefas Pendentes (${pendingTasks.length}):\n\n${pendingTasks.map((t, i) => `${i + 1}. ${t.description}\n   👤 ${t.client_name || 'Cliente'}`).join('\n\n')}`;
+      if (pendingTasks.length === 0) return '✅ Nenhuma tarefa pendente. Tudo em dia!';
+      return `📋 Tarefas Pendentes (${pendingTasks.length}):\n\n${pendingTasks
+        .map((t, i) => `${i + 1}. ${t.description}\n   👤 ${t.client_name || 'Cliente'}`)
+        .join('\n\n')}`;
     }
     if (q.includes('agendamento') || q.includes('próximo')) {
       if (todayApts.length === 0) return '📅 Nenhum agendamento para hoje.';
-      return `📅 Agendamentos de Hoje (${todayApts.length}):\n\n${todayApts.map((a, i) => `${i + 1}. ${a.client_name} — ${a.time}\n   ${a.product_name || ''}`).join('\n\n')}`;
+      return `📅 Agendamentos de Hoje (${todayApts.length}):\n\n${todayApts
+        .map((a, i) => `${i + 1}. ${a.client_name} — ${a.time}\n   ${a.product_name || ''}`)
+        .join('\n\n')}`;
     }
     if (q.includes('lead')) {
-      return `📊 Leads:\n\n• ${leads.length} leads no total\n• Novos: ${leads.filter(l => l.stage === 'novo').length}\n• Qualificados: ${leads.filter(l => l.stage === 'qualificado').length}\n• Fechados: ${leads.filter(l => l.stage === 'fechado').length}`;
+      return `📊 Leads:\n\n• ${leads.length} leads no total\n• Novos: ${leads.filter((l) => l.stage === 'novo').length}\n• Qualificados: ${leads.filter((l) => l.stage === 'qualificado').length}\n• Fechados: ${leads.filter((l) => l.stage === 'fechado').length}`;
     }
-    return `🤖 Posso ajudar com:\n\n• Resumo da sua carteira\n• Clientes quentes para contatar\n• Tarefas pendentes\n• Próximos agendamentos\n• Status dos leads\n\nPergunte sobre qualquer um desses temas!`;
+    return `🤖 Posso ajudar com:\n\n• Resumo da sua carteira\n• Clientes quentes para contatar\n• Tarefas pendentes\n• Próximos agendamentos\n• Status dos leads`;
   };
 
   const sendMessage = async (text: string) => {
@@ -69,71 +90,133 @@ export default function AIPage() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col h-[calc(100vh-160px)] lg:h-[calc(100vh-120px)]">
-      <div className="flex items-center gap-3 mb-3">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col h-[calc(100dvh-120px)] relative"
+    >
+      {/* Ambient background */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <motion.div
+          animate={{
+            background: [
+              'radial-gradient(ellipse 60% 50% at 30% 30%, rgba(245, 158, 11, 0.12), transparent 60%)',
+              'radial-gradient(ellipse 60% 50% at 70% 40%, rgba(167, 139, 250, 0.1), transparent 60%)',
+              'radial-gradient(ellipse 60% 50% at 30% 30%, rgba(245, 158, 11, 0.12), transparent 60%)',
+            ],
+          }}
+          transition={{ duration: 20, repeat: Infinity }}
+          className="absolute inset-0"
+        />
+      </div>
+
+      <div className="flex items-center gap-3 mb-4">
         <div className="relative">
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 blur-md opacity-50" />
-          <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center border border-white/20">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="absolute inset-0 rounded-md bg-solar blur-lg opacity-60 animate-pulse-solar" />
+          <div className="relative w-10 h-10 rounded-md bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
+            <Sparkles className="w-5 h-5 text-canvas" />
           </div>
         </div>
         <div>
-          <h1 className="text-lg font-bold text-[var(--text)] leading-tight">Nexus AI</h1>
-          <p className="text-[10px] text-[var(--text-muted)]">Assistente baseado nos seus dados reais</p>
+          <h1 className="font-display italic text-2xl tracking-tight text-text">Nexus AI</h1>
+          <p className="text-[11px] text-text-faint">
+            Assistente contextual baseado nos seus dados
+          </p>
         </div>
       </div>
 
-      <div className="flex-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-3xl flex flex-col overflow-hidden">
-        <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+      <Surface variant="elevated" padding="none" className="flex-1 flex flex-col overflow-hidden">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto p-5 space-y-4">
           {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full space-y-5">
-              <motion.div animate={{ y: [0, -6, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                className="w-16 h-16 rounded-3xl bg-gradient-to-br from-blue-500/15 to-violet-500/15 border border-[var(--border)] flex items-center justify-center">
-                <Sparkles className="w-7 h-7 text-blue-600" />
+            <div className="flex flex-col items-center justify-center h-full space-y-6">
+              <motion.div
+                animate={{ y: [0, -8, 0], rotate: [0, 4, -4, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                className="w-20 h-20 rounded-2xl bg-gradient-to-br from-solar/20 to-aurora-1/20 border border-solar/30 flex items-center justify-center"
+              >
+                <Sparkles className="w-10 h-10 text-solar" />
               </motion.div>
               <div className="text-center px-4">
-                <h2 className="text-base font-semibold text-[var(--text)]">Como posso ajudar?</h2>
-                <p className="text-xs text-[var(--text-muted)] mt-1">Consulto seus dados reais da carteira, leads e agendamentos</p>
+                <h2 className="font-display italic text-2xl text-text">Como posso ajudar?</h2>
+                <p className="text-sm text-text-soft mt-2 max-w-md">
+                  Consulto seus dados reais da carteira, leads e agendamentos.
+                </p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-md px-2">
-                {suggestedPrompts.map((p) => (
-                  <motion.button key={p.text} whileTap={{ scale: 0.97 }} onClick={() => sendMessage(p.text)}
-                    className="flex items-start gap-2.5 p-3 text-left bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl active:bg-[var(--bg-hover)]">
-                    <p.icon className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-[11px] text-[var(--text-secondary)]">{p.text}</span>
-                  </motion.button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg px-2">
+                {SUGGESTED.map((p) => (
+                  <Chip
+                    key={p.text}
+                    onClick={() => sendMessage(p.text)}
+                    className="!h-auto py-3 !px-3.5 justify-start text-left"
+                  >
+                    <p.icon className="w-3.5 h-3.5 text-solar flex-shrink-0" />
+                    <span className="text-[11px] leading-tight">{p.text}</span>
+                  </Chip>
                 ))}
               </div>
             </div>
           )}
-          {messages.map((msg, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={`max-w-[85%] ${msg.role === 'user' ? 'ml-auto' : 'mr-auto'}`}>
-              <div className={`text-[13px] leading-relaxed whitespace-pre-wrap ${
-                msg.role === 'user'
-                  ? 'p-3.5 bg-blue-50 border border-blue-200 rounded-2xl rounded-tr-md text-blue-800'
-                  : 'p-3.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl rounded-tl-md text-[var(--text-secondary)]'
-              }`}>{msg.content}</div>
-            </motion.div>
-          ))}
+
+          <AnimatePresence initial={false}>
+            {messages.map((msg, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={spring}
+                className={cn('max-w-[85%]', msg.role === 'user' ? 'ml-auto' : 'mr-auto')}
+              >
+                <div
+                  className={cn(
+                    'text-[13px] leading-relaxed whitespace-pre-wrap p-4 border rounded-lg',
+                    msg.role === 'user'
+                      ? 'bg-solar/10 border-solar/30 text-text rounded-tr-sm'
+                      : 'bg-surface-1 border-border-strong text-text-soft rounded-tl-sm'
+                  )}
+                >
+                  {msg.content}
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+
           {loading && (
-            <div className="flex items-center gap-2 p-3.5 mr-auto bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl rounded-tl-md max-w-[85%]">
-              <div className="flex gap-1">{[0, 1, 2].map((i) => (<motion.div key={i} animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.2 }} className="w-1.5 h-1.5 rounded-full bg-blue-500" />))}</div>
-              <span className="text-[11px] text-[var(--text-muted)]">Analisando...</span>
+            <div className="flex items-center gap-2 p-3 mr-auto bg-surface-1 border border-border rounded-lg rounded-tl-sm max-w-[85%]">
+              <div className="flex gap-1">
+                {[0, 1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    animate={{ y: [0, -4, 0], opacity: [0.4, 1, 0.4] }}
+                    transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.15 }}
+                    className="w-1.5 h-1.5 rounded-full bg-solar"
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-text-faint">Pensando…</span>
             </div>
           )}
         </div>
-        <div className="p-3 border-t border-[var(--border)]">
+
+        <div className="p-3 border-t border-border">
           <div className="flex items-center gap-2">
-            <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
-              placeholder="Pergunte sobre seus dados..."
-              className="flex-1 px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] placeholder:text-[var(--text-faint)] outline-none focus:border-[var(--accent)]" />
-            <motion.button whileTap={{ scale: 0.9 }} onClick={() => sendMessage(input)} disabled={!input.trim() || loading}
-              className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-violet-600 text-white disabled:opacity-40">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
+              placeholder="Pergunte sobre seus dados…"
+              className="flex-1 h-11 px-4 bg-surface-1 border border-border-strong rounded-md text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-solar focus:bg-surface-2 transition-colors"
+            />
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={() => sendMessage(input)}
+              disabled={!input.trim() || loading}
+              className="w-11 h-11 rounded-md bg-gradient-to-br from-solar to-solar-hot text-canvas disabled:opacity-40 flex items-center justify-center hover:shadow-glow transition-shadow"
+            >
               <ArrowUp className="w-5 h-5" />
             </motion.button>
           </div>
         </div>
-      </div>
+      </Surface>
     </motion.div>
   );
 }

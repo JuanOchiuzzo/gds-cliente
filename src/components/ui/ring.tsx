@@ -1,0 +1,77 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
+
+interface RingProps {
+  value: number; // 0-100
+  size?: number;
+  strokeWidth?: number;
+  className?: string;
+  showLabel?: boolean;
+  label?: string;
+  variant?: 'solar' | 'aurora' | 'success' | 'danger';
+}
+
+export function Ring({
+  value,
+  size = 44,
+  strokeWidth = 4,
+  className,
+  showLabel = true,
+  label,
+  variant = 'solar',
+}: RingProps) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (value / 100) * circumference;
+
+  const gradientId = `ring-grad-${variant}`;
+  const colors = {
+    solar: ['#F59E0B', '#EF4444'],
+    aurora: ['#A78BFA', '#22D3EE'],
+    success: ['#10D9A0', '#10D9A0'],
+    danger: ['#F43F5E', '#F43F5E'],
+  }[variant];
+
+  return (
+    <div className={cn('relative inline-flex items-center justify-center', className)}>
+      <svg width={size} height={size} className="-rotate-90">
+        <defs>
+          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={colors[0]} />
+            <stop offset="100%" stopColor={colors[1]} />
+          </linearGradient>
+        </defs>
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="var(--border-strong)"
+          strokeWidth={strokeWidth}
+        />
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={`url(#${gradientId})`}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </svg>
+      {showLabel && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-[11px] font-mono font-medium text-text tabular-nums">
+            {label ?? Math.round(value)}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}

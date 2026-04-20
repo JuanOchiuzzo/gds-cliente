@@ -1,273 +1,381 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import {
-  TrendingUp, Eye, Target, DollarSign,
-  ArrowUpRight, ArrowDownRight, ChevronRight, Sparkles,
-  Clock, MapPin, Flame, ListTodo, CalendarCheck, UserCircle, Plus,
-  Phone, MessageCircle,
+  TrendingUp,
+  Flame,
+  ListTodo,
+  CalendarCheck,
+  Clock,
+  Phone,
+  MessageCircle,
+  Sparkles,
+  ArrowUpRight,
+  UserCircle,
+  Plus,
 } from 'lucide-react';
-import { GlassCard } from '@/components/ui/glass-card';
-import { AnimatedCounter } from '@/components/ui/animated-counter';
+import { Surface } from '@/components/ui/surface';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { NumberFlow } from '@/components/ui/number-flow';
+import { Sparkline } from '@/components/ui/sparkline';
+import { Ring } from '@/components/ui/ring';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useAuth } from '@/lib/auth-context';
 import { useWallet } from '@/lib/hooks/use-wallet';
 import { useAppointments } from '@/lib/hooks/use-appointments';
 import { useQueue } from '@/lib/hooks/use-queue';
-import { formatCurrency, generateWhatsAppLink } from '@/lib/utils';
-import Link from 'next/link';
+import { generateWhatsAppLink } from '@/lib/utils';
+import { staggerParent, slideUp, spring } from '@/lib/motion';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
-const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 25 } } };
-
 export default function DashboardPage() {
   const { profile } = useAuth();
-  const { clients, tasks, loading: walletLoading } = useWallet();
-  const { appointments, loading: aptsLoading } = useAppointments();
-  const { queue, myPosition, loading: queueLoading } = useQueue();
+  const { clients, tasks } = useWallet();
+  const { appointments } = useAppointments();
+  const { queue, myPosition } = useQueue();
 
-  const firstName = profile?.full_name?.split(' ')[0] || 'Usuário';
+  const firstName = profile?.full_name?.split(' ')[0] || 'Guerreiro';
   const pendingTasks = tasks.filter((t) => !t.completed);
   const hotClients = clients.filter((c) => c.temperature === 'quente');
 
   const today = new Date().toISOString().split('T')[0];
   const todayApts = appointments.filter((a) => a.date === today);
+  const hour = new Date().getHours();
+  const greeting = hour < 6 ? 'Boa madrugada' : hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+
+  // Fake sparkline data (in real app, derive from activities)
+  const sparkData = [12, 18, 14, 22, 19, 28, 24, 32, 30, 38, 35, 42];
+  const conversionRate = clients.length
+    ? Math.round((hotClients.length / clients.length) * 100)
+    : 0;
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4 lg:space-y-6">
-      {/* Greeting */}
-      <motion.div variants={fadeUp}>
-        <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">
-          Olá, {firstName} 👋
+    <motion.div
+      variants={staggerParent(0.06)}
+      initial="hidden"
+      animate="visible"
+      className="max-w-[1400px] mx-auto space-y-6"
+    >
+      {/* Hero greeting */}
+      <motion.div variants={slideUp} className="pt-2 lg:pt-6">
+        <h1 className="font-display italic text-4xl lg:text-5xl tracking-tight">
+          {greeting}, <span className="not-italic font-sans text-solar-gradient">{firstName}</span>.
         </h1>
-        <p className="text-xs lg:text-sm text-[var(--text-muted)] mt-0.5">
-          {format(new Date(), "EEEE, dd 'de' MMMM", { locale: ptBR })}
+        <p className="mt-2 text-sm text-text-faint font-mono uppercase tracking-widest">
+          {format(new Date(), "EEEE · dd 'de' MMMM", { locale: ptBR })}
         </p>
       </motion.div>
 
-      {/* Fila de Plantão */}
-      {myPosition && (
-        <motion.div variants={fadeUp}>
-          <GlassCard hover={false} className="!p-4 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-amber-500/10 to-transparent rounded-bl-full" />
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                  <UserCircle className="w-5 h-5 text-amber-600" />
+      {/* Bento grid */}
+      <div className="grid grid-cols-12 gap-4 auto-rows-[minmax(0,auto)]">
+        {/* Hero metric — Carteira */}
+        <motion.div variants={slideUp} className="col-span-12 lg:col-span-6">
+          <Surface variant="elevated" padding="lg" className="relative overflow-hidden min-h-[240px] h-full">
+            <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full bg-solar/15 blur-[80px] pointer-events-none" />
+            <div className="relative flex flex-col h-full">
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-md bg-solar/15 border border-solar/30 flex items-center justify-center">
+                    <TrendingUp className="w-4 h-4 text-solar" />
+                  </div>
+                  <span className="text-xs font-medium text-text-faint uppercase tracking-wider">
+                    Sua carteira
+                  </span>
                 </div>
-                <div>
-                  <p className="text-xs text-[var(--text-muted)] font-medium">Fila de Plantão</p>
-                  <p className="text-sm font-bold text-[var(--text)]">{myPosition.stand_name || 'Stand'}</p>
-                </div>
+                <Badge variant="solar" size="xs">live</Badge>
               </div>
-              <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${
-                myPosition.position <= 2
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : myPosition.status === 'atendendo'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-zinc-100 text-zinc-600'
-              }`}>
-                {myPosition.position <= 2 && myPosition.status !== 'atendendo' && <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />}
-                {myPosition.status === 'atendendo' ? 'Atendendo' : myPosition.position <= 2 ? 'Você é o próximo!' : `Posição ${myPosition.position}`}
+
+              <div className="flex-1 flex flex-col justify-center py-4">
+                <div className="text-[56px] lg:text-[72px] font-sans font-medium leading-none tracking-tighter text-text">
+                  <NumberFlow value={clients.length} />
+                </div>
+                <p className="mt-1 text-sm text-text-soft">
+                  clientes ativos · {hotClients.length} quente{hotClients.length !== 1 && 's'}
+                </p>
+              </div>
+
+              <div className="flex items-end justify-between gap-4">
+                <Sparkline data={sparkData} width={180} height={40} variant="solar" />
+                <Link
+                  href="/dashboard/wallet"
+                  className="flex items-center gap-1.5 text-sm font-medium text-text-soft hover:text-solar transition-colors group"
+                >
+                  Abrir carteira
+                  <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </Link>
               </div>
             </div>
-            {queue.length > 0 && (
-              <div className="flex items-center gap-2 mt-3 overflow-x-auto no-scrollbar">
-                {queue.map((q) => (
-                  <div key={q.id} className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs whitespace-nowrap border ${
-                    q.agent_id === profile?.id
-                      ? 'bg-blue-50 border-blue-200 text-blue-700 font-semibold'
-                      : q.status === 'atendendo'
-                      ? 'bg-amber-50 border-amber-200 text-amber-700'
-                      : 'bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-muted)]'
-                  }`}>
-                    <span className="font-bold">{q.position}º</span>
-                    <span>{(q.agent_name || '').split(' ')[0]}</span>
+          </Surface>
+        </motion.div>
+
+        {/* KPI stack */}
+        <motion.div variants={slideUp} className="col-span-6 lg:col-span-3 grid grid-rows-2 gap-4">
+          <Surface variant="elevated" padding="md" className="flex flex-col justify-between min-h-[112px]">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-hot/15 border border-hot/30 flex items-center justify-center">
+                <Flame className="w-3.5 h-3.5 text-hot" />
+              </div>
+              <span className="text-[11px] font-medium text-text-faint uppercase tracking-wider">
+                Quentes
+              </span>
+            </div>
+            <div className="text-3xl font-sans font-medium text-text tracking-tight">
+              <NumberFlow value={hotClients.length} />
+            </div>
+          </Surface>
+          <Surface variant="elevated" padding="md" className="flex flex-col justify-between min-h-[112px]">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-aurora-1/15 border border-aurora-1/30 flex items-center justify-center">
+                <ListTodo className="w-3.5 h-3.5 text-aurora-1" />
+              </div>
+              <span className="text-[11px] font-medium text-text-faint uppercase tracking-wider">
+                Tarefas
+              </span>
+            </div>
+            <div className="text-3xl font-sans font-medium text-text tracking-tight">
+              <NumberFlow value={pendingTasks.length} />
+            </div>
+          </Surface>
+        </motion.div>
+
+        {/* Conversion ring */}
+        <motion.div variants={slideUp} className="col-span-6 lg:col-span-3">
+          <Surface variant="elevated" padding="md" className="flex flex-col justify-between min-h-full">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-medium text-text-faint uppercase tracking-wider">
+                Taxa quente
+              </span>
+            </div>
+            <div className="flex-1 flex items-center justify-center py-2">
+              <Ring value={conversionRate} size={110} strokeWidth={8} label={`${conversionRate}%`} />
+            </div>
+            <p className="text-[11px] text-text-faint text-center">dos seus clientes</p>
+          </Surface>
+        </motion.div>
+
+        {/* Queue position */}
+        {myPosition && (
+          <motion.div variants={slideUp} className="col-span-12 lg:col-span-7">
+            <Surface variant="elevated" padding="lg" className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-solar/5 to-transparent pointer-events-none" />
+              <div className="relative">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-md bg-solar/15 border border-solar/30 flex items-center justify-center animate-pulse-solar">
+                      <UserCircle className="w-4 h-4 text-solar" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-medium text-text-faint uppercase tracking-wider">
+                        Fila de Plantão
+                      </p>
+                      <p className="text-base font-medium text-text">
+                        {myPosition.stand_name || 'Stand'}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge
+                    variant={
+                      myPosition.status === 'atendendo'
+                        ? 'info'
+                        : myPosition.position <= 2
+                        ? 'success'
+                        : 'neutral'
+                    }
+                    size="md"
+                  >
+                    {myPosition.status === 'atendendo'
+                      ? 'Atendendo agora'
+                      : myPosition.position <= 2
+                      ? `Você é o próximo`
+                      : `Posição ${myPosition.position}`}
+                  </Badge>
+                </div>
+
+                {queue.length > 0 && (
+                  <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-1 px-1">
+                    {queue.slice(0, 8).map((q) => {
+                      const me = q.agent_id === profile?.id;
+                      return (
+                        <div
+                          key={q.id}
+                          className={`flex items-center gap-2 px-3 h-8 rounded-full text-xs whitespace-nowrap border flex-shrink-0 ${
+                            me
+                              ? 'bg-solar/15 border-solar/40 text-solar'
+                              : q.status === 'atendendo'
+                              ? 'bg-info/10 border-info/30 text-info'
+                              : 'bg-surface-1 border-border-strong text-text-soft'
+                          }`}
+                        >
+                          <span className="font-mono">{q.position}º</span>
+                          <span>{(q.agent_name || '').split(' ')[0]}</span>
+                          {me && <span className="w-1.5 h-1.5 rounded-full bg-solar animate-pulse" />}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </Surface>
+          </motion.div>
+        )}
+
+        {/* Today appointments */}
+        <motion.div
+          variants={slideUp}
+          className={`col-span-12 ${myPosition ? 'lg:col-span-5' : 'lg:col-span-8'}`}
+        >
+          <Surface variant="elevated" padding="lg" className="h-full">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <CalendarCheck className="w-4 h-4 text-aurora-2" />
+                <h3 className="text-sm font-medium text-text">Hoje</h3>
+                <Badge variant="info" size="xs">
+                  {todayApts.length}
+                </Badge>
+              </div>
+              <Link
+                href="/dashboard/appointments"
+                className="text-[11px] text-solar font-medium hover:underline underline-offset-4"
+              >
+                Ver tudo
+              </Link>
+            </div>
+
+            {todayApts.length === 0 ? (
+              <div className="py-6 text-center text-sm text-text-faint">
+                Nenhum agendamento para hoje.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {todayApts.slice(0, 4).map((apt) => (
+                  <div
+                    key={apt.id}
+                    className="flex items-center gap-3 p-3 rounded-md bg-surface-1 border border-border hover:border-border-glow transition-colors"
+                  >
+                    <div className="w-1 h-8 rounded-full bg-solar" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-text truncate">{apt.client_name}</p>
+                      <div className="flex items-center gap-2 mt-0.5 text-[11px] text-text-faint">
+                        <Clock className="w-3 h-3" /> {apt.time}
+                        {apt.product_name && <span>· {apt.product_name}</span>}
+                      </div>
+                    </div>
+                    <Badge
+                      variant={apt.status === 'confirmado' ? 'success' : 'warning'}
+                      size="xs"
+                    >
+                      {apt.status}
+                    </Badge>
                   </div>
                 ))}
               </div>
             )}
-          </GlassCard>
+          </Surface>
         </motion.div>
-      )}
 
-      {/* Quick Stats */}
-      <motion.div variants={fadeUp}>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-          {[
-            { label: 'Carteira', value: clients.length, icon: TrendingUp, suffix: ' clientes' },
-            { label: 'Quentes', value: hotClients.length, icon: Flame, suffix: '' },
-            { label: 'Tarefas', value: pendingTasks.length, icon: ListTodo, suffix: ' pendentes' },
-            { label: 'Agendamentos', value: todayApts.length, icon: CalendarCheck, suffix: ' hoje' },
-          ].map((kpi) => (
-            <GlassCard key={kpi.label} hover={false} className="!p-3.5">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="p-1.5 rounded-xl bg-blue-500/8 border border-blue-500/15">
-                  <kpi.icon className="w-3.5 h-3.5 text-blue-600" />
-                </div>
+        {/* Hot clients */}
+        {hotClients.length > 0 && (
+          <motion.div variants={slideUp} className="col-span-12">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Flame className="w-4 h-4 text-hot" />
+                <h3 className="font-display italic text-xl text-text">Clientes quentes</h3>
+                <Badge variant="hot" size="xs">
+                  {hotClients.length}
+                </Badge>
               </div>
-              <div className="text-lg font-bold text-[var(--text)]">
-                <AnimatedCounter value={kpi.value} />
-              </div>
-              <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{kpi.label}{kpi.suffix}</p>
-            </GlassCard>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* Agendamentos do dia */}
-      <motion.div variants={fadeUp}>
-        <div className="flex items-center justify-between mb-2.5 px-0.5">
-          <div className="flex items-center gap-2">
-            <CalendarCheck className="w-4 h-4 text-blue-600" />
-            <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Hoje</h3>
-            <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-              {todayApts.length} agendamento{todayApts.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-          <Link href="/dashboard/appointments" className="text-[11px] text-blue-600 font-medium flex items-center gap-0.5">
-            Ver agenda <ChevronRight className="w-3 h-3" />
-          </Link>
-        </div>
-        {todayApts.length === 0 ? (
-          <GlassCard hover={false} className="!p-6 text-center">
-            <CalendarCheck className="w-8 h-8 mx-auto text-[var(--text-faint)] mb-2" />
-            <p className="text-sm text-[var(--text-muted)]">Nenhum agendamento para hoje</p>
-            <Link href="/dashboard/appointments">
-              <button className="mt-3 text-xs text-[var(--accent)] font-medium">+ Criar agendamento</button>
-            </Link>
-          </GlassCard>
-        ) : (
-          <div className="space-y-2">
-            {todayApts.map((apt) => (
-              <GlassCard key={apt.id} hover={false} className="!p-3.5">
-                <div className="flex items-center gap-3">
-                  <div className="w-1 h-10 rounded-full bg-blue-500" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[var(--text)]">{apt.client_name}</p>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      <span className="flex items-center gap-1 text-[11px] text-[var(--text-muted)]">
-                        <Clock className="w-3 h-3" /> {apt.time}
-                      </span>
-                      {apt.product_name && (
-                        <span className="text-[11px] text-[var(--text-muted)]">{apt.product_name}</span>
-                      )}
+              <Link
+                href="/dashboard/wallet"
+                className="text-[11px] text-solar font-medium hover:underline underline-offset-4"
+              >
+                Carteira completa
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {hotClients.slice(0, 8).map((client, i) => (
+                <motion.div
+                  key={client.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ ...spring, delay: i * 0.04 }}
+                >
+                  <Surface variant="elevated" padding="md" className="group hover:border-border-glow transition-all">
+                    <div className="flex items-start gap-3">
+                      <Avatar name={client.name} size="md" status="online" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-text truncate">{client.name}</p>
+                        <p className="text-[11px] text-text-faint truncate">
+                          {client.interested_product || 'Sem produto'}
+                        </p>
+                      </div>
+                      <span className="text-base">🔥</span>
                     </div>
-                  </div>
-                  <Badge variant={apt.status === 'confirmado' ? 'emerald' : 'amber'} className="!text-[9px]">{apt.status}</Badge>
-                </div>
-              </GlassCard>
-            ))}
-          </div>
+                    {client.notes && (
+                      <p className="mt-2.5 text-[11px] text-text-soft line-clamp-2">
+                        {client.notes}
+                      </p>
+                    )}
+                    {client.phone && (
+                      <div className="mt-3 flex gap-2">
+                        <a
+                          href={generateWhatsAppLink(
+                            client.phone,
+                            `Olá ${client.name.split(' ')[0]}!`
+                          )}
+                          target="_blank"
+                          rel="noopener"
+                          className="flex-1 flex items-center justify-center gap-1 h-8 rounded-md text-[11px] font-medium bg-success/10 text-success border border-success/25 hover:bg-success/15 transition-colors"
+                        >
+                          <MessageCircle className="w-3 h-3" /> WhatsApp
+                        </a>
+                        <a
+                          href={`tel:${client.phone}`}
+                          className="flex-1 flex items-center justify-center gap-1 h-8 rounded-md text-[11px] font-medium bg-info/10 text-info border border-info/25 hover:bg-info/15 transition-colors"
+                        >
+                          <Phone className="w-3 h-3" /> Ligar
+                        </a>
+                      </div>
+                    )}
+                  </Surface>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         )}
-      </motion.div>
 
-      {/* Tarefas Pendentes */}
-      {pendingTasks.length > 0 && (
-        <motion.div variants={fadeUp}>
-          <div className="flex items-center justify-between mb-2.5 px-0.5">
-            <div className="flex items-center gap-2">
-              <ListTodo className="w-4 h-4 text-violet-600" />
-              <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Tarefas Pendentes</h3>
-              <span className="text-[10px] bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-medium">
-                {pendingTasks.length}
-              </span>
-            </div>
-            <Link href="/dashboard/wallet" className="text-[11px] text-blue-600 font-medium flex items-center gap-0.5">
-              Carteira <ChevronRight className="w-3 h-3" />
-            </Link>
-          </div>
-          <div className="space-y-2">
-            {pendingTasks.slice(0, 3).map((task) => {
-              const typeIcons: Record<string, string> = { ligar: '📞', agendar_visita: '📅', enviar_proposta: '📄', follow_up: '🔄', outro: '📋' };
-              const isOverdue = new Date(task.due_date) < new Date();
-              return (
-                <div key={task.id} className={`flex items-center gap-3 p-3 rounded-2xl border ${
-                  isOverdue ? 'bg-red-50 border-red-200' : 'bg-[var(--bg-card)] border-[var(--border)]'
-                }`}>
-                  <span className="text-base">{typeIcons[task.type] || '📋'}</span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-[var(--text)]">{task.description}</p>
-                    <p className="text-[10px] text-[var(--text-muted)] mt-0.5">
-                      {task.client_name} {isOverdue && '⚠️ atrasada'}
-                    </p>
+        {/* Empty state */}
+        {clients.length === 0 && todayApts.length === 0 && !myPosition && (
+          <motion.div variants={slideUp} className="col-span-12">
+            <Surface variant="elevated" padding="xl">
+              <EmptyState
+                icon={<Sparkles className="w-6 h-6" />}
+                title="Bem-vindo ao NEXUS ORBIT"
+                description="Comece adicionando clientes à sua carteira e criando agendamentos."
+                action={
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    <Link href="/dashboard/wallet">
+                      <Button variant="solar">
+                        <Plus className="w-4 h-4" />
+                        Adicionar cliente
+                      </Button>
+                    </Link>
+                    <Link href="/dashboard/appointments">
+                      <Button variant="outline">
+                        <CalendarCheck className="w-4 h-4" />
+                        Criar agendamento
+                      </Button>
+                    </Link>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
-
-      {/* Clientes Quentes */}
-      {hotClients.length > 0 && (
-        <motion.div variants={fadeUp}>
-          <div className="flex items-center justify-between mb-2.5 px-0.5">
-            <div className="flex items-center gap-2">
-              <Flame className="w-4 h-4 text-orange-500" />
-              <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Clientes Quentes</h3>
-            </div>
-            <Link href="/dashboard/wallet" className="text-[11px] text-blue-600 font-medium flex items-center gap-0.5">
-              Ver carteira <ChevronRight className="w-3 h-3" />
-            </Link>
-          </div>
-          <div className="flex gap-2.5 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
-            {hotClients.map((client) => (
-              <div key={client.id} className="flex-shrink-0 w-[220px] p-3.5 bg-[var(--bg-card)] backdrop-blur-[var(--sf-blur)] border border-[var(--border)] rounded-2xl">
-                <div className="flex items-center gap-2 mb-2">
-                  <Avatar name={client.name} size="sm" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[var(--text)] truncate">{client.name}</p>
-                    <p className="text-[10px] text-[var(--text-muted)]">{client.interested_product || 'Sem produto'}</p>
-                  </div>
-                  <span className="ml-auto text-base">🔥</span>
-                </div>
-                {client.notes && <p className="text-[10px] text-[var(--text-muted)] line-clamp-2 mb-2">{client.notes}</p>}
-                {client.phone && (
-                  <div className="flex gap-1.5">
-                    <a href={generateWhatsAppLink(client.phone, `Olá ${client.name.split(' ')[0]}!`)} target="_blank" rel="noopener"
-                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[10px] font-medium bg-green-100 text-green-700 border border-green-200">
-                      <MessageCircle className="w-3 h-3" /> WhatsApp
-                    </a>
-                    <a href={`tel:${client.phone}`}
-                      className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-xl text-[10px] font-medium bg-blue-100 text-blue-700 border border-blue-200">
-                      <Phone className="w-3 h-3" /> Ligar
-                    </a>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      )}
-
-      {/* Empty state se não tem nada */}
-      {clients.length === 0 && todayApts.length === 0 && (
-        <motion.div variants={fadeUp}>
-          <GlassCard hover={false} className="!p-8 text-center">
-            <Sparkles className="w-12 h-12 mx-auto text-[var(--text-faint)] mb-3" />
-            <h3 className="text-lg font-semibold text-[var(--text)]">Bem-vindo ao StandForge!</h3>
-            <p className="text-sm text-[var(--text-muted)] mt-2 max-w-md mx-auto">
-              Comece adicionando clientes à sua carteira e criando agendamentos.
-            </p>
-            <div className="flex gap-3 justify-center mt-4">
-              <Link href="/dashboard/wallet">
-                <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 text-white text-sm font-medium rounded-2xl">
-                  <Plus className="w-4 h-4" /> Adicionar Cliente
-                </button>
-              </Link>
-              <Link href="/dashboard/appointments">
-                <button className="flex items-center gap-2 px-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-secondary)] text-sm font-medium rounded-2xl">
-                  <CalendarCheck className="w-4 h-4" /> Criar Agendamento
-                </button>
-              </Link>
-            </div>
-          </GlassCard>
-        </motion.div>
-      )}
+                }
+              />
+            </Surface>
+          </motion.div>
+        )}
+      </div>
     </motion.div>
   );
 }

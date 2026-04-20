@@ -1,41 +1,70 @@
 'use client';
 
-import { forwardRef, type ButtonHTMLAttributes } from 'react';
-import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
+import { forwardRef } from 'react';
+import { motion, type HTMLMotionProps } from 'framer-motion';
+import { cva, cn, type VariantProps } from '@/lib/cva';
+import { spring } from '@/lib/motion';
+import { Loader2 } from 'lucide-react';
 
-interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'neon';
-  size?: 'sm' | 'md' | 'lg' | 'icon';
+const buttonVariants = cva(
+  'relative inline-flex items-center justify-center gap-2 rounded-md font-medium whitespace-nowrap select-none transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed',
+  {
+    variants: {
+      variant: {
+        solar:
+          'bg-gradient-to-br from-solar to-solar-hot text-canvas shadow-md hover:shadow-glow',
+        aurora:
+          'bg-aurora-gradient text-canvas shadow-md hover:shadow-glow',
+        primary:
+          'bg-surface-2 text-text border border-border-strong hover:bg-surface-3 hover:border-border-glow',
+        ghost:
+          'bg-transparent text-text-soft hover:bg-surface-1 hover:text-text',
+        subtle:
+          'bg-surface-1 text-text-soft hover:bg-surface-2 hover:text-text',
+        outline:
+          'bg-transparent text-text border border-border-strong hover:border-border-glow hover:bg-surface-1',
+        danger:
+          'bg-danger/90 text-white hover:bg-danger',
+        neon:
+          'bg-gradient-to-br from-solar to-solar-hot text-canvas shadow-md hover:shadow-glow',
+        secondary:
+          'bg-surface-1 text-text border border-border-strong hover:bg-surface-2',
+      },
+      size: {
+        xs: 'h-7 px-2.5 text-xs',
+        sm: 'h-8 px-3 text-[13px]',
+        md: 'h-10 px-4 text-sm',
+        lg: 'h-12 px-6 text-[15px]',
+        icon: 'h-9 w-9',
+        'icon-sm': 'h-7 w-7',
+        'icon-lg': 'h-11 w-11',
+      },
+    },
+    defaultVariants: { variant: 'primary', size: 'md' },
+  }
+);
+
+export interface ButtonProps
+  extends Omit<HTMLMotionProps<'button'>, 'ref'>,
+    VariantProps<typeof buttonVariants> {
+  loading?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', children, ...props }, ref) => {
-    const v = {
-      primary: 'bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] shadow-sm hover:shadow-md',
-      secondary: 'bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-strong)] hover:bg-[var(--bg-hover)] shadow-xs',
-      ghost: 'text-[var(--text-muted)] hover:text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]',
-      danger: 'bg-red-50 text-[var(--red)] border border-red-200 hover:bg-red-100',
-      neon: 'bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] text-white font-semibold shadow-md hover:shadow-[0_4px_20px_var(--accent-glow)]',
-    };
-    const s = {
-      sm: 'px-3 py-1.5 text-xs rounded-xl gap-1.5',
-      md: 'px-4 py-2 text-sm rounded-[var(--radius)] gap-2',
-      lg: 'px-5 py-2.5 text-sm rounded-[var(--radius)] gap-2',
-      icon: 'p-2 rounded-xl',
-    };
-
-    return (
-      <motion.button
-        ref={ref as React.Ref<HTMLButtonElement>}
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.97 }}
-        className={cn('inline-flex items-center justify-center font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed', v[variant], s[size], className)}
-        {...(props as React.ComponentProps<typeof motion.button>)}
-      >
-        {children}
-      </motion.button>
-    );
-  }
+  ({ variant, size, className, loading, disabled, children, ...rest }, ref) => (
+    <motion.button
+      ref={ref}
+      whileTap={disabled || loading ? undefined : { scale: 0.96 }}
+      whileHover={disabled || loading ? undefined : { y: -1 }}
+      transition={spring}
+      disabled={disabled || loading}
+      className={cn(buttonVariants({ variant, size }), className)}
+      {...rest}
+    >
+      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{children}</>}
+    </motion.button>
+  )
 );
 Button.displayName = 'Button';
+
+export { buttonVariants };

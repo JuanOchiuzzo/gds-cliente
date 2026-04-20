@@ -1,19 +1,27 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
+import { Instrument_Serif } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/lib/auth-context';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const instrumentSerif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['italic', 'normal'],
+  variable: '--font-instrument-serif',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: 'StandForge CRM',
-  description: 'CRM premium para gestão de stands imobiliários.',
+  title: 'StandForge · Nexus Orbit',
+  description: 'Onde negócios imobiliários ganham órbita.',
   manifest: '/manifest.json',
 };
 
 export const viewport: Viewport = {
-  themeColor: '#faf9f6',
+  themeColor: '#0A0B0D',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -22,10 +30,18 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`} suppressHydrationWarning>
+    <html
+      lang="pt-BR"
+      suppressHydrationWarning
+      className={`${GeistSans.variable} ${GeistMono.variable} ${instrumentSerif.variable}`}
+    >
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <AuthProvider>{children}</AuthProvider>
-        <Toaster position="top-center" toastOptions={{ className: 'sf-toast' }} />
+        <Toaster
+          position="top-center"
+          theme="dark"
+          toastOptions={{ className: 'sf-toast' }}
+        />
       </body>
     </html>
   );

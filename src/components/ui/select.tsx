@@ -4,45 +4,102 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { spring } from '@/lib/motion';
 
-interface SelectOption { value: string; label: string; }
-interface SelectProps { value: string; onChange: (v: string) => void; options: SelectOption[]; placeholder?: string; label?: string; className?: string; }
+interface SelectOption {
+  value: string;
+  label: string;
+}
 
-export function Select({ value, onChange, options, placeholder = 'Selecionar...', label, className }: SelectProps) {
+interface SelectProps {
+  value: string;
+  onChange: (v: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  label?: string;
+  className?: string;
+  disabled?: boolean;
+}
+
+export function Select({
+  value,
+  onChange,
+  options,
+  placeholder = 'Selecionar…',
+  label,
+  className,
+  disabled,
+}: SelectProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const selected = options.find((o) => o.value === value);
 
   useEffect(() => {
-    const fn = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    const fn = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
     document.addEventListener('mousedown', fn);
     return () => document.removeEventListener('mousedown', fn);
   }, []);
 
   return (
-    <div className="space-y-1">
-      {label && <label className="text-xs font-medium text-[var(--text-secondary)]">{label}</label>}
+    <div className="space-y-1.5 w-full">
+      {label && <label className="text-xs font-medium text-text-soft tracking-wide">{label}</label>}
       <div ref={ref} className={cn('relative', className)}>
-        <button type="button" onClick={() => setOpen(!open)}
-          className={cn('w-full flex items-center justify-between px-3.5 py-2.5 text-sm text-left bg-[var(--bg-card)] border border-[var(--border-strong)] rounded-[var(--radius)] transition-all',
-            open && 'ring-2 ring-[var(--accent-soft)] border-[var(--accent)]',
-            selected ? 'text-[var(--text)]' : 'text-[var(--text-faint)]')}>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setOpen(!open)}
+          className={cn(
+            'w-full h-10 flex items-center justify-between px-3 text-sm text-left bg-surface-1 border rounded-md transition-colors',
+            'disabled:opacity-40 disabled:cursor-not-allowed',
+            open
+              ? 'border-solar bg-surface-2'
+              : 'border-border-strong hover:border-border-glow',
+            selected ? 'text-text' : 'text-text-faint'
+          )}
+        >
           <span className="truncate">{selected?.label || placeholder}</span>
-          <ChevronDown className={cn('w-4 h-4 text-[var(--text-muted)] transition-transform', open && 'rotate-180')} />
+          <ChevronDown
+            className={cn(
+              'w-4 h-4 text-text-faint transition-transform',
+              open && 'rotate-180'
+            )}
+          />
         </button>
         <AnimatePresence>
           {open && (
-            <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.12 }}
-              className="absolute z-50 w-full mt-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-[var(--radius)] shadow-[var(--shadow-lg)] overflow-hidden max-h-56 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0, y: -6, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6, scale: 0.98 }}
+              transition={spring}
+              className="absolute z-50 w-full mt-1 bg-surface-1 border border-border-strong rounded-md shadow-lg overflow-hidden max-h-60 overflow-y-auto"
+            >
               {options.map((o) => (
-                <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false); }}
-                  className={cn('w-full flex items-center justify-between px-3.5 py-2 text-sm text-left transition-colors',
-                    o.value === value ? 'bg-[var(--accent-soft)] text-[var(--accent)] font-medium' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-hover)]')}>
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(o.value);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    'w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-colors',
+                    o.value === value
+                      ? 'bg-solar/10 text-solar'
+                      : 'text-text-soft hover:bg-surface-2 hover:text-text'
+                  )}
+                >
                   <span className="truncate">{o.label}</span>
                   {o.value === value && <Check className="w-3.5 h-3.5" />}
                 </button>
               ))}
-              {options.length === 0 && <div className="px-3.5 py-3 text-sm text-[var(--text-muted)] text-center">Nenhuma opção</div>}
+              {options.length === 0 && (
+                <div className="px-3 py-4 text-sm text-text-faint text-center">
+                  Nenhuma opção
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

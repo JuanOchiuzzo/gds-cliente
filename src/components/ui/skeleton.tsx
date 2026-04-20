@@ -4,7 +4,7 @@ export function Skeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'animate-shimmer rounded-2xl bg-gradient-to-r from-zinc-800/50 via-zinc-700/50 to-zinc-800/50 bg-[length:200%_100%]',
+        'animate-shimmer rounded-md bg-gradient-to-r from-surface-1 via-surface-2 to-surface-1',
         className
       )}
     />
@@ -13,10 +13,10 @@ export function Skeleton({ className }: { className?: string }) {
 
 export function KPISkeleton() {
   return (
-    <div className="bg-zinc-950/60 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 space-y-3">
-      <Skeleton className="h-4 w-24" />
+    <div className="bg-surface-0 border border-border rounded-lg p-5 space-y-3">
+      <Skeleton className="h-3 w-20" />
       <Skeleton className="h-8 w-32" />
-      <Skeleton className="h-3 w-16" />
+      <Skeleton className="h-2.5 w-16" />
     </div>
   );
 }

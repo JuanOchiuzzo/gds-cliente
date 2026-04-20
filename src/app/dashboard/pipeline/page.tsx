@@ -2,170 +2,403 @@
 
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  MessageCircle,
+  Phone,
+  ChevronLeft,
+  ChevronRight,
+  TrendingUp,
+  X,
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { Surface } from '@/components/ui/surface';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Modal } from '@/components/ui/modal';
-import { useLeads } from '@/lib/hooks/use-leads';
-import { formatCurrency, getLeadStageLabel, getLeadSourceLabel, generateWhatsAppLink, timeAgo } from '@/lib/utils';
-import { MessageCircle, Phone, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
-import { toast } from 'sonner';
-import type { LeadRow } from '@/lib/hooks/use-leads';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Ring } from '@/components/ui/ring';
+import { NumberFlow, CurrencyFlow } from '@/components/ui/number-flow';
+import { useLeads, type LeadRow } from '@/lib/hooks/use-leads';
+import {
+  formatCurrency,
+  getLeadStageLabel,
+  generateWhatsAppLink,
+  timeAgo,
+} from '@/lib/utils';
+import { staggerParent, slideUp, spring } from '@/lib/motion';
+import { cn } from '@/lib/utils';
+import { fireConfetti } from '@/components/effects/confetti';
 
-type Stage = 'novo' | 'qualificado' | 'visita_agendada' | 'proposta' | 'negociacao' | 'fechado' | 'perdido';
-const stages: { key: Stage; label: string; color: string; dotColor: string; bg: string }[] = [
-  { key: 'novo', label: 'Novo Lead', color: 'text-blue-600', dotColor: 'bg-cyan-400', bg: 'bg-cyan-500/5' },
-  { key: 'qualificado', label: 'Qualificado', color: 'text-violet-500', dotColor: 'bg-violet-400', bg: 'bg-violet-500/5' },
-  { key: 'visita_agendada', label: 'Visita Agendada', color: 'text-amber-500', dotColor: 'bg-amber-400', bg: 'bg-amber-500/5' },
-  { key: 'proposta', label: 'Proposta', color: 'text-indigo-500', dotColor: 'bg-indigo-400', bg: 'bg-indigo-500/5' },
-  { key: 'negociacao', label: 'Negociação', color: 'text-orange-500', dotColor: 'bg-orange-400', bg: 'bg-orange-500/5' },
-  { key: 'fechado', label: 'Fechado ✓', color: 'text-emerald-500', dotColor: 'bg-emerald-400', bg: 'bg-emerald-500/5' },
-  { key: 'perdido', label: 'Perdido', color: 'text-red-500', dotColor: 'bg-red-400', bg: 'bg-red-500/5' },
+type Stage =
+  | 'novo'
+  | 'qualificado'
+  | 'visita_agendada'
+  | 'proposta'
+  | 'negociacao'
+  | 'fechado'
+  | 'perdido';
+
+interface StageMeta {
+  key: Stage;
+  label: string;
+  accent: string;
+  ring: string;
+  heat: number;
+}
+
+const STAGES: StageMeta[] = [
+  { key: 'novo', label: 'Novo', accent: 'text-info', ring: 'ring-info/30', heat: 0 },
+  { key: 'qualificado', label: 'Qualificado', accent: 'text-aurora-1', ring: 'ring-aurora-1/30', heat: 1 },
+  { key: 'visita_agendada', label: 'Visita', accent: 'text-aurora-2', ring: 'ring-aurora-2/30', heat: 2 },
+  { key: 'proposta', label: 'Proposta', accent: 'text-warning', ring: 'ring-warning/30', heat: 3 },
+  { key: 'negociacao', label: 'Negociação', accent: 'text-solar', ring: 'ring-solar/30', heat: 4 },
+  { key: 'fechado', label: 'Fechado', accent: 'text-success', ring: 'ring-success/30', heat: 5 },
+  { key: 'perdido', label: 'Perdido', accent: 'text-danger', ring: 'ring-danger/30', heat: -1 },
 ];
 
 export default function PipelinePage() {
   const { leads, loading, update } = useLeads();
   const [selectedLead, setSelectedLead] = useState<LeadRow | null>(null);
   const [draggedLead, setDraggedLead] = useState<string | null>(null);
+  const [overStage, setOverStage] = useState<Stage | null>(null);
   const [mobileStageIdx, setMobileStageIdx] = useState(0);
 
   const grouped = useMemo(() => {
-    const map: Record<Stage, LeadRow[]> = { novo: [], qualificado: [], visita_agendada: [], proposta: [], negociacao: [], fechado: [], perdido: [] };
-    leads.forEach((l) => { if (map[l.stage as Stage]) map[l.stage as Stage].push(l); });
+    const map: Record<Stage, LeadRow[]> = {
+      novo: [],
+      qualificado: [],
+      visita_agendada: [],
+      proposta: [],
+      negociacao: [],
+      fechado: [],
+      perdido: [],
+    };
+    leads.forEach((l) => {
+      if (map[l.stage as Stage]) map[l.stage as Stage].push(l);
+    });
     return map;
+  }, [leads]);
+
+  const totals = useMemo(() => {
+    const t: Record<Stage, number> = {
+      novo: 0,
+      qualificado: 0,
+      visita_agendada: 0,
+      proposta: 0,
+      negociacao: 0,
+      fechado: 0,
+      perdido: 0,
+    };
+    leads.forEach((l) => {
+      t[l.stage as Stage] += l.estimated_value || 0;
+    });
+    return t;
   }, [leads]);
 
   const handleDrop = async (stage: Stage) => {
     if (!draggedLead) return;
+    const lead = leads.find((l) => l.id === draggedLead);
+    const wasNotClosed = lead?.stage !== 'fechado';
     const { error } = await update(draggedLead, { stage });
     if (error) toast.error('Erro ao mover lead');
-    else toast.success(`Lead movido para ${getLeadStageLabel(stage)}`);
+    else {
+      if (stage === 'fechado' && wasNotClosed) {
+        fireConfetti();
+        toast.success(`🎉 Venda fechada: ${lead?.name || 'Lead'}`);
+      } else {
+        toast.success(`Movido para ${getLeadStageLabel(stage)}`);
+      }
+    }
     setDraggedLead(null);
+    setOverStage(null);
   };
 
-  const currentStage = stages[mobileStageIdx];
+  const currentStage = STAGES[mobileStageIdx];
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" /></div>;
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-8 h-8 border-2 border-border-strong border-t-solar rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-      <div>
-        <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">Pipeline</h1>
-        <p className="text-xs text-[var(--text-muted)] mt-0.5 lg:hidden">Deslize entre as etapas</p>
-        <p className="text-sm text-[var(--text-muted)] mt-1 hidden lg:block">Arraste os leads entre as colunas</p>
-      </div>
+    <motion.div
+      variants={staggerParent(0.05)}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      <motion.div variants={slideUp}>
+        <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Pipeline</h1>
+        <p className="mt-1.5 text-sm text-text-soft">
+          Arraste leads entre os {STAGES.length} estágios do funil
+        </p>
+      </motion.div>
 
       {/* MOBILE */}
-      <div className="lg:hidden space-y-3">
+      <div className="lg:hidden space-y-4">
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-4 px-4 pb-1">
-          {stages.map((s, i) => (
-            <button key={s.key} onClick={() => setMobileStageIdx(i)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border whitespace-nowrap text-xs font-medium transition-all ${
-                mobileStageIdx === i ? `${s.bg} ${s.color} border-current/30` : 'bg-[var(--bg-card)] text-[var(--text-muted)] border-[var(--border)]'
-              }`}>
-              <div className={`w-2 h-2 rounded-full ${s.dotColor} ${mobileStageIdx === i ? '' : 'opacity-40'}`} />
-              {s.label} <span className="text-[10px] opacity-60">{grouped[s.key].length}</span>
+          {STAGES.map((s, i) => (
+            <button
+              key={s.key}
+              onClick={() => setMobileStageIdx(i)}
+              className={cn(
+                'flex items-center gap-1.5 px-3 h-8 rounded-full border whitespace-nowrap text-xs font-medium transition-colors flex-shrink-0',
+                mobileStageIdx === i
+                  ? `bg-surface-2 ${s.accent} border-border-glow`
+                  : 'bg-surface-1 text-text-faint border-border'
+              )}
+            >
+              {s.label}
+              <span className="text-[10px] text-text-faint font-mono">
+                {grouped[s.key].length}
+              </span>
             </button>
           ))}
         </div>
 
-        <div className="flex items-center justify-between px-1">
-          <button onClick={() => setMobileStageIdx(Math.max(0, mobileStageIdx - 1))} disabled={mobileStageIdx === 0} className="p-2 rounded-xl text-[var(--text-muted)] disabled:opacity-30"><ChevronLeft className="w-5 h-5" /></button>
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setMobileStageIdx(Math.max(0, mobileStageIdx - 1))}
+            disabled={mobileStageIdx === 0}
+            className="w-9 h-9 rounded-md text-text-faint hover:bg-surface-1 disabled:opacity-30 flex items-center justify-center"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
           <div className="flex items-center gap-2">
-            <div className={`w-2.5 h-2.5 rounded-full ${currentStage.dotColor}`} />
-            <span className={`text-sm font-semibold ${currentStage.color}`}>{currentStage.label}</span>
-            <span className="text-xs text-[var(--text-faint)] bg-[var(--bg-card)] px-2 py-0.5 rounded-lg">{grouped[currentStage.key].length}</span>
+            <span className={cn('text-base font-medium', currentStage.accent)}>
+              {currentStage.label}
+            </span>
+            <Badge variant="neutral" size="xs">
+              {grouped[currentStage.key].length}
+            </Badge>
           </div>
-          <button onClick={() => setMobileStageIdx(Math.min(stages.length - 1, mobileStageIdx + 1))} disabled={mobileStageIdx === stages.length - 1} className="p-2 rounded-xl text-[var(--text-muted)] disabled:opacity-30"><ChevronRight className="w-5 h-5" /></button>
+          <button
+            onClick={() => setMobileStageIdx(Math.min(STAGES.length - 1, mobileStageIdx + 1))}
+            disabled={mobileStageIdx === STAGES.length - 1}
+            className="w-9 h-9 rounded-md text-text-faint hover:bg-surface-1 disabled:opacity-30 flex items-center justify-center"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
 
         <AnimatePresence mode="wait">
-          <motion.div key={currentStage.key} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-2 min-h-[200px]">
+          <motion.div
+            key={currentStage.key}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-2 min-h-[280px]"
+          >
             {grouped[currentStage.key].length === 0 ? (
-              <div className="text-center py-12 text-[var(--text-faint)]"><p className="text-sm">Nenhum lead nesta etapa</p></div>
-            ) : grouped[currentStage.key].map((lead) => (
-              <motion.div key={lead.id} whileTap={{ scale: 0.98 }} onClick={() => setSelectedLead(lead)}
-                className="p-3.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl active:bg-[var(--bg-hover)] cursor-pointer">
-                <div className="flex items-center gap-3">
-                  <Avatar name={lead.name} size="md" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[var(--text)] truncate">{lead.name}</p>
-                    <span className="text-xs text-[var(--text-muted)]">{formatCurrency(lead.estimated_value)}</span>
-                  </div>
-                  {lead.phone && (
-                    <div className="flex flex-col gap-1">
-                      <a href={generateWhatsAppLink(lead.phone, `Olá ${lead.name.split(' ')[0]}!`)} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()} className="p-2 rounded-xl text-green-600"><MessageCircle className="w-4 h-4" /></a>
-                      <a href={`tel:${lead.phone}`} onClick={(e) => e.stopPropagation()} className="p-2 rounded-xl text-blue-600"><Phone className="w-4 h-4" /></a>
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            ))}
+              <div className="text-center py-14 text-text-faint">
+                <p className="text-sm">Nenhum lead nesta etapa</p>
+              </div>
+            ) : (
+              grouped[currentStage.key].map((lead) => (
+                <LeadCard
+                  key={lead.id}
+                  lead={lead}
+                  onClick={() => setSelectedLead(lead)}
+                  draggable={false}
+                />
+              ))
+            )}
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* DESKTOP Kanban */}
-      <div className="hidden lg:flex gap-4 overflow-x-auto pb-4 no-scrollbar">
-        {stages.map((stage) => (
-          <div key={stage.key} className="flex-shrink-0 w-72" onDragOver={(e) => e.preventDefault()} onDrop={() => handleDrop(stage.key)}>
-            <div className="flex items-center gap-2 mb-3 px-1">
-              <div className={`w-2 h-2 rounded-full ${stage.dotColor}`} />
-              <span className={`text-sm font-semibold ${stage.color}`}>{stage.label}</span>
-              <span className="ml-auto text-xs text-[var(--text-faint)] bg-[var(--bg-card)] px-2 py-0.5 rounded-lg">{grouped[stage.key].length}</span>
-            </div>
-            <div className="space-y-2 min-h-[200px] p-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
-              {grouped[stage.key].map((lead) => (
-                <div key={lead.id} draggable onDragStart={() => setDraggedLead(lead.id)} onClick={() => setSelectedLead(lead)}
-                  className="p-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl hover:border-[var(--border-strong)] cursor-grab active:cursor-grabbing group">
-                  <div className="flex items-start gap-2">
-                    <GripVertical className="w-4 h-4 text-[var(--text-faint)] mt-0.5 opacity-0 group-hover:opacity-100 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <Avatar name={lead.name} size="sm" />
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-[var(--text)] truncate">{lead.name}</p>
-                          <p className="text-[10px] text-[var(--text-muted)]">{lead.stand_name || ''}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-[var(--text-secondary)]">{formatCurrency(lead.estimated_value)}</span>
-                        <span className="text-[10px] text-[var(--text-faint)]">{timeAgo(lead.updated_at)}</span>
-                      </div>
-                    </div>
-                  </div>
+      <div className="hidden lg:flex gap-4 overflow-x-auto pb-4 no-scrollbar snap-x snap-mandatory">
+        {STAGES.map((stage) => {
+          const isOver = overStage === stage.key && draggedLead;
+          return (
+            <div
+              key={stage.key}
+              className="flex-shrink-0 w-[300px] snap-start"
+              onDragOver={(e) => {
+                e.preventDefault();
+                setOverStage(stage.key);
+              }}
+              onDragLeave={() => setOverStage(null)}
+              onDrop={() => handleDrop(stage.key)}
+            >
+              <div className="flex items-center justify-between mb-3 px-1">
+                <div className="flex items-center gap-2">
+                  <span className={cn('text-sm font-medium', stage.accent)}>
+                    {stage.label}
+                  </span>
+                  <Badge variant="neutral" size="xs">
+                    {grouped[stage.key].length}
+                  </Badge>
                 </div>
-              ))}
+                <span className="text-[11px] text-text-faint font-mono">
+                  {formatCurrency(totals[stage.key])}
+                </span>
+              </div>
+
+              <div
+                className={cn(
+                  'min-h-[420px] p-2 rounded-lg transition-all',
+                  'bg-surface-0/50 border border-border',
+                  isOver && `border-transparent ring-2 ${stage.ring} bg-surface-1`
+                )}
+              >
+                <AnimatePresence>
+                  {grouped[stage.key].map((lead) => (
+                    <motion.div
+                      key={lead.id}
+                      layout
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={spring}
+                      className="mb-2 last:mb-0"
+                    >
+                      <LeadCard
+                        lead={lead}
+                        draggable
+                        onDragStart={() => setDraggedLead(lead.id)}
+                        onClick={() => setSelectedLead(lead)}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <Modal open={!!selectedLead} onClose={() => setSelectedLead(null)} title={selectedLead?.name || ''} size="md">
-        {selectedLead && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Avatar name={selectedLead.name} size="lg" />
-              <div><p className="font-semibold text-[var(--text)]">{selectedLead.name}</p><p className="text-sm text-[var(--text-muted)]">{selectedLead.email}</p></div>
-            </div>
-            <div className="grid grid-cols-2 gap-2.5">
-              <div className="p-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl"><p className="text-sm font-semibold text-[var(--text)]">{formatCurrency(selectedLead.estimated_value)}</p><p className="text-[10px] text-[var(--text-muted)]">Valor</p></div>
-              <div className="p-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl"><p className="text-sm font-semibold text-[var(--text)]">{selectedLead.ai_score}/100</p><p className="text-[10px] text-[var(--text-muted)]">Score IA</p></div>
-            </div>
-            {selectedLead.phone && (
-              <div className="grid grid-cols-2 gap-2">
-                <a href={generateWhatsAppLink(selectedLead.phone, `Olá ${selectedLead.name.split(' ')[0]}!`)} target="_blank" rel="noopener">
-                  <div className="flex items-center justify-center gap-2 px-4 py-3 bg-green-50 border border-green-200 rounded-2xl text-sm font-medium text-green-700"><MessageCircle className="w-4 h-4" /> WhatsApp</div>
-                </a>
-                <a href={`tel:${selectedLead.phone}`}>
-                  <div className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 border border-blue-200 rounded-2xl text-sm font-medium text-blue-700"><Phone className="w-4 h-4" /> Ligar</div>
-                </a>
+      {/* Detail dialog */}
+      <Dialog open={!!selectedLead} onOpenChange={(v) => !v && setSelectedLead(null)}>
+        <DialogContent size="md">
+          {selectedLead && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-3">
+                  <Avatar name={selectedLead.name} size="lg" ring="solar" />
+                  <div>
+                    <p className="font-display italic text-2xl text-text">{selectedLead.name}</p>
+                    <p className="text-xs text-text-soft mt-0.5">{selectedLead.email}</p>
+                  </div>
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Surface variant="flat" padding="md">
+                  <p className="text-[11px] text-text-faint uppercase tracking-wider mb-1">Valor</p>
+                  <p className="text-xl font-medium text-solar">
+                    <CurrencyFlow value={selectedLead.estimated_value} />
+                  </p>
+                </Surface>
+                <Surface variant="flat" padding="md" className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] text-text-faint uppercase tracking-wider mb-1">
+                      Score IA
+                    </p>
+                    <p className="text-xl font-medium text-text">
+                      <NumberFlow value={selectedLead.ai_score} suffix="/100" />
+                    </p>
+                  </div>
+                  <Ring value={selectedLead.ai_score} size={52} strokeWidth={4} showLabel={false} />
+                </Surface>
               </div>
-            )}
-          </div>
-        )}
-      </Modal>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Badge variant="solar" size="sm">
+                  {getLeadStageLabel(selectedLead.stage)}
+                </Badge>
+                {selectedLead.source && <Badge variant="aurora" size="sm">{selectedLead.source}</Badge>}
+                {selectedLead.stand_name && (
+                  <Badge variant="neutral" size="sm">{selectedLead.stand_name}</Badge>
+                )}
+              </div>
+
+              {selectedLead.phone && (
+                <div className="mt-5 grid grid-cols-2 gap-2">
+                  <a
+                    href={generateWhatsAppLink(
+                      selectedLead.phone,
+                      `Olá ${selectedLead.name.split(' ')[0]}!`
+                    )}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <Button variant="outline" className="w-full border-success/30 text-success hover:bg-success/10 hover:border-success">
+                      <MessageCircle className="w-4 h-4" />
+                      WhatsApp
+                    </Button>
+                  </a>
+                  <a href={`tel:${selectedLead.phone}`}>
+                    <Button variant="outline" className="w-full border-info/30 text-info hover:bg-info/10 hover:border-info">
+                      <Phone className="w-4 h-4" />
+                      Ligar
+                    </Button>
+                  </a>
+                </div>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </motion.div>
+  );
+}
+
+function LeadCard({
+  lead,
+  draggable,
+  onClick,
+  onDragStart,
+}: {
+  lead: LeadRow;
+  draggable: boolean;
+  onClick: () => void;
+  onDragStart?: () => void;
+}) {
+  return (
+    <div
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onClick={onClick}
+      className={cn(
+        'group p-3 bg-surface-0 border border-border rounded-md transition-all',
+        'hover:border-border-glow hover:bg-surface-1',
+        draggable && 'cursor-grab active:cursor-grabbing active:opacity-70'
+      )}
+    >
+      <div className="flex items-center gap-2.5">
+        <Avatar name={lead.name} size="sm" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-text truncate">{lead.name}</p>
+          <p className="text-[11px] text-text-faint truncate">
+            {lead.stand_name || 'Sem stand'}
+          </p>
+        </div>
+        {lead.ai_score > 0 && (
+          <Ring
+            value={lead.ai_score}
+            size={28}
+            strokeWidth={2.5}
+            showLabel={false}
+            variant={lead.ai_score > 75 ? 'solar' : 'aurora'}
+          />
+        )}
+      </div>
+      <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-border">
+        <span className="text-[12px] text-text-soft font-mono">
+          {formatCurrency(lead.estimated_value)}
+        </span>
+        <span className="text-[10px] text-text-faint">{timeAgo(lead.updated_at)}</span>
+      </div>
+    </div>
   );
 }

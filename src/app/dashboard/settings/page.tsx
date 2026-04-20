@@ -3,16 +3,15 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { User, Shield, LogOut, Smartphone, Camera } from 'lucide-react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { toast } from 'sonner';
+import { Surface } from '@/components/ui/surface';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/auth-context';
 import { getSupabase } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-
-const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
-const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
+import { staggerParent, slideUp } from '@/lib/motion';
 
 export default function SettingsPage() {
   const { profile, signOut, user } = useAuth();
@@ -34,60 +33,49 @@ export default function SettingsPage() {
       .update({ full_name: fullName, phone: phone || null })
       .eq('id', profile.id);
     if (error) toast.error('Erro ao salvar');
-    else toast.success('Perfil atualizado!');
+    else toast.success('Perfil atualizado');
     setSaving(false);
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-
-    // Validate
     if (!file.type.startsWith('image/')) {
       toast.error('Selecione uma imagem');
       return;
     }
     if (file.size > 2 * 1024 * 1024) {
-      toast.error('Imagem deve ter no máximo 2MB');
+      toast.error('Máximo 2MB');
       return;
     }
 
     setUploading(true);
-
     const ext = file.name.split('.').pop();
     const filePath = `${user.id}/avatar.${ext}`;
 
-    // Upload to Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from('avatars')
       .upload(filePath, file, { upsert: true });
 
     if (uploadError) {
-      toast.error('Erro ao enviar foto');
+      toast.error('Erro no upload');
       setUploading(false);
       return;
     }
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    const publicUrl = urlData.publicUrl + '?t=' + Date.now();
 
-    const publicUrl = urlData.publicUrl + '?t=' + Date.now(); // cache bust
-
-    // Update profile
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ avatar_url: publicUrl })
       .eq('id', user.id);
 
-    if (updateError) {
-      toast.error('Erro ao atualizar perfil');
-    } else {
+    if (updateError) toast.error('Erro ao atualizar');
+    else {
       setAvatarUrl(publicUrl);
-      toast.success('Foto atualizada!');
+      toast.success('Foto atualizada');
     }
-
     setUploading(false);
   };
 
@@ -102,43 +90,45 @@ export default function SettingsPage() {
       redirectTo: `${window.location.origin}/dashboard/settings`,
     });
     if (error) toast.error(error.message);
-    else toast.success('Email de redefinição enviado!');
+    else toast.success('Email enviado');
   };
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4 max-w-3xl">
-      <motion.div variants={fadeUp}>
-        <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">Configurações</h1>
-        <p className="text-xs text-[var(--text-muted)] mt-0.5">Gerencie sua conta</p>
+    <motion.div
+      variants={staggerParent(0.06)}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6 max-w-3xl"
+    >
+      <motion.div variants={slideUp}>
+        <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Configurações</h1>
+        <p className="mt-1 text-sm text-text-soft">Gerencie sua conta e preferências</p>
       </motion.div>
 
       {/* Profile */}
-      <motion.div variants={fadeUp}>
-        <GlassCard hover={false}>
-          <div className="flex items-center gap-2 mb-4">
-            <User className="w-5 h-5 text-blue-600" />
-            <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Perfil</h3>
+      <motion.div variants={slideUp}>
+        <Surface variant="elevated" padding="lg">
+          <div className="flex items-center gap-2 mb-5">
+            <User className="w-4 h-4 text-solar" />
+            <h3 className="text-sm font-medium text-text">Perfil</h3>
           </div>
-          <div className="space-y-4">
-            {/* Avatar with upload */}
+
+          <div className="space-y-5">
             <div className="flex items-center gap-4">
               <div className="relative">
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt={profile?.full_name || ''}
-                    className="w-16 h-16 rounded-2xl object-cover border border-[var(--border)]"
-                  />
-                ) : (
-                  <Avatar name={profile?.full_name || 'U'} size="lg" />
-                )}
+                <Avatar
+                  name={profile?.full_name || 'U'}
+                  src={avatarUrl}
+                  size="2xl"
+                  ring="solar"
+                />
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
-                  className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[var(--accent)] text-white flex items-center justify-center shadow-md hover:scale-110 transition-transform disabled:opacity-50"
+                  className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-gradient-to-br from-solar to-solar-hot text-canvas flex items-center justify-center shadow-glow hover:scale-110 transition-transform disabled:opacity-50"
                 >
                   {uploading ? (
-                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="w-3.5 h-3.5 border-2 border-canvas/30 border-t-canvas rounded-full animate-spin" />
                   ) : (
                     <Camera className="w-3.5 h-3.5" />
                   )}
@@ -152,79 +142,76 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <p className="text-sm font-semibold text-[var(--text)]">{profile?.full_name}</p>
-                <p className="text-xs text-[var(--text-muted)]">{profile?.email}</p>
-                <p className="text-xs text-[var(--text-muted)] capitalize">{profile?.role}</p>
+                <p className="text-base font-medium text-text">{profile?.full_name}</p>
+                <p className="text-sm text-text-soft">{profile?.email}</p>
+                <p className="text-xs text-text-faint capitalize mt-0.5">{profile?.role}</p>
               </div>
             </div>
 
-            {/* Form fields */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-xs text-[var(--text-muted)] font-medium">Nome</label>
-                <input
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none focus:ring-2 focus:ring-blue-500/20"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs text-[var(--text-muted)] font-medium">Telefone</label>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none focus:ring-2 focus:ring-blue-500/20"
-                  placeholder="(11) 99999-0000"
-                />
-              </div>
+              <Input
+                label="Nome completo"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+              />
+              <Input
+                label="Telefone"
+                placeholder="(11) 99999-0000"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+              />
             </div>
-            <Button variant="neon" size="sm" onClick={handleSave} disabled={saving}>
-              {saving ? 'Salvando...' : 'Salvar Alterações'}
+
+            <Button variant="solar" onClick={handleSave} loading={saving}>
+              Salvar alterações
             </Button>
           </div>
-        </GlassCard>
+        </Surface>
       </motion.div>
 
       {/* Security */}
-      <motion.div variants={fadeUp}>
-        <GlassCard hover={false}>
-          <div className="flex items-center gap-2 mb-4">
-            <Shield className="w-5 h-5 text-blue-600" />
-            <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Segurança</h3>
+      <motion.div variants={slideUp}>
+        <Surface variant="elevated" padding="lg">
+          <div className="flex items-center gap-2 mb-5">
+            <Shield className="w-4 h-4 text-aurora-1" />
+            <h3 className="text-sm font-medium text-text">Segurança</h3>
           </div>
-          <div className="flex items-center justify-between p-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
+          <div className="flex items-center justify-between p-3 bg-surface-1 border border-border rounded-md">
             <div>
-              <p className="text-sm text-[var(--text)]">Alterar senha</p>
-              <p className="text-xs text-[var(--text-muted)]">Enviaremos um email para redefinição</p>
+              <p className="text-sm text-text font-medium">Alterar senha</p>
+              <p className="text-xs text-text-soft">Enviaremos um email de redefinição</p>
             </div>
-            <Button variant="secondary" size="sm" onClick={handleChangePassword}>Alterar</Button>
+            <Button variant="outline" size="sm" onClick={handleChangePassword}>
+              Alterar
+            </Button>
           </div>
-        </GlassCard>
+        </Surface>
       </motion.div>
 
       {/* PWA */}
-      <motion.div variants={fadeUp}>
-        <GlassCard hover={false}>
+      <motion.div variants={slideUp}>
+        <Surface variant="elevated" padding="lg">
           <div className="flex items-center gap-2 mb-4">
-            <Smartphone className="w-5 h-5 text-violet-600" />
-            <h3 className="text-sm font-semibold text-[var(--text-secondary)]">Instalar App</h3>
+            <Smartphone className="w-4 h-4 text-aurora-2" />
+            <h3 className="text-sm font-medium text-text">Instalar como app</h3>
           </div>
-          <p className="text-sm text-[var(--text-muted)] mb-3">
-            Instale o StandForge como app no seu celular para acesso rápido.
+          <p className="text-sm text-text-soft mb-2">
+            Instale o StandForge no seu dispositivo para acesso rápido.
           </p>
-          <p className="text-xs text-[var(--text-faint)]">
-            No Chrome: Menu (⋮) → &quot;Adicionar à tela inicial&quot;
+          <p className="text-xs text-text-faint">
+            Chrome: Menu (⋮) → &ldquo;Adicionar à tela inicial&rdquo;
           </p>
-        </GlassCard>
+        </Surface>
       </motion.div>
 
       {/* Logout */}
-      <motion.div variants={fadeUp}>
+      <motion.div variants={slideUp}>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-2 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 font-medium text-sm hover:bg-red-100:bg-red-500/15 transition-colors"
+          className="w-full flex items-center justify-center gap-2 h-12 rounded-md bg-danger/10 border border-danger/25 text-danger font-medium text-sm hover:bg-danger/15 transition-colors"
         >
-          <LogOut className="w-4 h-4" /> Sair da Conta
+          <LogOut className="w-4 h-4" />
+          Sair da conta
         </button>
       </motion.div>
     </motion.div>

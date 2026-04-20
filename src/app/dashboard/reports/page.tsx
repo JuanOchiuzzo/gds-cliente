@@ -1,16 +1,15 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { BarChart3 } from 'lucide-react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { BarChart3, Flame, Thermometer, Snowflake } from 'lucide-react';
+import { Surface } from '@/components/ui/surface';
+import { NumberFlow, CurrencyFlow } from '@/components/ui/number-flow';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useLeads } from '@/lib/hooks/use-leads';
 import { useStands } from '@/lib/hooks/use-stands';
 import { useAppointments } from '@/lib/hooks/use-appointments';
 import { useWallet } from '@/lib/hooks/use-wallet';
-import { formatCurrency } from '@/lib/utils';
-
-const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
-const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
+import { staggerParent, slideUp } from '@/lib/motion';
 
 export default function ReportsPage() {
   const { leads, loading: leadsLoading } = useLeads();
@@ -22,106 +21,194 @@ export default function ReportsPage() {
 
   const totalLeads = leads.length;
   const leadsByStage: Record<string, number> = {};
-  leads.forEach((l) => { leadsByStage[l.stage] = (leadsByStage[l.stage] || 0) + 1; });
+  leads.forEach((l) => {
+    leadsByStage[l.stage] = (leadsByStage[l.stage] || 0) + 1;
+  });
 
   const totalStands = stands.filter((s) => s.status === 'ativo').length;
   const totalSold = stands.reduce((acc, s) => acc + s.sold_units, 0);
-  const totalRevenue = leads.filter((l) => l.stage === 'fechado').reduce((acc, l) => acc + l.estimated_value, 0);
+  const totalRevenue = leads
+    .filter((l) => l.stage === 'fechado')
+    .reduce((acc, l) => acc + l.estimated_value, 0);
 
   const totalAppointments = appointments.length;
   const completedVisits = appointments.filter((a) => a.status === 'realizado').length;
   const pendingTasks = tasks.filter((t) => !t.completed).length;
 
-  const conversionRate = totalLeads > 0 ? ((leadsByStage['fechado'] || 0) / totalLeads * 100) : 0;
+  const conversionRate =
+    totalLeads > 0 ? ((leadsByStage['fechado'] || 0) / totalLeads) * 100 : 0;
+
+  const STAGES = [
+    { key: 'novo', label: 'Novo', color: 'from-info to-info' },
+    { key: 'qualificado', label: 'Qualificado', color: 'from-aurora-1 to-aurora-1' },
+    { key: 'visita_agendada', label: 'Visita', color: 'from-aurora-2 to-aurora-2' },
+    { key: 'proposta', label: 'Proposta', color: 'from-warning to-warning' },
+    { key: 'negociacao', label: 'Negociação', color: 'from-solar to-solar' },
+    { key: 'fechado', label: 'Fechado', color: 'from-success to-success' },
+    { key: 'perdido', label: 'Perdido', color: 'from-danger to-danger' },
+  ];
 
   if (loading) {
-    return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" /></div>;
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="w-8 h-8 border-2 border-border-strong border-t-solar rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4">
-      <motion.div variants={fadeUp}>
-        <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">Relatórios</h1>
-        <p className="text-xs text-[var(--text-muted)] mt-0.5">Visão geral dos seus dados</p>
+    <motion.div
+      variants={staggerParent(0.04)}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      <motion.div variants={slideUp}>
+        <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Relatórios</h1>
+        <p className="mt-1 text-sm text-text-soft">Visão consolidada dos seus dados</p>
       </motion.div>
 
-      {/* Summary Cards */}
-      <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Hero KPIs */}
+      <motion.div variants={slideUp} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <Surface variant="elevated" padding="md" className="relative overflow-hidden">
+          <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-solar/10 blur-[40px]" />
+          <p className="text-[11px] text-text-faint uppercase tracking-wider mb-2">Receita fechada</p>
+          <p className="text-2xl font-medium text-solar-gradient">
+            <CurrencyFlow value={totalRevenue} />
+          </p>
+        </Surface>
+        <Surface variant="elevated" padding="md">
+          <p className="text-[11px] text-text-faint uppercase tracking-wider mb-2">Taxa conversão</p>
+          <p className="text-2xl font-medium text-text">
+            <NumberFlow value={conversionRate} suffix="%" format={{ maximumFractionDigits: 1 }} />
+          </p>
+        </Surface>
+        <Surface variant="elevated" padding="md">
+          <p className="text-[11px] text-text-faint uppercase tracking-wider mb-2">Leads total</p>
+          <p className="text-2xl font-medium text-text">
+            <NumberFlow value={totalLeads} />
+          </p>
+        </Surface>
+        <Surface variant="elevated" padding="md">
+          <p className="text-[11px] text-text-faint uppercase tracking-wider mb-2">Stands ativos</p>
+          <p className="text-2xl font-medium text-text">
+            <NumberFlow value={totalStands} />
+          </p>
+        </Surface>
+      </motion.div>
+
+      {/* Secondary KPIs */}
+      <motion.div variants={slideUp} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'Total Leads', value: totalLeads.toString() },
-          { label: 'Stands Ativos', value: totalStands.toString() },
-          { label: 'Unidades Vendidas', value: totalSold.toString() },
-          { label: 'Taxa Conversão', value: `${conversionRate.toFixed(1)}%` },
-          { label: 'Receita (Fechados)', value: formatCurrency(totalRevenue) },
-          { label: 'Agendamentos', value: totalAppointments.toString() },
-          { label: 'Visitas Realizadas', value: completedVisits.toString() },
-          { label: 'Tarefas Pendentes', value: pendingTasks.toString() },
-        ].map((item) => (
-          <GlassCard key={item.label} hover={false} className="!p-4">
-            <p className="text-lg font-bold text-[var(--text)]">{item.value}</p>
-            <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{item.label}</p>
-          </GlassCard>
+          { label: 'Unidades vendidas', value: totalSold },
+          { label: 'Agendamentos', value: totalAppointments },
+          { label: 'Visitas realizadas', value: completedVisits },
+          { label: 'Tarefas pendentes', value: pendingTasks },
+        ].map((i) => (
+          <Surface key={i.label} variant="flat" padding="md">
+            <p className="text-[11px] text-text-faint uppercase tracking-wider mb-1.5">
+              {i.label}
+            </p>
+            <p className="text-xl font-medium text-text">
+              <NumberFlow value={i.value} />
+            </p>
+          </Surface>
         ))}
       </motion.div>
 
-      {/* Leads by Stage */}
-      <motion.div variants={fadeUp}>
-        <GlassCard hover={false}>
-          <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4">Leads por Etapa</h3>
+      {/* Leads by stage */}
+      <motion.div variants={slideUp}>
+        <Surface variant="elevated" padding="lg">
+          <h3 className="text-sm font-medium text-text mb-5 flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-solar" /> Leads por etapa
+          </h3>
           {totalLeads === 0 ? (
-            <p className="text-sm text-[var(--text-muted)] text-center py-8">Nenhum lead cadastrado</p>
+            <p className="text-sm text-text-faint text-center py-8">Nenhum lead cadastrado</p>
           ) : (
             <div className="space-y-3">
-              {[
-                { key: 'novo', label: 'Novo', color: 'bg-blue-500' },
-                { key: 'qualificado', label: 'Qualificado', color: 'bg-violet-500' },
-                { key: 'visita_agendada', label: 'Visita Agendada', color: 'bg-amber-500' },
-                { key: 'proposta', label: 'Proposta', color: 'bg-indigo-500' },
-                { key: 'negociacao', label: 'Negociação', color: 'bg-orange-500' },
-                { key: 'fechado', label: 'Fechado', color: 'bg-emerald-500' },
-                { key: 'perdido', label: 'Perdido', color: 'bg-red-500' },
-              ].map((stage) => {
+              {STAGES.map((stage, idx) => {
                 const count = leadsByStage[stage.key] || 0;
                 const pct = totalLeads > 0 ? (count / totalLeads) * 100 : 0;
                 return (
                   <div key={stage.key} className="flex items-center gap-3">
-                    <span className="text-xs text-[var(--text-secondary)] w-28">{stage.label}</span>
-                    <div className="flex-1 h-2 bg-[var(--bg-card)] rounded-full overflow-hidden">
-                      <div className={`h-full rounded-full ${stage.color}`} style={{ width: `${pct}%` }} />
+                    <span className="text-xs text-text-soft w-28">{stage.label}</span>
+                    <div className="flex-1 h-2 bg-surface-2 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.9, delay: idx * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                        className={`h-full rounded-full bg-gradient-to-r ${stage.color}`}
+                      />
                     </div>
-                    <span className="text-xs font-semibold text-[var(--text)] w-8 text-right">{count}</span>
+                    <span className="text-xs font-mono text-text w-12 text-right">
+                      <NumberFlow value={count} />
+                    </span>
                   </div>
                 );
               })}
             </div>
           )}
-        </GlassCard>
+        </Surface>
       </motion.div>
 
-      {/* Carteira Stats */}
-      <motion.div variants={fadeUp}>
-        <GlassCard hover={false}>
-          <h3 className="text-sm font-semibold text-[var(--text-secondary)] mb-4">Minha Carteira</h3>
+      {/* Wallet temperature */}
+      <motion.div variants={slideUp}>
+        <Surface variant="elevated" padding="lg">
+          <h3 className="text-sm font-medium text-text mb-5">Carteira por temperatura</h3>
           <div className="grid grid-cols-3 gap-3">
             {[
-              { label: '🔥 Quentes', value: clients.filter((c) => c.temperature === 'quente').length },
-              { label: '🌡️ Mornos', value: clients.filter((c) => c.temperature === 'morno').length },
-              { label: '❄️ Frios', value: clients.filter((c) => c.temperature === 'frio').length },
-            ].map((item) => (
-              <div key={item.label} className="text-center p-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
-                <p className="text-xl font-bold text-[var(--text)]">{item.value}</p>
-                <p className="text-[10px] text-[var(--text-muted)]">{item.label}</p>
+              {
+                label: 'Quentes',
+                value: clients.filter((c) => c.temperature === 'quente').length,
+                icon: <Flame className="w-4 h-4" />,
+                color: 'text-hot',
+                bg: 'bg-hot/10',
+                border: 'border-hot/25',
+              },
+              {
+                label: 'Mornos',
+                value: clients.filter((c) => c.temperature === 'morno').length,
+                icon: <Thermometer className="w-4 h-4" />,
+                color: 'text-warm',
+                bg: 'bg-warm/10',
+                border: 'border-warm/25',
+              },
+              {
+                label: 'Frios',
+                value: clients.filter((c) => c.temperature === 'frio').length,
+                icon: <Snowflake className="w-4 h-4" />,
+                color: 'text-cold',
+                bg: 'bg-cold/10',
+                border: 'border-cold/25',
+              },
+            ].map((i) => (
+              <div
+                key={i.label}
+                className={`text-center p-4 rounded-md border ${i.bg} ${i.border}`}
+              >
+                <div className={`mx-auto w-8 h-8 flex items-center justify-center ${i.color}`}>
+                  {i.icon}
+                </div>
+                <p className="text-2xl font-medium text-text mt-2">
+                  <NumberFlow value={i.value} />
+                </p>
+                <p className={`text-[11px] uppercase tracking-wider mt-0.5 ${i.color}`}>
+                  {i.label}
+                </p>
               </div>
             ))}
           </div>
-        </GlassCard>
+        </Surface>
       </motion.div>
 
       {totalLeads === 0 && totalStands === 0 && (
-        <GlassCard hover={false} className="!p-8 text-center">
-          <BarChart3 className="w-10 h-10 mx-auto text-[var(--text-faint)] mb-3" />
-          <p className="text-sm text-[var(--text-muted)]">Adicione dados para ver relatórios detalhados</p>
-        </GlassCard>
+        <Surface variant="elevated" padding="xl">
+          <EmptyState
+            icon={<BarChart3 className="w-6 h-6" />}
+            title="Sem dados ainda"
+            description="Adicione leads e stands para ver relatórios detalhados."
+          />
+        </Surface>
       )}
     </motion.div>
   );

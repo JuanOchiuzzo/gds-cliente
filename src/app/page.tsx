@@ -3,9 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Sparkles, Mail, Lock, ArrowRight, UserPlus, LogIn } from 'lucide-react';
+import { Sparkles, Mail, Lock, User, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { spring, slideUp, staggerParent } from '@/lib/motion';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,109 +20,216 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   if (authLoading) return null;
-  if (user) { router.push('/dashboard'); return null; }
+  if (user) {
+    router.push('/dashboard');
+    return null;
+  }
 
   const handleSubmit = async () => {
-    if (!email || !password) { toast.error('Preencha email e senha'); return; }
-    if (isSignUp && !fullName) { toast.error('Preencha seu nome'); return; }
+    if (!email || !password) {
+      toast.error('Preencha email e senha');
+      return;
+    }
+    if (isSignUp && !fullName) {
+      toast.error('Preencha seu nome');
+      return;
+    }
     setLoading(true);
     if (isSignUp) {
       const { error } = await signUp(email, password, fullName);
       if (error) toast.error(error);
-      else { toast.success('Conta criada! Verifique seu email.'); setIsSignUp(false); setPassword(''); }
+      else {
+        toast.success('Conta criada! Verifique seu email.');
+        setIsSignUp(false);
+        setPassword('');
+      }
     } else {
       const { error } = await signIn(email, password);
-      if (error) { error.includes('Email not confirmed') ? toast.error('Confirme seu email primeiro.') : toast.error(error); }
-      else router.push('/dashboard');
+      if (error) {
+        error.includes('Email not confirmed')
+          ? toast.error('Confirme seu email primeiro.')
+          : toast.error(error);
+      } else router.push('/dashboard');
     }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-[100dvh] flex">
-      {/* Left — branding */}
-      <div className="hidden lg:flex flex-col justify-between w-[45%] bg-[#1c1917] p-10 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-30">
-          <div className="absolute top-[20%] left-[10%] w-[400px] h-[400px] rounded-full bg-indigo-600/20 blur-[100px]" />
-          <div className="absolute bottom-[10%] right-[10%] w-[300px] h-[300px] rounded-full bg-violet-600/20 blur-[100px]" />
-        </div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <span className="text-lg font-bold text-white">StandForge</span>
+    <div className="min-h-[100dvh] bg-canvas text-text relative overflow-hidden flex">
+      {/* Animated aurora backdrop + grid pattern */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-grid opacity-[0.25]" />
+        <motion.div
+          animate={{
+            background: [
+              'radial-gradient(ellipse 60% 50% at 20% 30%, rgba(245, 158, 11, 0.18), transparent 60%)',
+              'radial-gradient(ellipse 60% 50% at 70% 20%, rgba(167, 139, 250, 0.12), transparent 60%)',
+              'radial-gradient(ellipse 60% 50% at 20% 30%, rgba(245, 158, 11, 0.18), transparent 60%)',
+            ],
+          }}
+          transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
+          className="absolute inset-0"
+        />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] rounded-full bg-aurora-1/10 blur-[120px]" />
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full bg-solar/10 blur-[100px]" />
+        {/* Floating orbs */}
+        <motion.div
+          animate={{ y: [0, -20, 0], x: [0, 8, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-1/4 left-[30%] w-2 h-2 rounded-full bg-solar blur-sm"
+        />
+        <motion.div
+          animate={{ y: [0, 16, 0], x: [0, -10, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
+          className="absolute top-[60%] left-[20%] w-1.5 h-1.5 rounded-full bg-aurora-2 blur-[1px]"
+        />
+        <motion.div
+          animate={{ y: [0, -24, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
+          className="absolute top-[40%] right-[40%] w-1.5 h-1.5 rounded-full bg-aurora-1 blur-[1px]"
+        />
+      </div>
+
+      {/* Left — editorial */}
+      <div className="relative z-10 hidden lg:flex flex-col justify-between w-[58%] p-14 xl:p-20">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="flex items-center gap-2.5"
+        >
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
+            <Sparkles className="w-5 h-5 text-canvas" />
           </div>
-        </div>
-        <div className="relative z-10 space-y-4">
-          <h2 className="text-3xl font-bold text-white leading-tight">
-            O futuro da gestão<br />de stands imobiliários
-          </h2>
-          <p className="text-stone-400 text-sm max-w-md">
-            Carteira de clientes, fila de plantão, agendamentos com voucher, ranking da equipe — tudo num app premium feito pra quem vende no campo.
-          </p>
-        </div>
-        <p className="relative z-10 text-[11px] text-stone-600">© 2026 StandForge</p>
+          <span className="text-lg font-medium tracking-tight">StandForge</span>
+          <span className="ml-3 px-2 py-0.5 text-[10px] font-mono text-solar border border-solar/30 bg-solar/5 rounded-full tracking-widest uppercase">
+            Nexus Orbit
+          </span>
+        </motion.div>
+
+        <motion.div
+          variants={staggerParent(0.12, 0.2)}
+          initial="hidden"
+          animate="visible"
+          className="space-y-8 max-w-xl"
+        >
+          <motion.h1
+            variants={slideUp}
+            className="font-display italic text-[56px] xl:text-[72px] leading-[0.95] tracking-tight"
+          >
+            Onde negócios<br />
+            imobiliários<br />
+            <span className="text-solar-gradient not-italic font-sans font-medium">ganham órbita.</span>
+          </motion.h1>
+          <motion.p variants={slideUp} className="text-text-soft text-[17px] leading-relaxed max-w-md">
+            Carteira viva, fila de plantão em tempo real, vouchers compartilháveis e IA que entende
+            o seu mercado — tudo em uma interface que você nunca viu antes.
+          </motion.p>
+
+          <motion.div variants={slideUp} className="flex items-center gap-6 text-[13px] text-text-faint">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-soft" />
+              Realtime Supabase
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-solar animate-pulse-soft" />
+              Mobile-first PWA
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-aurora-2 animate-pulse-soft" />
+              IA contextual
+            </div>
+          </motion.div>
+        </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="text-[11px] text-text-ghost font-mono tracking-widest uppercase"
+        >
+          © 2026 · StandForge Systems
+        </motion.p>
       </div>
 
       {/* Right — form */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-[var(--bg)]">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }} className="w-full max-w-sm space-y-8">
+      <div className="relative z-10 flex-1 flex items-center justify-center p-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={spring}
+          className="w-full max-w-[380px]"
+        >
           {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-2.5 justify-center">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+          <div className="lg:hidden flex items-center gap-2.5 justify-center mb-10">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
+              <Sparkles className="w-5 h-5 text-canvas" />
             </div>
-            <span className="text-xl font-bold text-[var(--text)]">StandForge</span>
+            <span className="text-lg font-medium">StandForge</span>
           </div>
 
-          <div className="text-center lg:text-left">
-            <h1 className="text-2xl font-bold text-[var(--text)]">{isSignUp ? 'Criar conta' : 'Entrar'}</h1>
-            <p className="text-sm text-[var(--text-muted)] mt-1">{isSignUp ? 'Preencha seus dados' : 'Acesse sua conta'}</p>
-          </div>
-
-          <div className="space-y-3">
-            {isSignUp && (
-              <div>
-                <label className="text-xs font-medium text-[var(--text-secondary)] mb-1 block">Nome completo</label>
-                <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Seu nome"
-                  className="w-full px-3.5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-strong)] rounded-[var(--radius)] text-sm text-[var(--text)] placeholder:text-[var(--text-faint)] focus:ring-2 focus:ring-[var(--accent-soft)] focus:border-[var(--accent)] transition-all" />
-              </div>
-            )}
-            <div>
-              <label className="text-xs font-medium text-[var(--text-secondary)] mb-1 block">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-faint)]" />
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                  placeholder="seu@email.com"
-                  className="w-full pl-9 pr-3.5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-strong)] rounded-[var(--radius)] text-sm text-[var(--text)] placeholder:text-[var(--text-faint)] focus:ring-2 focus:ring-[var(--accent-soft)] focus:border-[var(--accent)] transition-all" />
-              </div>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-[var(--text-secondary)] mb-1 block">Senha</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-faint)]" />
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-                  placeholder="••••••••"
-                  className="w-full pl-9 pr-3.5 py-2.5 bg-[var(--bg-card)] border border-[var(--border-strong)] rounded-[var(--radius)] text-sm text-[var(--text)] placeholder:text-[var(--text-faint)] focus:ring-2 focus:ring-[var(--accent-soft)] focus:border-[var(--accent)] transition-all" />
-              </div>
+          <div
+            className="relative p-8 rounded-2xl bg-surface-0/70 backdrop-blur-xl border border-border-strong shadow-xl"
+          >
+            <div className="mb-8">
+              <h2 className="font-display italic text-3xl tracking-tight mb-1.5">
+                {isSignUp ? 'Crie sua conta' : 'Bem-vindo de volta.'}
+              </h2>
+              <p className="text-sm text-text-soft">
+                {isSignUp ? 'Um novo ciclo começa aqui.' : 'Continue de onde parou.'}
+              </p>
             </div>
 
-            <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} onClick={handleSubmit} disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-gradient-to-r from-[var(--gradient-start)] to-[var(--gradient-end)] text-white text-sm font-semibold rounded-[var(--radius)] shadow-md hover:shadow-[0_4px_20px_var(--accent-glow)] transition-all disabled:opacity-50">
-              {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                : isSignUp ? <><UserPlus className="w-4 h-4" /> Criar Conta</>
-                : <><LogIn className="w-4 h-4" /> Entrar</>}
-            </motion.button>
-          </div>
+            <div className="space-y-4">
+              {isSignUp && (
+                <Input
+                  icon={<User className="w-4 h-4" />}
+                  placeholder="Nome completo"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                />
+              )}
+              <Input
+                icon={<Mail className="w-4 h-4" />}
+                type="email"
+                placeholder="seu@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              />
+              <Input
+                icon={<Lock className="w-4 h-4" />}
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              />
 
-          <p className="text-center text-sm text-[var(--text-muted)]">
-            {isSignUp ? 'Já tem conta?' : 'Não tem conta?'}{' '}
-            <button onClick={() => setIsSignUp(!isSignUp)} className="text-[var(--accent)] font-medium hover:underline">
-              {isSignUp ? 'Entrar' : 'Criar conta'}
-            </button>
-          </p>
+              <Button
+                variant="solar"
+                size="lg"
+                className="w-full group"
+                loading={loading}
+                onClick={handleSubmit}
+              >
+                {isSignUp ? 'Criar conta' : 'Entrar'}
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+              </Button>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-border text-center">
+              <p className="text-sm text-text-soft">
+                {isSignUp ? 'Já tem conta?' : 'Novo por aqui?'}{' '}
+                <button
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-solar font-medium hover:underline underline-offset-4"
+                >
+                  {isSignUp ? 'Entrar' : 'Criar conta'}
+                </button>
+              </p>
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>

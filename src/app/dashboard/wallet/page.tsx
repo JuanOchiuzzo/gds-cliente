@@ -1,37 +1,78 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  Search, Plus, Phone, MessageCircle, Flame, Thermometer, Snowflake,
-  ListTodo, Check, CalendarPlus, PhoneCall,
+  Search,
+  Plus,
+  Phone,
+  MessageCircle,
+  Flame,
+  Thermometer,
+  Snowflake,
+  ListTodo,
+  Check,
+  CalendarPlus,
+  Lock,
 } from 'lucide-react';
-import { GlassCard } from '@/components/ui/glass-card';
+import { toast } from 'sonner';
+import { Surface } from '@/components/ui/surface';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
-import { Modal } from '@/components/ui/modal';
+import { Input, Textarea } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
+import { Chip } from '@/components/ui/chip';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { EmptyState } from '@/components/ui/empty-state';
 import { useWallet, type WalletClientRow } from '@/lib/hooks/use-wallet';
 import { useStands } from '@/lib/hooks/use-stands';
-import { generateWhatsAppLink } from '@/lib/utils';
+import { generateWhatsAppLink, cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import { Select } from '@/components/ui/select';
-import { toast } from 'sonner';
-
-const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
-const fadeUp = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
+import { staggerParent, slideUp } from '@/lib/motion';
 
 type Temp = 'quente' | 'morno' | 'frio';
-const tempConfig: Record<Temp, { icon: React.ReactNode; label: string; color: string }> = {
-  quente: { icon: <Flame className="w-4 h-4" />, label: 'Quente', color: 'text-orange-500' },
-  morno: { icon: <Thermometer className="w-4 h-4" />, label: 'Morno', color: 'text-amber-500' },
-  frio: { icon: <Snowflake className="w-4 h-4" />, label: 'Frio', color: 'text-blue-400' },
+
+const TEMP_CONFIG: Record<Temp, {
+  icon: React.ReactNode;
+  label: string;
+  color: string;
+  bg: string;
+  border: string;
+}> = {
+  quente: {
+    icon: <Flame className="w-4 h-4" />,
+    label: 'Quente',
+    color: 'text-hot',
+    bg: 'bg-hot/10',
+    border: 'border-hot/30',
+  },
+  morno: {
+    icon: <Thermometer className="w-4 h-4" />,
+    label: 'Morno',
+    color: 'text-warm',
+    bg: 'bg-warm/10',
+    border: 'border-warm/30',
+  },
+  frio: {
+    icon: <Snowflake className="w-4 h-4" />,
+    label: 'Frio',
+    color: 'text-cold',
+    bg: 'bg-cold/10',
+    border: 'border-cold/30',
+  },
 };
 
-const taskTypes = [
+const TASK_TYPES = [
   { key: 'ligar', icon: '📞', label: 'Ligar' },
-  { key: 'agendar_visita', icon: '📅', label: 'Agendar Visita' },
-  { key: 'enviar_proposta', icon: '📄', label: 'Enviar Proposta' },
+  { key: 'agendar_visita', icon: '📅', label: 'Agendar visita' },
+  { key: 'enviar_proposta', icon: '📄', label: 'Proposta' },
   { key: 'follow_up', icon: '🔄', label: 'Follow-up' },
 ];
 
@@ -43,375 +84,607 @@ export default function WalletPage() {
   const [selectedClient, setSelectedClient] = useState<WalletClientRow | null>(null);
   const [showNewClient, setShowNewClient] = useState(false);
   const [showNewTask, setShowNewTask] = useState(false);
-  const [tab, setTab] = useState<'clientes' | 'tarefas'>('clientes');
 
-  // New client form
-  const [newName, setNewName] = useState('');
-  const [newPhone, setNewPhone] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [newProduct, setNewProduct] = useState('');
-  const [newTemp, setNewTemp] = useState<Temp>('morno');
-  const [newNotes, setNewNotes] = useState('');
-  const [newStandId, setNewStandId] = useState('');
+  const [form, setForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    product: '',
+    temp: 'morno' as Temp,
+    notes: '',
+    stand_id: '',
+  });
 
-  // New task form
-  const [taskType, setTaskType] = useState('ligar');
-  const [taskDesc, setTaskDesc] = useState('');
-  const [taskDue, setTaskDue] = useState('');
+  const [taskForm, setTaskForm] = useState({
+    type: 'ligar',
+    description: '',
+    due_date: '',
+  });
 
-  const filtered = useMemo(() => {
-    return clients.filter((c) => {
-      const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) || (c.phone || '').includes(search);
-      const matchTemp = tempFilter === 'all' || c.temperature === tempFilter;
-      return matchSearch && matchTemp;
-    });
-  }, [clients, search, tempFilter]);
+  const filtered = useMemo(
+    () =>
+      clients.filter((c) => {
+        const matchSearch =
+          c.name.toLowerCase().includes(search.toLowerCase()) ||
+          (c.phone || '').includes(search);
+        const matchTemp = tempFilter === 'all' || c.temperature === tempFilter;
+        return matchSearch && matchTemp;
+      }),
+    [clients, search, tempFilter]
+  );
 
   const pendingTasks = tasks.filter((t) => !t.completed);
   const completedTasks = tasks.filter((t) => t.completed);
+  const clientTasks = selectedClient
+    ? tasks.filter((t) => t.client_id === selectedClient.id)
+    : [];
 
-  const clientTasks = selectedClient ? tasks.filter((t) => t.client_id === selectedClient.id) : [];
+  const byTemp = {
+    quente: filtered.filter((c) => c.temperature === 'quente'),
+    morno: filtered.filter((c) => c.temperature === 'morno'),
+    frio: filtered.filter((c) => c.temperature === 'frio'),
+  };
 
   const handleCreateClient = async () => {
-    if (!newName) { toast.error('Nome é obrigatório'); return; }
+    if (!form.name) {
+      toast.error('Nome é obrigatório');
+      return;
+    }
     await createClient({
-      name: newName, phone: newPhone, email: newEmail,
-      interested_product: newProduct || null, temperature: newTemp,
-      notes: newNotes || null, stand_id: newStandId || null,
+      name: form.name,
+      phone: form.phone,
+      email: form.email,
+      interested_product: form.product || null,
+      temperature: form.temp,
+      notes: form.notes || null,
+      stand_id: form.stand_id || null,
     });
-    toast.success('Cliente adicionado à carteira!');
+    toast.success('Cliente adicionado');
     setShowNewClient(false);
-    setNewName(''); setNewPhone(''); setNewEmail(''); setNewProduct(''); setNewTemp('morno'); setNewNotes(''); setNewStandId('');
+    setForm({ name: '', phone: '', email: '', product: '', temp: 'morno', notes: '', stand_id: '' });
   };
 
   const handleCreateTask = async () => {
-    if (!taskDesc || !taskDue || !selectedClient) { toast.error('Preencha todos os campos'); return; }
+    if (!taskForm.description || !taskForm.due_date || !selectedClient) {
+      toast.error('Preencha todos os campos');
+      return;
+    }
     await createTask({
       client_id: selectedClient.id,
-      type: taskType as 'ligar',
-      description: taskDesc,
-      due_date: new Date(taskDue).toISOString(),
+      type: taskForm.type as 'ligar',
+      description: taskForm.description,
+      due_date: new Date(taskForm.due_date).toISOString(),
     });
-    toast.success('Tarefa criada!');
+    toast.success('Tarefa criada');
     setShowNewTask(false);
-    setTaskDesc(''); setTaskDue('');
+    setTaskForm({ type: 'ligar', description: '', due_date: '' });
   };
 
   const handleComplete = async (id: string) => {
     await completeTask(id);
-    toast.success('Tarefa concluída! ✅');
+    toast.success('Tarefa concluída');
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[var(--accent)]/30 border-t-[var(--accent)] rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-border-strong border-t-solar rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
-    <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-4">
-      <motion.div variants={fadeUp} className="flex items-center justify-between">
+    <motion.div
+      variants={staggerParent(0.04)}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      <motion.div variants={slideUp} className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-[var(--text)]">Minha Carteira</h1>
-          <p className="text-xs text-[var(--text-muted)] mt-0.5">🔒 Dados visíveis só para você</p>
+          <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Carteira</h1>
+          <p className="mt-1 text-sm text-text-soft flex items-center gap-1.5">
+            <Lock className="w-3 h-3" />
+            Dados privados · só você vê
+          </p>
         </div>
-        <Button variant="neon" size="sm" onClick={() => setShowNewClient(true)}>
-          <Plus className="w-4 h-4" /> <span className="hidden sm:inline">Cliente</span>
+        <Button variant="solar" onClick={() => setShowNewClient(true)}>
+          <Plus className="w-4 h-4" />
+          <span className="hidden sm:inline">Cliente</span>
         </Button>
       </motion.div>
 
-      {/* Tabs */}
-      <motion.div variants={fadeUp} className="flex gap-1 p-1 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
-        {(['clientes', 'tarefas'] as const).map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-medium transition-all ${
-              tab === t ? 'bg-[var(--bg-card)] text-[var(--text)] shadow-sm border border-[var(--border)]' : 'text-[var(--text-muted)]'
-            }`}>
-            {t === 'clientes' ? <><Flame className="w-3.5 h-3.5" /> Clientes ({clients.length})</> : <><ListTodo className="w-3.5 h-3.5" /> Tarefas ({pendingTasks.length})</>}
-          </button>
-        ))}
-      </motion.div>
+      <Tabs defaultValue="clientes">
+        <motion.div variants={slideUp}>
+          <TabsList>
+            <TabsTrigger value="clientes" className="gap-2">
+              <Flame className="w-3.5 h-3.5" />
+              Clientes <span className="font-mono text-text-faint">{clients.length}</span>
+            </TabsTrigger>
+            <TabsTrigger value="tarefas" className="gap-2">
+              <ListTodo className="w-3.5 h-3.5" />
+              Tarefas <span className="font-mono text-text-faint">{pendingTasks.length}</span>
+            </TabsTrigger>
+          </TabsList>
+        </motion.div>
 
-      {/* CLIENTES TAB */}
-      {tab === 'clientes' && (
-        <>
-          <motion.div variants={fadeUp} className="space-y-2.5">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-faint)]" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar cliente..."
-                className="w-full pl-10 pr-4 py-2.5 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] placeholder:text-[var(--text-faint)] outline-none focus:ring-2 focus:ring-blue-500/20:ring-cyan-500/20 transition-all" />
-            </div>
-            <div className="flex gap-2">
-              {(['all', 'quente', 'morno', 'frio'] as const).map((t) => (
-                <button key={t} onClick={() => setTempFilter(t)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all ${
-                    tempFilter === t ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-[var(--bg-card)] border-[var(--border)] text-[var(--text-muted)]'
-                  }`}>
-                  {t === 'all' ? 'Todos' : <><span className={tempConfig[t].color}>{tempConfig[t].icon}</span> {tempConfig[t].label}</>}
-                </button>
-              ))}
+        <TabsContent value="clientes" className="space-y-5">
+          <motion.div variants={slideUp} className="space-y-3">
+            <Input
+              icon={<Search className="w-4 h-4" />}
+              placeholder="Buscar cliente…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
+              <Chip active={tempFilter === 'all'} onClick={() => setTempFilter('all')}>
+                Todos
+              </Chip>
+              {(['quente', 'morno', 'frio'] as const).map((t) => {
+                const c = TEMP_CONFIG[t];
+                return (
+                  <Chip
+                    key={t}
+                    active={tempFilter === t}
+                    onClick={() => setTempFilter(t)}
+                  >
+                    <span className={c.color}>{c.icon}</span>
+                    {c.label}
+                  </Chip>
+                );
+              })}
             </div>
           </motion.div>
 
+          {/* Temperature columns */}
           {filtered.length === 0 ? (
-            <div className="text-center py-16">
-              <Flame className="w-10 h-10 mx-auto text-[var(--text-faint)] mb-3" />
-              <p className="text-sm text-[var(--text-muted)]">{clients.length === 0 ? 'Sua carteira está vazia' : 'Nenhum cliente encontrado'}</p>
-              <Button variant="neon" size="sm" className="mt-4" onClick={() => setShowNewClient(true)}>
-                <Plus className="w-4 h-4" /> Adicionar Cliente
-              </Button>
-            </div>
+            <Surface variant="elevated" padding="xl">
+              <EmptyState
+                icon={<Flame className="w-6 h-6" />}
+                title={clients.length === 0 ? 'Sua carteira está vazia' : 'Nada encontrado'}
+                description="Adicione seus clientes para começar a organizar."
+                action={
+                  <Button variant="solar" onClick={() => setShowNewClient(true)}>
+                    <Plus className="w-4 h-4" />
+                    Adicionar cliente
+                  </Button>
+                }
+              />
+            </Surface>
           ) : (
-            <motion.div variants={stagger} className="space-y-2">
-              {filtered.map((client) => {
-                const cTasks = tasks.filter((t) => t.client_id === client.id && !t.completed);
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {(['quente', 'morno', 'frio'] as const).map((t) => {
+                const cfg = TEMP_CONFIG[t];
                 return (
-                  <motion.div key={client.id} variants={fadeUp}>
-                    <motion.div whileTap={{ scale: 0.98 }} onClick={() => setSelectedClient(client)}
-                      className="p-3.5 bg-[var(--bg-card)] backdrop-blur-[var(--sf-blur)] border border-[var(--border)] rounded-2xl active:bg-[var(--bg-hover)] transition-colors cursor-pointer">
+                  <div key={t}>
+                    <div className="flex items-center gap-2 mb-3 px-1">
+                      <span className={cfg.color}>{cfg.icon}</span>
+                      <h3 className={cn('text-sm font-medium', cfg.color)}>{cfg.label}</h3>
+                      <Badge variant="neutral" size="xs">
+                        {byTemp[t].length}
+                      </Badge>
+                    </div>
+                    <div className="space-y-2">
+                      {byTemp[t].length === 0 ? (
+                        <div className="text-center py-8 text-xs text-text-faint">
+                          —
+                        </div>
+                      ) : (
+                        byTemp[t].map((client) => {
+                          const cTasks = tasks.filter(
+                            (task) => task.client_id === client.id && !task.completed
+                          );
+                          return (
+                            <motion.div
+                              key={client.id}
+                              layout
+                              onClick={() => setSelectedClient(client)}
+                              className={cn(
+                                'p-3 bg-surface-0 border rounded-md cursor-pointer transition-colors',
+                                'border-border hover:border-border-glow hover:bg-surface-1'
+                              )}
+                            >
+                              <div className="flex items-start gap-2.5">
+                                <Avatar name={client.name} size="sm" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-text truncate">
+                                    {client.name}
+                                  </p>
+                                  <p className="text-[11px] text-text-faint truncate">
+                                    {client.interested_product || 'Sem produto'}
+                                  </p>
+                                  {cTasks.length > 0 && (
+                                    <span className="inline-flex items-center gap-1 mt-1 text-[10px] text-aurora-1">
+                                      <ListTodo className="w-2.5 h-2.5" /> {cTasks.length}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              {client.phone && (
+                                <div className="flex gap-1.5 mt-2 pt-2 border-t border-border">
+                                  <a
+                                    href={generateWhatsAppLink(
+                                      client.phone,
+                                      `Olá ${client.name.split(' ')[0]}!`
+                                    )}
+                                    target="_blank"
+                                    rel="noopener"
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="flex-1 flex items-center justify-center h-7 rounded-sm text-success hover:bg-success/10"
+                                  >
+                                    <MessageCircle className="w-3.5 h-3.5" />
+                                  </a>
+                                  <a
+                                    href={`tel:${client.phone}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="flex-1 flex items-center justify-center h-7 rounded-sm text-info hover:bg-info/10"
+                                  >
+                                    <Phone className="w-3.5 h-3.5" />
+                                  </a>
+                                </div>
+                              )}
+                            </motion.div>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="tarefas" className="space-y-3">
+          {pendingTasks.length === 0 && completedTasks.length === 0 ? (
+            <Surface variant="elevated" padding="xl">
+              <EmptyState
+                icon={<ListTodo className="w-6 h-6" />}
+                title="Nenhuma tarefa"
+                description="Crie tarefas pelos cards de clientes."
+              />
+            </Surface>
+          ) : (
+            <>
+              {pendingTasks.map((task) => {
+                const isOverdue = new Date(task.due_date) < new Date();
+                const cfg = TASK_TYPES.find((t) => t.key === task.type) || TASK_TYPES[3];
+                return (
+                  <motion.div
+                    key={task.id}
+                    layout
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                  >
+                    <Surface
+                      variant="flat"
+                      padding="sm"
+                      className={cn(
+                        isOverdue ? 'border-danger/30 bg-danger/5' : ''
+                      )}
+                    >
                       <div className="flex items-center gap-3">
-                        <Avatar name={client.name} size="md" />
+                        <span className="text-base">{cfg.icon}</span>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-semibold text-[var(--text)] truncate">{client.name}</h3>
-                            <span className={tempConfig[client.temperature].color}>{tempConfig[client.temperature].icon}</span>
-                          </div>
-                          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{client.interested_product || 'Sem produto definido'}</p>
-                          {cTasks.length > 0 && (
-                            <span className="inline-flex items-center gap-1 text-[10px] text-violet-600 font-medium mt-0.5">
-                              <ListTodo className="w-3 h-3" /> {cTasks.length} tarefa{cTasks.length > 1 ? 's' : ''}
+                          <p className="text-sm text-text">{task.description}</p>
+                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-text-faint">
+                            <span>{task.client_name}</span>
+                            <span className={isOverdue ? 'text-danger' : ''}>
+                              · {format(new Date(task.due_date), 'dd/MM HH:mm')}
+                              {isOverdue && ' · atrasada'}
                             </span>
-                          )}
+                          </div>
                         </div>
-                        <div className="flex flex-col gap-1">
-                          {client.phone && (
-                            <>
-                              <a href={generateWhatsAppLink(client.phone, `Olá ${client.name.split(' ')[0]}!`)} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}
-                                className="p-2 rounded-xl text-green-600 active:bg-green-500/10">
-                                <MessageCircle className="w-4 h-4" />
-                              </a>
-                              <a href={`tel:${client.phone}`} onClick={(e) => e.stopPropagation()}
-                                className="p-2 rounded-xl text-blue-600 active:bg-blue-500/10">
-                                <Phone className="w-4 h-4" />
-                              </a>
-                            </>
-                          )}
-                        </div>
+                        <motion.button
+                          whileTap={{ scale: 0.85 }}
+                          onClick={() => handleComplete(task.id)}
+                          className="w-8 h-8 rounded-md bg-success/10 border border-success/25 text-success flex items-center justify-center hover:bg-success/20"
+                        >
+                          <Check className="w-4 h-4" />
+                        </motion.button>
                       </div>
-                    </motion.div>
+                    </Surface>
                   </motion.div>
                 );
               })}
-            </motion.div>
-          )}
-        </>
-      )}
-
-      {/* TAREFAS TAB */}
-      {tab === 'tarefas' && (
-        <motion.div variants={stagger} className="space-y-2">
-          {pendingTasks.length === 0 ? (
-            <div className="text-center py-16">
-              <ListTodo className="w-10 h-10 mx-auto text-[var(--text-faint)] mb-3" />
-              <p className="text-sm text-[var(--text-muted)]">Nenhuma tarefa pendente</p>
-            </div>
-          ) : (
-            pendingTasks.map((task) => {
-              const isOverdue = new Date(task.due_date) < new Date();
-              const cfg = taskTypes.find((t) => t.key === task.type) || taskTypes[3];
-              return (
-                <motion.div key={task.id} variants={fadeUp}>
-                  <div className={`flex items-center gap-3 p-3.5 rounded-2xl border ${
-                    isOverdue ? 'bg-red-50 border-red-200' : 'bg-[var(--bg-card)] border-[var(--border)]'
-                  }`}>
-                    <span className="text-lg">{cfg.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-[var(--text)]">{task.description}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-[10px] text-[var(--text-muted)]">{task.client_name}</span>
-                        <span className={`text-[10px] font-medium ${isOverdue ? 'text-red-600' : 'text-[var(--text-muted)]'}`}>
-                          {format(new Date(task.due_date), 'dd/MM HH:mm')}{isOverdue && ' ⚠️'}
-                        </span>
-                      </div>
+              {completedTasks.length > 0 && (
+                <div className="pt-4">
+                  <p className="text-xs text-text-faint uppercase tracking-wider mb-2 font-medium">
+                    Concluídas
+                  </p>
+                  {completedTasks.slice(0, 5).map((task) => (
+                    <div
+                      key={task.id}
+                      className="flex items-center gap-3 p-2.5 opacity-50"
+                    >
+                      <span className="text-base">
+                        {(TASK_TYPES.find((t) => t.key === task.type) || TASK_TYPES[3]).icon}
+                      </span>
+                      <p className="text-xs text-text-soft line-through flex-1">
+                        {task.description}
+                      </p>
+                      <Check className="w-4 h-4 text-success" />
                     </div>
-                    <motion.button whileTap={{ scale: 0.85 }} onClick={() => handleComplete(task.id)}
-                      className="p-2 rounded-xl bg-emerald-100 text-emerald-600 border border-emerald-200">
-                      <Check className="w-4 h-4" />
-                    </motion.button>
-                  </div>
-                </motion.div>
-              );
-            })
-          )}
-          {completedTasks.length > 0 && (
-            <div className="pt-2">
-              <p className="text-xs text-[var(--text-faint)] font-medium mb-2">Concluídas</p>
-              {completedTasks.slice(0, 5).map((task) => (
-                <div key={task.id} className="flex items-center gap-3 p-3 rounded-2xl opacity-50">
-                  <span className="text-lg">{(taskTypes.find((t) => t.key === task.type) || taskTypes[3]).icon}</span>
-                  <p className="text-xs text-[var(--text-muted)] line-through flex-1">{task.description}</p>
-                  <Check className="w-4 h-4 text-emerald-500" />
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
-        </motion.div>
-      )}
-
-      {/* Client Detail Modal */}
-      <Modal open={!!selectedClient} onClose={() => setSelectedClient(null)} title={selectedClient?.name || ''} size="lg">
-        {selectedClient && (
-          <div className="space-y-5">
-            <div className="flex items-center gap-4">
-              <Avatar name={selectedClient.name} size="lg" />
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-[var(--text)]">{selectedClient.name}</h3>
-                <p className="text-sm text-[var(--text-muted)]">{selectedClient.phone}</p>
-                <p className="text-sm text-[var(--text-muted)]">{selectedClient.email}</p>
-              </div>
-              <div className={`flex items-center gap-1.5 ${tempConfig[selectedClient.temperature].color}`}>
-                {tempConfig[selectedClient.temperature].icon}
-                <span className="text-sm font-semibold">{tempConfig[selectedClient.temperature].label}</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {selectedClient.phone && (
-                <>
-                  <a href={`tel:${selectedClient.phone}`} className="block">
-                    <div className="flex flex-col items-center gap-1.5 p-3 bg-blue-50 border border-blue-200 rounded-2xl">
-                      <PhoneCall className="w-5 h-5 text-blue-600" />
-                      <span className="text-[11px] font-medium text-blue-700">Ligar</span>
-                    </div>
-                  </a>
-                  <a href={generateWhatsAppLink(selectedClient.phone, `Olá ${selectedClient.name.split(' ')[0]}!`)} target="_blank" rel="noopener" className="block">
-                    <div className="flex flex-col items-center gap-1.5 p-3 bg-green-50 border border-green-200 rounded-2xl">
-                      <MessageCircle className="w-5 h-5 text-green-600" />
-                      <span className="text-[11px] font-medium text-green-700">WhatsApp</span>
-                    </div>
-                  </a>
-                </>
               )}
-              <button onClick={() => setShowNewTask(true)} className="block w-full">
-                <div className="flex flex-col items-center gap-1.5 p-3 bg-violet-50 border border-violet-200 rounded-2xl">
-                  <CalendarPlus className="w-5 h-5 text-violet-600" />
-                  <span className="text-[11px] font-medium text-violet-700">Nova Tarefa</span>
-                </div>
-              </button>
-            </div>
-            {selectedClient.notes && (
-              <div className="p-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl">
-                <p className="text-xs text-[var(--text-secondary)]">{selectedClient.notes}</p>
-              </div>
-            )}
-            {clientTasks.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-[var(--text-secondary)] mb-2">Tarefas</p>
-                {clientTasks.map((task) => (
-                  <div key={task.id} className={`flex items-center gap-2 p-2.5 rounded-xl border mb-1.5 ${task.completed ? 'opacity-50' : ''} bg-[var(--bg-card)] border-[var(--border)]`}>
-                    <span>{(taskTypes.find((t) => t.key === task.type) || taskTypes[3]).icon}</span>
-                    <span className={`text-xs flex-1 ${task.completed ? 'line-through text-[var(--text-faint)]' : 'text-[var(--text)]'}`}>{task.description}</span>
-                    {!task.completed && (
-                      <button onClick={() => handleComplete(task.id)} className="p-1 rounded-lg bg-emerald-100 text-emerald-600">
-                        <Check className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-            <p className="text-[10px] text-[var(--text-faint)] text-center">🔒 Dados visíveis somente para você</p>
-          </div>
-        )}
-      </Modal>
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
 
-      {/* New Client Modal */}
-      <Modal open={showNewClient} onClose={() => setShowNewClient(false)} title="Novo Cliente" size="md">
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label className="text-xs text-[var(--text-muted)] font-medium">Nome *</label>
-              <input value={newName} onChange={(e) => setNewName(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Nome do cliente" />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-[var(--text-muted)] font-medium">Telefone</label>
-              <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="(11) 99999-0000" />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-[var(--text-muted)] font-medium">Email</label>
-              <input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="email@exemplo.com" />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs text-[var(--text-muted)] font-medium">Produto de interesse</label>
-              <input value={newProduct} onChange={(e) => setNewProduct(e.target.value)} className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Apt 1204 Bloco A" />
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-xs text-[var(--text-muted)] font-medium">Temperatura</label>
-            <div className="flex gap-2">
-              {(['quente', 'morno', 'frio'] as const).map((t) => (
-                <button key={t} onClick={() => setNewTemp(t)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl border text-sm font-medium transition-all ${
-                    newTemp === t ? 'bg-blue-50 border-blue-300' : 'bg-[var(--bg-card)] border-[var(--border)]'
-                  } text-[var(--text-secondary)]`}>
-                  <span className={tempConfig[t].color}>{tempConfig[t].icon}</span> {tempConfig[t].label}
-                </button>
-              ))}
-            </div>
-          </div>
-          {stands.length > 0 && (
-            <div className="space-y-1.5">
-              <label className="text-xs text-[var(--text-muted)] font-medium">Stand</label>
-              <select value={newStandId} onChange={(e) => setNewStandId(e.target.value)}
-                className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none">
-                <option value="">Selecionar stand...</option>
-                {stands.filter((s) => s.status === 'ativo').map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
+      {/* Client detail */}
+      <Dialog
+        open={!!selectedClient && !showNewTask}
+        onOpenChange={(v) => !v && setSelectedClient(null)}
+      >
+        <DialogContent size="lg">
+          {selectedClient && (
+            <div className="space-y-5">
+              <DialogHeader>
+                <DialogTitle className="flex items-start gap-3">
+                  <Avatar name={selectedClient.name} size="lg" ring="solar" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display italic text-2xl text-text">{selectedClient.name}</p>
+                    <div className="text-[11px] text-text-soft mt-0.5 space-x-2">
+                      {selectedClient.phone && <span>{selectedClient.phone}</span>}
+                      {selectedClient.email && <span>· {selectedClient.email}</span>}
+                    </div>
+                  </div>
+                  <div
+                    className={cn(
+                      'inline-flex items-center gap-1.5 px-3 h-8 rounded-full border font-medium text-xs',
+                      TEMP_CONFIG[selectedClient.temperature].color,
+                      TEMP_CONFIG[selectedClient.temperature].bg,
+                      TEMP_CONFIG[selectedClient.temperature].border
+                    )}
+                  >
+                    {TEMP_CONFIG[selectedClient.temperature].icon}
+                    {TEMP_CONFIG[selectedClient.temperature].label}
+                  </div>
+                </DialogTitle>
+              </DialogHeader>
+
+              <div className="grid grid-cols-3 gap-2">
+                {selectedClient.phone && (
+                  <>
+                    <a href={`tel:${selectedClient.phone}`}>
+                      <Button variant="outline" className="w-full flex-col h-auto py-3 border-info/30 text-info hover:bg-info/10">
+                        <Phone className="w-4 h-4 mb-0.5" />
+                        <span className="text-[11px]">Ligar</span>
+                      </Button>
+                    </a>
+                    <a
+                      href={generateWhatsAppLink(
+                        selectedClient.phone,
+                        `Olá ${selectedClient.name.split(' ')[0]}!`
+                      )}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <Button variant="outline" className="w-full flex-col h-auto py-3 border-success/30 text-success hover:bg-success/10">
+                        <MessageCircle className="w-4 h-4 mb-0.5" />
+                        <span className="text-[11px]">WhatsApp</span>
+                      </Button>
+                    </a>
+                  </>
+                )}
+                <Button
+                  variant="outline"
+                  className="w-full flex-col h-auto py-3 border-aurora-1/30 text-aurora-1 hover:bg-aurora-1/10"
+                  onClick={() => setShowNewTask(true)}
+                >
+                  <CalendarPlus className="w-4 h-4 mb-0.5" />
+                  <span className="text-[11px]">Tarefa</span>
+                </Button>
+              </div>
+
+              {selectedClient.notes && (
+                <Surface variant="flat" padding="md">
+                  <p className="text-xs text-text-faint uppercase tracking-wider mb-1.5">Notas</p>
+                  <p className="text-sm text-text-soft">{selectedClient.notes}</p>
+                </Surface>
+              )}
+
+              {clientTasks.length > 0 && (
+                <div>
+                  <p className="text-xs text-text-faint uppercase tracking-wider mb-2 font-medium">
+                    Tarefas
+                  </p>
+                  <div className="space-y-1.5">
+                    {clientTasks.map((task) => (
+                      <div
+                        key={task.id}
+                        className={cn(
+                          'flex items-center gap-2 p-2.5 rounded-md border bg-surface-1 border-border',
+                          task.completed && 'opacity-50'
+                        )}
+                      >
+                        <span>
+                          {(TASK_TYPES.find((t) => t.key === task.type) || TASK_TYPES[3]).icon}
+                        </span>
+                        <span
+                          className={cn(
+                            'text-xs flex-1',
+                            task.completed ? 'line-through text-text-faint' : 'text-text'
+                          )}
+                        >
+                          {task.description}
+                        </span>
+                        {!task.completed && (
+                          <button
+                            onClick={() => handleComplete(task.id)}
+                            className="w-6 h-6 rounded-sm bg-success/10 border border-success/25 text-success flex items-center justify-center hover:bg-success/15"
+                          >
+                            <Check className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <p className="text-[10px] text-text-ghost text-center flex items-center justify-center gap-1">
+                <Lock className="w-2.5 h-2.5" />
+                Visível apenas para você
+              </p>
             </div>
           )}
-          <div className="space-y-1.5">
-            <label className="text-xs text-[var(--text-muted)] font-medium">Notas</label>
-            <textarea rows={3} value={newNotes} onChange={(e) => setNewNotes(e.target.value)}
-              className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none resize-none" placeholder="Observações pessoais..." />
-          </div>
-          <div className="flex gap-2 pt-2">
-            <Button variant="secondary" className="flex-1" onClick={() => setShowNewClient(false)}>Cancelar</Button>
-            <Button variant="neon" className="flex-1" onClick={handleCreateClient}>Salvar</Button>
-          </div>
-        </div>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
-      {/* New Task Modal */}
-      <Modal open={showNewTask} onClose={() => setShowNewTask(false)} title={`Nova Tarefa${selectedClient ? ` — ${selectedClient.name}` : ''}`} size="sm">
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-2">
-            {taskTypes.map((t) => (
-              <button key={t.key} onClick={() => setTaskType(t.key)}
-                className={`flex items-center gap-2 p-3 rounded-2xl border text-xs font-medium transition-all ${
-                  taskType === t.key ? 'bg-blue-50 border-blue-300' : 'bg-[var(--bg-card)] border-[var(--border)]'
-                } text-[var(--text-secondary)]`}>
-                <span>{t.icon}</span> {t.label}
-              </button>
-            ))}
-          </div>
-          <input value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} placeholder="O que precisa fazer?"
-            className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" />
-          <input type="datetime-local" value={taskDue} onChange={(e) => setTaskDue(e.target.value)}
-            className="w-full px-4 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl text-sm text-[var(--text)] outline-none" />
-          <div className="flex gap-2 pt-2">
-            <Button variant="secondary" className="flex-1" onClick={() => setShowNewTask(false)}>Cancelar</Button>
-            <Button variant="neon" className="flex-1" onClick={handleCreateTask}>Criar Tarefa</Button>
-          </div>
-        </div>
-      </Modal>
+      {/* New client */}
+      <Dialog open={showNewClient} onOpenChange={setShowNewClient}>
+        <DialogContent size="md">
+          <DialogHeader>
+            <DialogTitle>Novo cliente</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Input
+                label="Nome"
+                placeholder="Nome completo"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+              <Input
+                label="Telefone"
+                placeholder="(11) 99999-0000"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
+              <Input
+                label="Email"
+                placeholder="email@exemplo.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+              <Input
+                label="Produto de interesse"
+                placeholder="Apt 1204 Bloco A"
+                value={form.product}
+                onChange={(e) => setForm({ ...form, product: e.target.value })}
+              />
+            </div>
 
-      {/* FAB */}
-      <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowNewClient(true)}
-        className="lg:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-violet-600 flex items-center justify-center shadow-lg border border-white/20">
-        <Plus className="w-6 h-6 text-white" />
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-text-soft tracking-wide">Temperatura</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['quente', 'morno', 'frio'] as const).map((t) => {
+                  const cfg = TEMP_CONFIG[t];
+                  const active = form.temp === t;
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => setForm({ ...form, temp: t })}
+                      className={cn(
+                        'flex items-center justify-center gap-2 h-11 rounded-md border text-sm font-medium transition-colors',
+                        active
+                          ? `${cfg.bg} ${cfg.border} ${cfg.color}`
+                          : 'bg-surface-1 border-border text-text-soft hover:border-border-glow'
+                      )}
+                    >
+                      {cfg.icon} {cfg.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {stands.length > 0 && (
+              <Select
+                label="Stand"
+                value={form.stand_id}
+                onChange={(v) => setForm({ ...form, stand_id: v })}
+                options={[
+                  { value: '', label: '—' },
+                  ...stands
+                    .filter((s) => s.status === 'ativo')
+                    .map((s) => ({ value: s.id, label: s.name })),
+                ]}
+              />
+            )}
+
+            <Textarea
+              label="Notas"
+              rows={3}
+              placeholder="Observações pessoais…"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+            />
+
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setShowNewClient(false)}>
+                Cancelar
+              </Button>
+              <Button variant="solar" className="flex-1" onClick={handleCreateClient}>
+                Salvar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New task */}
+      <Dialog open={showNewTask} onOpenChange={setShowNewTask}>
+        <DialogContent size="sm">
+          <DialogHeader>
+            <DialogTitle>
+              Nova tarefa{selectedClient ? ` · ${selectedClient.name}` : ''}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              {TASK_TYPES.map((t) => {
+                const active = taskForm.type === t.key;
+                return (
+                  <button
+                    key={t.key}
+                    onClick={() => setTaskForm({ ...taskForm, type: t.key })}
+                    className={cn(
+                      'flex items-center justify-center gap-2 h-10 rounded-md border text-xs font-medium transition-colors',
+                      active
+                        ? 'bg-solar/10 border-solar/30 text-solar'
+                        : 'bg-surface-1 border-border text-text-soft hover:border-border-glow'
+                    )}
+                  >
+                    <span>{t.icon}</span> {t.label}
+                  </button>
+                );
+              })}
+            </div>
+            <Input
+              placeholder="O que precisa fazer?"
+              value={taskForm.description}
+              onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })}
+            />
+            <Input
+              type="datetime-local"
+              value={taskForm.due_date}
+              onChange={(e) => setTaskForm({ ...taskForm, due_date: e.target.value })}
+            />
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setShowNewTask(false)}>
+                Cancelar
+              </Button>
+              <Button variant="solar" className="flex-1" onClick={handleCreateTask}>
+                Criar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Mobile FAB */}
+      <motion.button
+        whileTap={{ scale: 0.9 }}
+        onClick={() => setShowNewClient(true)}
+        className="lg:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow"
+        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+      >
+        <Plus className="w-6 h-6 text-canvas" />
       </motion.button>
     </motion.div>
   );
