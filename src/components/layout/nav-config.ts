@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   Calendar,
   BarChart3,
-  Sparkles,
+  BrainCircuit,
   Settings,
   type LucideIcon,
 } from 'lucide-react';
@@ -41,7 +41,7 @@ export const NAV_ITEMS: NavItem[] = [
 
   { href: '/dashboard/calendar', label: 'Calendário', shortLabel: 'Cal', icon: Calendar, shortcut: 'G Y', group: 'other' },
   { href: '/dashboard/reports', label: 'Relatórios', shortLabel: 'Report', icon: BarChart3, shortcut: 'G O', group: 'other' },
-  { href: '/dashboard/ai', label: 'Nexus AI', shortLabel: 'AI', icon: Sparkles, shortcut: 'G I', group: 'other' },
+  { href: '/dashboard/ai', label: 'GDS AI', shortLabel: 'AI', icon: BrainCircuit, shortcut: 'G I', group: 'other' },
   { href: '/dashboard/settings', label: 'Configurações', shortLabel: 'Config', icon: Settings, shortcut: 'G ,', group: 'other' },
 ];
 
