@@ -104,7 +104,7 @@ export default function LoginPage() {
           className="flex items-center gap-2.5"
         >
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
-            <Sparkles className="w-5 h-5 text-canvas" />
+            <span className="text-xs font-bold tracking-wider text-canvas">GDS</span>
           </div>
           <span className="text-lg font-medium tracking-tight">StandForge</span>
           <span className="ml-3 px-2 py-0.5 text-[10px] font-mono text-solar border border-solar/30 bg-solar/5 rounded-full tracking-widest uppercase">
@@ -168,7 +168,7 @@ export default function LoginPage() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2.5 justify-center mb-10">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
-              <Sparkles className="w-5 h-5 text-canvas" />
+              <span className="text-xs font-bold tracking-wider text-canvas">GDS</span>
             </div>
             <span className="text-lg font-medium">StandForge</span>
           </div>

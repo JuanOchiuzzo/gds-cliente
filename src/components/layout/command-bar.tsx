@@ -36,7 +36,7 @@ export function CommandBar() {
         {/* Mobile logo */}
         <Link href="/dashboard" className="lg:hidden flex items-center gap-2 flex-shrink-0">
           <div className="w-8 h-8 rounded-md bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
-            <Sparkles className="w-4 h-4 text-canvas" />
+            <span className="text-[10px] font-bold tracking-wider text-canvas">GDS</span>
           </div>
         </Link>
 

@@ -114,11 +114,11 @@ export default function AIPage() {
         <div className="relative">
           <div className="absolute inset-0 rounded-md bg-solar blur-lg opacity-60 animate-pulse-solar" />
           <div className="relative w-10 h-10 rounded-md bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
-            <Sparkles className="w-5 h-5 text-canvas" />
+            <span className="text-[11px] font-bold tracking-wider text-canvas">GDS</span>
           </div>
         </div>
         <div>
-          <h1 className="font-display italic text-2xl tracking-tight text-text">Nexus AI</h1>
+          <h1 className="font-display italic text-2xl tracking-tight text-text">GDS AI</h1>
           <p className="text-[11px] text-text-faint">
             Assistente contextual baseado nos seus dados
           </p>

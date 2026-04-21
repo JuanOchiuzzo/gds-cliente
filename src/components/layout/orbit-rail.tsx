@@ -36,7 +36,7 @@ export function OrbitRail() {
           transition={spring}
           className="w-9 h-9 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow"
         >
-          <Sparkles className="w-4 h-4 text-canvas" />
+          <span className="text-[11px] font-bold tracking-wider text-canvas">GDS</span>
         </motion.div>
       </Link>
 
