@@ -11,10 +11,10 @@ import {
   ShieldCheck,
   Calendar,
   BarChart3,
-  BrainCircuit,
   Settings,
   type LucideIcon,
 } from 'lucide-react';
+import { AiIcon } from './icons/ai-icon';
 
 export interface NavItem {
   href: string;
@@ -41,7 +41,7 @@ export const NAV_ITEMS: NavItem[] = [
 
   { href: '/dashboard/calendar', label: 'Calendário', shortLabel: 'Cal', icon: Calendar, shortcut: 'G Y', group: 'other' },
   { href: '/dashboard/reports', label: 'Relatórios', shortLabel: 'Report', icon: BarChart3, shortcut: 'G O', group: 'other' },
-  { href: '/dashboard/ai', label: 'GDS AI', shortLabel: 'AI', icon: BrainCircuit, shortcut: 'G I', group: 'other' },
+  { href: '/dashboard/ai', label: 'GDS AI', shortLabel: 'AI', icon: AiIcon as unknown as LucideIcon, shortcut: 'G I', group: 'other' },
   { href: '/dashboard/settings', label: 'Configurações', shortLabel: 'Config', icon: Settings, shortcut: 'G ,', group: 'other' },
 ];
 
