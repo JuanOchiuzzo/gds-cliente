@@ -1,0 +1,1 @@
+find /home/ochiuzzo/Documentos/GDS/src -name "*.tsx" | grep -i "saldo\|financeiro\|conta"
