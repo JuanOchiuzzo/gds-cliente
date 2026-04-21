@@ -49,7 +49,7 @@ export const MOBILE_PRIMARY = [
   NAV_ITEMS.find((i) => i.href === '/dashboard')!,
   NAV_ITEMS.find((i) => i.href === '/dashboard/wallet')!,
   NAV_ITEMS.find((i) => i.href === '/dashboard/ai')!,
-  NAV_ITEMS.find((i) => i.href === '/dashboard/pipeline')!,
+  NAV_ITEMS.find((i) => i.href === '/dashboard/appointments')!,
   NAV_ITEMS.find((i) => i.href === '/dashboard/plantao')!,
 ];
 
