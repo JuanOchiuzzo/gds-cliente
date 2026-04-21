@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
 import { pickRelation } from '@/lib/utils';
 
@@ -47,18 +47,21 @@ export function useLeads() {
     setLoading(false);
   }, [supabase]);
 
+  const fetchRef = useRef(fetch);
+  useEffect(() => { fetchRef.current = fetch; }, [fetch]);
+
   useEffect(() => { fetch(); }, [fetch]);
 
   // Realtime subscription
   useEffect(() => {
     const channel = supabase
-      .channel('leads-changes')
+      .channel(`leads-changes-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => {
-        fetch();
+        fetchRef.current();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [supabase, fetch]);
+  }, [supabase]);
 
   const create = async (lead: Partial<LeadRow>) => {
     const { data, error } = await supabase.from('leads').insert(lead).select().single();

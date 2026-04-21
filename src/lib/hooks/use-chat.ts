@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth-context';
 import { pickRelation } from '@/lib/utils';
@@ -39,23 +39,26 @@ export function useChat(channel: string) {
     setLoading(false);
   }, [supabase, channel]);
 
+  const fetchRef = useRef(fetch);
+  useEffect(() => { fetchRef.current = fetch; }, [fetch]);
+
   useEffect(() => { fetch(); }, [fetch]);
 
   // Realtime
   useEffect(() => {
     const ch = supabase
-      .channel(`chat-${channel}`)
+      .channel(`chat-${channel}-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'chat_messages',
         filter: `channel=eq.${channel}`,
       }, () => {
-        fetch();
+        fetchRef.current();
       })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [supabase, channel, fetch]);
+  }, [supabase, channel]);
 
   const send = async (content: string) => {
     if (!user) return;

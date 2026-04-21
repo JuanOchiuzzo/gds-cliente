@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
 import { pickRelation } from '@/lib/utils';
 
@@ -37,18 +37,21 @@ export function useActivities(limit = 10) {
     setLoading(false);
   }, [supabase, limit]);
 
+  const fetchRef = useRef(fetch);
+  useEffect(() => { fetchRef.current = fetch; }, [fetch]);
+
   useEffect(() => { fetch(); }, [fetch]);
 
   // Realtime
   useEffect(() => {
     const channel = supabase
-      .channel('activities-changes')
+      .channel(`activities-changes-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activities' }, () => {
-        fetch();
+        fetchRef.current();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [supabase, fetch]);
+  }, [supabase]);
 
   const create = async (activity: Partial<ActivityRow>) => {
     const { error } = await supabase.from('activities').insert(activity);

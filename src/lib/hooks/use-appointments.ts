@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth-context';
 import { pickRelation } from '@/lib/utils';
@@ -52,18 +52,21 @@ export function useAppointments() {
     setLoading(false);
   }, [supabase, user]);
 
+  const fetchRef = useRef(fetch);
+  useEffect(() => { fetchRef.current = fetch; }, [fetch]);
+
   useEffect(() => { if (user) fetch(); }, [user, fetch]);
 
   // Realtime
   useEffect(() => {
     const channel = supabase
-      .channel('appointments-changes')
+      .channel(`appointments-changes-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
-        fetch();
+        fetchRef.current();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [supabase, fetch]);
+  }, [supabase]);
 
   const create = async (apt: Partial<AppointmentRow>) => {
     if (!user) return { data: null, error: 'Not authenticated' };

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth-context';
 import { pickRelation } from '@/lib/utils';
@@ -49,18 +49,21 @@ export function useQueue(standId?: string) {
     setLoading(false);
   }, [supabase, standId, today]);
 
+  const fetchRef = useRef(fetch);
+  useEffect(() => { fetchRef.current = fetch; }, [fetch]);
+
   useEffect(() => { fetch(); }, [fetch]);
 
   // Realtime
   useEffect(() => {
     const channel = supabase
-      .channel('queue-changes')
+      .channel(`queue-changes-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'queue' }, () => {
-        fetch();
+        fetchRef.current();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [supabase, fetch]);
+  }, [supabase]);
 
   const myPosition = queue.find((q) => q.agent_id === user?.id);
 
