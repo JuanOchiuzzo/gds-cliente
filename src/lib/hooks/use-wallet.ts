@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth-context';
+import { pickRelation } from '@/lib/utils';
 
 export interface WalletClientRow {
   id: string;
@@ -52,7 +53,7 @@ export function useWallet() {
 
     const mapped = (data || []).map((d: Record<string, unknown>) => ({
       ...d,
-      stand_name: (d.stands as Record<string, string> | null)?.name || null,
+      stand_name: pickRelation<string>(d.stands, 'name'),
     })) as WalletClientRow[];
 
     setClients(mapped);
@@ -68,7 +69,7 @@ export function useWallet() {
 
     const mapped = (data || []).map((d: Record<string, unknown>) => ({
       ...d,
-      client_name: (d.wallet_clients as Record<string, string> | null)?.name || null,
+      client_name: pickRelation<string>(d.wallet_clients, 'name'),
     })) as ClientTaskRow[];
 
     setTasks(mapped);

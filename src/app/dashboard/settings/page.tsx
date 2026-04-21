@@ -86,8 +86,10 @@ export default function SettingsPage() {
 
   const handleChangePassword = async () => {
     if (!profile?.email) return;
+    const origin =
+      typeof window !== 'undefined' ? window.location.origin : '';
     const { error } = await supabase.auth.resetPasswordForEmail(profile.email, {
-      redirectTo: `${window.location.origin}/dashboard/settings`,
+      redirectTo: `${origin}/dashboard/settings`,
     });
     if (error) toast.error(error.message);
     else toast.success('Email enviado');

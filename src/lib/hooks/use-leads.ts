@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
+import { pickRelation } from '@/lib/utils';
 
 export interface LeadRow {
   id: string;
@@ -38,8 +39,8 @@ export function useLeads() {
 
     const mapped = (data || []).map((d: Record<string, unknown>) => ({
       ...d,
-      stand_name: (d.stands as Record<string, string> | null)?.name || null,
-      agent_name: (d.profiles as Record<string, string> | null)?.full_name || null,
+      stand_name: pickRelation<string>(d.stands, 'name'),
+      agent_name: pickRelation<string>(d.profiles, 'full_name'),
     })) as LeadRow[];
 
     setLeads(mapped);

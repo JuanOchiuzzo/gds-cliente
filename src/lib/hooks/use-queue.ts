@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth-context';
+import { pickRelation } from '@/lib/utils';
 
 export interface QueueRow {
   id: string;
@@ -40,8 +41,8 @@ export function useQueue(standId?: string) {
 
     const mapped = (data || []).map((d: Record<string, unknown>) => ({
       ...d,
-      agent_name: (d.profiles as Record<string, string> | null)?.full_name || null,
-      stand_name: (d.stands as Record<string, string> | null)?.name || null,
+      agent_name: pickRelation<string>(d.profiles, 'full_name'),
+      stand_name: pickRelation<string>(d.stands, 'name'),
     })) as QueueRow[];
 
     setQueue(mapped);

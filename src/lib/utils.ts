@@ -137,6 +137,27 @@ export function getVisitResultLabel(result: string): string {
   return labels[result] || result;
 }
 
+/**
+ * Extracts a field from a Supabase joined relation. Supabase may return the
+ * joined record as an object (many-to-one) or as an array (one-to-many or
+ * when FK is ambiguous). This helper handles both safely.
+ */
+export function pickRelation<T = unknown>(
+  relation: unknown,
+  field: string
+): T | null {
+  if (!relation) return null;
+  if (Array.isArray(relation)) {
+    const first = relation[0];
+    if (!first || typeof first !== 'object') return null;
+    const value = (first as Record<string, unknown>)[field];
+    return (value as T) ?? null;
+  }
+  if (typeof relation !== 'object') return null;
+  const value = (relation as Record<string, unknown>)[field];
+  return (value as T) ?? null;
+}
+
 export function getAppointmentStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     pendente: 'Pendente', confirmado: 'Confirmado', realizado: 'Realizado',

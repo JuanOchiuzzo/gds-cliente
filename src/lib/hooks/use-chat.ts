@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth-context';
+import { pickRelation } from '@/lib/utils';
 
 export interface ChatMessageRow {
   id: string;
@@ -31,7 +32,7 @@ export function useChat(channel: string) {
 
     const mapped = (data || []).map((d: Record<string, unknown>) => ({
       ...d,
-      sender_name: (d.profiles as Record<string, string> | null)?.full_name || 'Anônimo',
+      sender_name: pickRelation<string>(d.profiles, 'full_name') || 'Anônimo',
     })) as ChatMessageRow[];
 
     setMessages(mapped);

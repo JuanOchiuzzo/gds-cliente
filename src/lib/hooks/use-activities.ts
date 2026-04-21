@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
+import { pickRelation } from '@/lib/utils';
 
 export interface ActivityRow {
   id: string;
@@ -29,7 +30,7 @@ export function useActivities(limit = 10) {
 
     const mapped = (data || []).map((d: Record<string, unknown>) => ({
       ...d,
-      agent_name: (d.profiles as Record<string, string> | null)?.full_name || null,
+      agent_name: pickRelation<string>(d.profiles, 'full_name'),
     })) as ActivityRow[];
 
     setActivities(mapped);

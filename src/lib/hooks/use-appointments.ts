@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { getSupabase } from '@/lib/supabase/client';
 import { useAuth } from '@/lib/auth-context';
+import { pickRelation } from '@/lib/utils';
 
 export interface AppointmentRow {
   id: string;
@@ -43,8 +44,8 @@ export function useAppointments() {
 
     const mapped = (data || []).map((d: Record<string, unknown>) => ({
       ...d,
-      stand_name: (d.stands as Record<string, string> | null)?.name || null,
-      stand_address: (d.stands as Record<string, string> | null)?.address || null,
+      stand_name: pickRelation<string>(d.stands, 'name'),
+      stand_address: pickRelation<string>(d.stands, 'address'),
     })) as AppointmentRow[];
 
     setAppointments(mapped);
