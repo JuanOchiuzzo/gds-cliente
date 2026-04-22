@@ -115,6 +115,43 @@ export function timeAgo(dateStr: string): string {
   return date.toLocaleDateString('pt-BR');
 }
 
+// ── Validation / normalization helpers ───────────────────────
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+export function isValidEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  const trimmed = email.trim();
+  if (!trimmed) return false;
+  return EMAIL_RE.test(trimmed);
+}
+
+/** Remove tudo que não for dígito. Retorna string. */
+export function onlyDigits(input: string | null | undefined): string {
+  return `${input || ''}`.replace(/\D/g, '');
+}
+
+/**
+ * Valida telefone brasileiro (DDD + número, 10 ou 11 dígitos).
+ * Aceita input com máscara (parênteses, espaços, hífen).
+ */
+export function isValidBRPhone(phone: string | null | undefined): boolean {
+  const d = onlyDigits(phone);
+  if (d.length !== 10 && d.length !== 11) return false;
+  // DDDs válidos no Brasil: 11-99 (primeiro dígito nunca 0)
+  const ddd = parseInt(d.slice(0, 2), 10);
+  if (ddd < 11 || ddd > 99) return false;
+  return true;
+}
+
+/** Formata telefone BR: (11) 91234-5678 ou (11) 1234-5678. */
+export function formatBRPhone(phone: string | null | undefined): string {
+  const d = onlyDigits(phone);
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return phone || '';
+}
+
 
 export function getTemperatureLabel(temp: string): string {
   const labels: Record<string, string> = { quente: '🔥 Quente', morno: '🌤️ Morno', frio: '❄️ Frio' };

@@ -35,7 +35,7 @@ const QUICK_ACTIONS = [
 export function CommandPalette({ open, onOpenChange }: Props) {
   const router = useRouter();
   const [value, setValue] = useState('');
-  const { leads } = useLeads();
+  const { leads } = useLeads({ fetchAll: true });
   const { clients } = useWallet();
 
   useEffect(() => {

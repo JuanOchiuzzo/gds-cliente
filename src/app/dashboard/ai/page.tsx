@@ -27,7 +27,7 @@ export default function AIPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const { clients, tasks } = useWallet();
-  const { leads } = useLeads();
+  const { leads } = useLeads({ fetchAll: true });
   const { appointments } = useAppointments();
 
   useEffect(() => {

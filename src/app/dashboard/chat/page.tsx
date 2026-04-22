@@ -19,7 +19,7 @@ const CHANNELS = [
 export default function ChatPage() {
   const [activeChannel, setActiveChannel] = useState('geral');
   const [input, setInput] = useState('');
-  const { messages, loading, send } = useChat(activeChannel);
+  const { messages, loading, loadingOlder, hasMore, loadOlder, send } = useChat(activeChannel);
   const { user } = useAuth();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -110,7 +110,19 @@ export default function ChatPage() {
                 <p className="text-sm">Nenhuma mensagem. Seja o primeiro!</p>
               </div>
             ) : (
-              <AnimatePresence initial={false}>
+              <>
+                {hasMore && (
+                  <div className="flex justify-center pb-2">
+                    <button
+                      onClick={loadOlder}
+                      disabled={loadingOlder}
+                      className="text-[11px] text-text-faint hover:text-text px-3 py-1 rounded-full border border-border hover:border-border-strong transition-colors"
+                    >
+                      {loadingOlder ? 'Carregando…' : 'Carregar mensagens antigas'}
+                    </button>
+                  </div>
+                )}
+                <AnimatePresence initial={false}>
                 {messages.map((msg) => {
                   const isMe = msg.sender_id === user?.id;
                   return (
@@ -142,6 +154,7 @@ export default function ChatPage() {
                   );
                 })}
               </AnimatePresence>
+              </>
             )}
           </div>
 

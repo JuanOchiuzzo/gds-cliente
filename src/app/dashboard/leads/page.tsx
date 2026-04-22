@@ -39,6 +39,9 @@ import {
   generateWhatsAppLink,
   getFirstName,
   timeAgo,
+  isValidEmail,
+  isValidBRPhone,
+  onlyDigits,
   cn,
 } from '@/lib/utils';
 import { staggerParent, slideUp } from '@/lib/motion';
@@ -65,7 +68,7 @@ const STAGE_ORDER = [
 const SOURCE_OPTIONS = ['whatsapp', 'site', 'evento', 'stand', 'indicacao', 'instagram', 'telefone'];
 
 export default function LeadsPage() {
-  const { leads, loading, create, update, remove } = useLeads();
+  const { leads, loading, loadingMore, hasMore, total, loadMore, create, update, remove } = useLeads();
   const { stands } = useStands();
   const { user } = useAuth();
   const [search, setSearch] = useState('');
@@ -99,14 +102,22 @@ export default function LeadsPage() {
   );
 
   const handleCreate = async () => {
-    if (!form.name) {
+    if (!form.name.trim()) {
       toast.error('Nome é obrigatório');
       return;
     }
+    if (form.email && !isValidEmail(form.email)) {
+      toast.error('Email inválido');
+      return;
+    }
+    if (form.phone && !isValidBRPhone(form.phone)) {
+      toast.error('Telefone inválido (use DDD + número)');
+      return;
+    }
     await create({
-      name: form.name,
-      phone: form.phone || null,
-      email: form.email || null,
+      name: form.name.trim(),
+      phone: form.phone ? onlyDigits(form.phone) : null,
+      email: form.email ? form.email.trim().toLowerCase() : null,
       source: form.source as LeadRow['source'],
       stand_id: form.stand_id || null,
       agent_id: user?.id || null,
@@ -132,11 +143,19 @@ export default function LeadsPage() {
   };
 
   const handleEdit = async () => {
-    if (!selected || !form.name) return;
+    if (!selected || !form.name.trim()) return;
+    if (form.email && !isValidEmail(form.email)) {
+      toast.error('Email inválido');
+      return;
+    }
+    if (form.phone && !isValidBRPhone(form.phone)) {
+      toast.error('Telefone inválido (use DDD + número)');
+      return;
+    }
     await update(selected.id, {
-      name: form.name,
-      phone: form.phone || null,
-      email: form.email || null,
+      name: form.name.trim(),
+      phone: form.phone ? onlyDigits(form.phone) : null,
+      email: form.email ? form.email.trim().toLowerCase() : null,
       source: form.source,
       estimated_value: Number(form.value) || 0,
       notes: form.notes || null,
@@ -188,7 +207,7 @@ export default function LeadsPage() {
         <div>
           <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Leads</h1>
           <p className="mt-1 text-sm text-text-soft">
-            {filtered.length} de {leads.length} total
+            {filtered.length} de {total || leads.length} total
           </p>
         </div>
         <Button variant="solar" size="md" onClick={() => setShowNew(true)}>
@@ -305,6 +324,17 @@ export default function LeadsPage() {
               </div>
             </motion.div>
           ))}
+          {hasMore && stageFilter === 'all' && !search && (
+            <div className="pt-3 flex justify-center">
+              <Button
+                variant="outline"
+                onClick={loadMore}
+                disabled={loadingMore}
+              >
+                {loadingMore ? 'Carregando…' : `Carregar mais (${total - leads.length} restantes)`}
+              </Button>
+            </div>
+          )}
         </motion.div>
       )}
 

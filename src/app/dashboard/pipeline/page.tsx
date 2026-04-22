@@ -63,7 +63,7 @@ const STAGES: StageMeta[] = [
 ];
 
 export default function PipelinePage() {
-  const { leads, loading, update } = useLeads();
+  const { leads, loading, update } = useLeads({ fetchAll: true });
   const [selectedLead, setSelectedLead] = useState<LeadRow | null>(null);
   const [draggedLead, setDraggedLead] = useState<string | null>(null);
   const [overStage, setOverStage] = useState<Stage | null>(null);
