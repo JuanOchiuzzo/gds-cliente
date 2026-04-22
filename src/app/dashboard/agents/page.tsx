@@ -85,14 +85,8 @@ export default function AgentsPage() {
   }
 
   const top3 = sorted.slice(0, 3);
-  // Ordem do pódio: 2º à esquerda, 1º no centro (mais alto), 3º à direita
+  // Ordem do pódio: 2º à esquerda, 1º no centro, 3º à direita
   const podiumOrder: (AgentRow | undefined)[] = [top3[1], top3[0], top3[2]];
-  const podiumHeights = ['h-28 sm:h-32', 'h-36 sm:h-44', 'h-24 sm:h-28'];
-  const podiumBg = [
-    'bg-gradient-to-b from-aurora-1/15 to-transparent border-aurora-1/30',
-    'bg-gradient-to-b from-solar/20 to-transparent border-solar/50 shadow-[0_0_40px_-10px_rgba(245,158,11,0.35)]',
-    'bg-gradient-to-b from-aurora-2/15 to-transparent border-aurora-2/30',
-  ];
   const medals = [
     { icon: <Medal className="w-4 h-4" />, label: '2º', color: 'text-aurora-1' },
     { icon: <Crown className="w-5 h-5" />, label: '1º', color: 'text-solar' },
@@ -172,122 +166,164 @@ export default function AgentsPage() {
       {top3.length >= 3 && (
         <motion.div variants={slideUp}>
           <Surface variant="elevated" padding="lg" className="relative overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none opacity-60">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[70%] h-40 rounded-full bg-solar/10 blur-[80px]" />
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-[60%] h-48 rounded-full bg-solar/10 blur-[80px]" />
+              <div className="absolute -bottom-20 left-0 w-1/2 h-48 rounded-full bg-aurora-1/5 blur-[80px]" />
+              <div className="absolute -bottom-20 right-0 w-1/2 h-48 rounded-full bg-aurora-2/5 blur-[80px]" />
             </div>
 
-            <div className="relative flex items-center gap-2 mb-2">
-              <Trophy className="w-4 h-4 text-solar" />
-              <h3 className="text-sm font-medium text-text">Pódio do mês</h3>
+            <div className="relative flex items-center justify-between gap-2 mb-6 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-solar" />
+                <h3 className="text-sm font-medium text-text">Pódio do mês</h3>
+              </div>
+              <p className="text-[11px] text-text-faint">
+                ordenado por{' '}
+                <span className="text-text">
+                  {SORTS.find((s) => s.key === sortKey)?.label.toLowerCase()}
+                </span>
+              </p>
             </div>
-            <p className="relative text-[11px] text-text-faint mb-6">
-              Os três maiores destaques em{' '}
-              {SORTS.find((s) => s.key === sortKey)?.label.toLowerCase()}.
-            </p>
 
-            {/* Cabeças */}
-            <div className="relative grid grid-cols-3 gap-3 sm:gap-6 items-end">
-              {podiumOrder.map((agent, idx) =>
-                agent ? (
-                  <div
+            <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch">
+              {podiumOrder.map((agent, idx) => {
+                if (!agent) return <div key={`empty-${idx}`} className="hidden sm:block" />;
+                const isFirst = idx === 1;
+                const cardTone = [
+                  'bg-gradient-to-br from-aurora-1/10 via-surface-1 to-surface-1 border-aurora-1/30',
+                  'bg-gradient-to-br from-solar/15 via-surface-1 to-surface-1 border-solar/50 shadow-[0_0_60px_-20px_rgba(245,158,11,0.5)]',
+                  'bg-gradient-to-br from-aurora-2/10 via-surface-1 to-surface-1 border-aurora-2/30',
+                ][idx];
+
+                return (
+                  <motion.div
                     key={agent.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                     className={cn(
-                      'flex flex-col items-center',
-                      idx === 1 ? '-translate-y-2' : ''
+                      'relative rounded-2xl border p-5 flex flex-col items-center text-center overflow-hidden',
+                      cardTone,
+                      isFirst && 'sm:-translate-y-3'
                     )}
                   >
-                    <motion.div
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: idx * 0.12, type: 'spring', stiffness: 200, damping: 18 }}
-                      className="relative flex flex-col items-center"
-                    >
-                      {idx === 1 && (
-                        <Crown className="absolute -top-7 w-6 h-6 text-solar drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                    {/* Medal badge (top-right) */}
+                    <div
+                      className={cn(
+                        'absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider',
+                        medals[idx].color,
+                        'bg-canvas/80 backdrop-blur-sm border border-border'
                       )}
-                      <div className="relative inline-flex items-center justify-center">
-                        <Ring
-                          value={Math.min(100, agent.conversion_rate || 0)}
-                          size={idx === 1 ? 96 : 76}
-                          strokeWidth={idx === 1 ? 4 : 3}
-                          variant={ringVariant[idx]}
-                          showLabel={false}
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <Avatar
-                            name={getDisplayName(agent.name, 'Agente')}
-                            src={agent.avatar_url}
-                            size={idx === 1 ? 'lg' : 'md'}
-                            ring={idx === 1 ? 'solar' : 'subtle'}
-                          />
-                        </div>
-                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-canvas border border-border text-[9px] font-mono text-text-soft">
-                          {formatPercent(agent.conversion_rate)}
-                        </div>
-                      </div>
-                      <div
-                        className={cn(
-                          'mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-widest',
-                          medals[idx].color,
-                          'bg-surface-1 border border-border'
-                        )}
+                    >
+                      {medals[idx].icon}
+                      <span>{medals[idx].label}</span>
+                    </div>
+
+                    {/* Crown on first */}
+                    {isFirst && (
+                      <motion.div
+                        initial={{ y: -8, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4, duration: 0.5 }}
+                        className="absolute top-3 left-3"
                       >
-                        {medals[idx].icon} {medals[idx].label}
+                        <Crown className="w-5 h-5 text-solar drop-shadow-[0_0_8px_rgba(245,158,11,0.7)]" />
+                      </motion.div>
+                    )}
+
+                    {/* Avatar + ring */}
+                    <div className="relative inline-flex items-center justify-center mt-4">
+                      <Ring
+                        value={Math.min(100, agent.conversion_rate || 0)}
+                        size={isFirst ? 104 : 84}
+                        strokeWidth={isFirst ? 5 : 4}
+                        variant={ringVariant[idx]}
+                        showLabel={false}
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Avatar
+                          name={getDisplayName(agent.name, 'Agente')}
+                          src={agent.avatar_url}
+                          size={isFirst ? 'lg' : 'md'}
+                          ring={isFirst ? 'solar' : 'subtle'}
+                        />
                       </div>
-                      <p className="mt-2 text-sm font-medium text-text text-center truncate max-w-[9rem]">
+                    </div>
+
+                    {/* Name + stand */}
+                    <div className="mt-5 w-full">
+                      <p
+                        className={cn(
+                          'font-medium text-text truncate',
+                          isFirst ? 'text-base' : 'text-sm'
+                        )}
+                        title={getDisplayName(agent.name, 'Agente')}
+                      >
                         {shortName(agent.name)}
                       </p>
-                      {agent.stand_name && (
-                        <p className="text-[10px] text-text-faint text-center truncate max-w-[9rem]">
+                      {agent.stand_name ? (
+                        <p className="text-[11px] text-text-faint truncate mt-0.5">
                           {agent.stand_name.replace(/^Stand\s+/i, '')}
                         </p>
-                      )}
-                    </motion.div>
-                  </div>
-                ) : (
-                  <div key={`empty-${idx}`} />
-                )
-              )}
-            </div>
-
-            {/* Bases */}
-            <div className="relative mt-3 grid grid-cols-3 gap-3 sm:gap-6 items-end">
-              {podiumOrder.map((agent, idx) =>
-                agent ? (
-                  <motion.div
-                    key={`base-${agent.id}`}
-                    initial={{ scaleY: 0, opacity: 0 }}
-                    animate={{ scaleY: 1, opacity: 1 }}
-                    transition={{ delay: 0.25 + idx * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    style={{ transformOrigin: 'bottom' }}
-                    className={cn(
-                      'relative border rounded-t-lg flex flex-col items-center justify-end pb-3',
-                      podiumBg[idx],
-                      podiumHeights[idx]
-                    )}
-                  >
-                    <p className="text-[10px] uppercase tracking-widest text-text-faint">
-                      {SORTS.find((s) => s.key === sortKey)?.label}
-                    </p>
-                    <p
-                      className={cn(
-                        'text-2xl sm:text-3xl font-medium mt-0.5',
-                        idx === 1 ? 'text-solar-gradient' : 'text-text'
-                      )}
-                    >
-                      {sortKey === 'revenue' ? (
-                        <CurrencyFlow value={agent[sortKey] as number} />
-                      ) : sortKey === 'conversion_rate' ? (
-                        <NumberFlow value={agent[sortKey] as number} suffix="%" format={{ maximumFractionDigits: 1 }} />
                       ) : (
-                        <NumberFlow value={agent[sortKey] as number} />
+                        <p className="text-[11px] text-text-faint/60 mt-0.5">—</p>
                       )}
-                    </p>
+                    </div>
+
+                    {/* Divider */}
+                    <div className="w-10 h-px bg-border my-4" />
+
+                    {/* Primary metric */}
+                    <div className="w-full">
+                      <p className="text-[10px] uppercase tracking-widest text-text-faint">
+                        {SORTS.find((s) => s.key === sortKey)?.label}
+                      </p>
+                      <p
+                        className={cn(
+                          'font-display italic font-medium leading-none mt-1.5',
+                          isFirst ? 'text-3xl sm:text-4xl text-solar-gradient' : 'text-2xl sm:text-3xl text-text'
+                        )}
+                      >
+                        {sortKey === 'revenue' ? (
+                          <CurrencyFlow value={agent[sortKey] as number} />
+                        ) : sortKey === 'conversion_rate' ? (
+                          <NumberFlow
+                            value={agent[sortKey] as number}
+                            suffix="%"
+                            format={{ maximumFractionDigits: 1 }}
+                          />
+                        ) : (
+                          <NumberFlow value={agent[sortKey] as number} />
+                        )}
+                      </p>
+                    </div>
+
+                    {/* Sub metrics */}
+                    <div className="mt-5 grid grid-cols-3 gap-2 w-full pt-4 border-t border-border/60">
+                      <div>
+                        <p className="text-xs font-mono text-text">{agent.monthly_sales}</p>
+                        <p className="text-[9px] text-text-faint uppercase tracking-wider mt-0.5">
+                          Mês
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-mono text-solar">
+                          {formatPercent(agent.conversion_rate)}
+                        </p>
+                        <p className="text-[9px] text-text-faint uppercase tracking-wider mt-0.5">
+                          Conv.
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-mono text-text">{agent.total_leads}</p>
+                        <p className="text-[9px] text-text-faint uppercase tracking-wider mt-0.5">
+                          Leads
+                        </p>
+                      </div>
+                    </div>
                   </motion.div>
-                ) : (
-                  <div key={`empty-base-${idx}`} />
-                )
-              )}
+                );
+              })}
             </div>
           </Surface>
         </motion.div>
