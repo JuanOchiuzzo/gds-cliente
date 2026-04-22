@@ -126,12 +126,20 @@ export function MobileDock() {
             </Link>
           );
         })}
-        <button onClick={() => setSheetOpen(true)}>
+        <button
+          onClick={() => setSheetOpen(true)}
+          aria-label="Abrir menu"
+          className="ml-1"
+        >
           <motion.div
-            whileTap={{ scale: 0.88 }}
-            className="w-10 h-10 rounded-full flex items-center justify-center text-text-soft"
+            whileTap={{ scale: 0.9 }}
+            className={cn(
+              'relative w-12 h-12 rounded-full flex items-center justify-center',
+              'bg-surface-2 border border-border-strong text-text',
+              'shadow-md'
+            )}
           >
-            <LayoutGrid className="w-[18px] h-[18px]" />
+            <LayoutGrid className="w-[22px] h-[22px]" />
           </motion.div>
         </button>
       </nav>
