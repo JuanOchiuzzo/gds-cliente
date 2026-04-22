@@ -1,0 +1,11 @@
+// Next.js 15 instrumentation hook. Carrega configs do Sentry por runtime.
+export async function register() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    await import('./sentry.server.config');
+  }
+  if (process.env.NEXT_RUNTIME === 'edge') {
+    await import('./sentry.edge.config');
+  }
+}
+
+export { captureRequestError as onRequestError } from '@sentry/nextjs';

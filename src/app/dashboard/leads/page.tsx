@@ -44,6 +44,7 @@ import {
   onlyDigits,
   cn,
 } from '@/lib/utils';
+import { tryConsume, RATE_LIMITS } from '@/lib/rate-limit';
 import { staggerParent, slideUp } from '@/lib/motion';
 
 const STAGE_VARIANT: Record<string, BadgeProps['variant']> = {
@@ -112,6 +113,10 @@ export default function LeadsPage() {
     }
     if (form.phone && !isValidBRPhone(form.phone)) {
       toast.error('Telefone inválido (use DDD + número)');
+      return;
+    }
+    if (!tryConsume(`lead:create:${user?.id ?? 'anon'}`, RATE_LIMITS.createLead)) {
+      toast.error('Muitos leads em pouco tempo. Aguarde um instante.');
       return;
     }
     await create({

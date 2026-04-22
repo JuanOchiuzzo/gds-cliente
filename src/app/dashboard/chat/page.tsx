@@ -8,6 +8,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { useChat } from '@/lib/hooks/use-chat';
 import { useAuth } from '@/lib/auth-context';
 import { timeAgo, cn } from '@/lib/utils';
+import { tryConsume, RATE_LIMITS } from '@/lib/rate-limit';
 import { spring, slideUp } from '@/lib/motion';
 
 const CHANNELS = [
@@ -31,6 +32,9 @@ export default function ChatPage() {
 
   const handleSend = () => {
     if (!input.trim()) return;
+    if (!tryConsume(`chat:${user?.id ?? 'anon'}:${activeChannel}`, RATE_LIMITS.sendMessage)) {
+      return;
+    }
     send(input);
     setInput('');
   };
