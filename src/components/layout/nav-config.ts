@@ -4,7 +4,6 @@ import {
   CalendarCheck,
   UserCircle,
   Users,
-  KanbanSquare,
   Building2,
   UserCog,
   MessageSquare,
@@ -32,7 +31,6 @@ export const NAV_ITEMS: NavItem[] = [
   { href: '/dashboard/plantao', label: 'Plantão', icon: UserCircle, shortcut: 'G P', group: 'main' },
 
   { href: '/dashboard/leads', label: 'Leads', icon: Users, shortcut: 'G L', group: 'sales' },
-  { href: '/dashboard/pipeline', label: 'Pipeline', icon: KanbanSquare, shortcut: 'G K', group: 'sales' },
   { href: '/dashboard/stands', label: 'Stands', icon: Building2, shortcut: 'G S', group: 'sales' },
 
   { href: '/dashboard/agents', label: 'Ranking', icon: UserCog, shortcut: 'G R', group: 'team' },

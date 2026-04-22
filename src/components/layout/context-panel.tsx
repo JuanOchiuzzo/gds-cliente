@@ -68,12 +68,6 @@ function getPanelContent(pathname: string) {
       'Tarefas com prazo',
       'Converta frio → morno',
     ]} />,
-    '/dashboard/pipeline': <PanelSection title="Pipeline" items={[
-      'Arraste cards entre colunas',
-      '7 estágios do funil',
-      'Long-press abre detalhes',
-      'Filtre por stand acima',
-    ]} />,
     '/dashboard/leads': <PanelSection title="Leads" items={[
       'Filtre por stage ou origem',
       'Hover para ações rápidas',

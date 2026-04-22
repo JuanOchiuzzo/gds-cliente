@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Building2, Users, KanbanSquare, Calendar,
+  LayoutDashboard, Building2, Users, Calendar,
   MessageSquare, BarChart3, Settings, Sparkles, UserCog, Menu, X,
   Wallet, CalendarCheck, ShieldCheck, UserCircle,
 } from 'lucide-react';
@@ -21,7 +21,6 @@ const primary = [
 const more = [
   { href: '/dashboard/plantao', label: 'Plantão', icon: UserCircle },
   { href: '/dashboard/leads', label: 'Leads', icon: Users },
-  { href: '/dashboard/pipeline', label: 'Pipeline', icon: KanbanSquare },
   { href: '/dashboard/stands', label: 'Stands', icon: Building2 },
   { href: '/dashboard/agents', label: 'Ranking', icon: UserCog },
   { href: '/dashboard/team', label: 'Roles', icon: ShieldCheck },

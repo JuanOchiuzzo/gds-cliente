@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-  LayoutDashboard, Building2, Users, KanbanSquare, UserCog,
+  LayoutDashboard, Building2, Users, UserCog,
   Calendar, MessageSquare, BarChart3, Settings, Sparkles,
   Wallet, CalendarCheck, ShieldCheck, UserCircle, LogOut,
 } from 'lucide-react';
@@ -21,7 +21,6 @@ const nav = [
   ]},
   { section: 'Vendas', items: [
     { href: '/dashboard/leads', label: 'Leads', icon: Users },
-    { href: '/dashboard/pipeline', label: 'Pipeline', icon: KanbanSquare },
     { href: '/dashboard/stands', label: 'Stands', icon: Building2 },
   ]},
   { section: 'Equipe', items: [
