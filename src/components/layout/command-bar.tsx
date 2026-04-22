@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, Command as CommandIcon, Sparkles, ChevronRight } from 'lucide-react';
+import { Search, Command as CommandIcon, Sparkles, ChevronRight } from 'lucide-react';
 import { findNavItem } from './nav-config';
 import { cn } from '@/lib/utils';
 import { CommandPalette } from '@/components/command-palette';
+import { NotificationsButton } from '@/components/layout/notifications-button';
 
 export function CommandBar() {
   const pathname = usePathname();
@@ -84,13 +85,7 @@ export function CommandBar() {
         </motion.button>
 
         {/* Notifications */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          className="relative w-9 h-9 rounded-md flex items-center justify-center text-text-soft hover:bg-surface-1 transition-colors"
-        >
-          <Bell className="w-4 h-4" />
-          <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-solar animate-pulse-soft" />
-        </motion.button>
+        <NotificationsButton iconSize={16} className="w-9 h-9 flex items-center justify-center" />
       </header>
       <CommandPalette open={cmdOpen} onOpenChange={setCmdOpen} />
     </>

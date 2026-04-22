@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Bell, Command } from 'lucide-react';
+import { Search, Command } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { CommandPalette } from '@/components/command-palette';
+import { NotificationsButton } from '@/components/layout/notifications-button';
 
 export function Topbar() {
   const [cmdOpen, setCmdOpen] = useState(false);
@@ -36,11 +37,7 @@ export function Topbar() {
               className="lg:hidden p-2 rounded-lg text-[var(--text-muted)] active:bg-[var(--bg-hover)]">
               <Search className="w-[18px] h-[18px]" />
             </motion.button>
-            <motion.button whileTap={{ scale: 0.9 }}
-              className="relative p-2 rounded-lg text-[var(--text-muted)] active:bg-[var(--bg-hover)]">
-              <Bell className="w-[18px] h-[18px]" />
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
-            </motion.button>
+            <NotificationsButton />
           </div>
         </div>
       </header>
