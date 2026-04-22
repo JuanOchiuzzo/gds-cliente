@@ -7,8 +7,8 @@ import { AuthProvider } from '@/lib/auth-context';
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'StandForge CRM',
-  description: 'CRM premium para gestão de stands imobiliários.',
+  title: 'GDS — Gestão de Stands Imobiliários',
+  description: 'Plataforma premium para gestão de stands imobiliários: carteira, plantão, agendamentos e IA contextual.',
   manifest: '/manifest.json',
   icons: {
     icon: [

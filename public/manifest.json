@@ -1,7 +1,7 @@
 {
-  "name": "StandForge CRM",
-  "short_name": "StandForge",
-  "description": "O futuro da gestão de stands imobiliários",
+  "name": "GDS — Gestão de Stands",
+  "short_name": "GDS",
+  "description": "Plataforma de gestão de stands imobiliários",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0a0a0f",

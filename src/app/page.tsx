@@ -106,9 +106,9 @@ export default function LoginPage() {
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
             <span className="text-xs font-bold tracking-wider text-canvas">GDS</span>
           </div>
-          <span className="text-lg font-medium tracking-tight">StandForge</span>
+          <span className="text-lg font-medium tracking-tight">GDS</span>
           <span className="ml-3 px-2 py-0.5 text-[10px] font-mono text-solar border border-solar/30 bg-solar/5 rounded-full tracking-widest uppercase">
-            Nexus Orbit
+            Premium
           </span>
         </motion.div>
 
@@ -153,7 +153,7 @@ export default function LoginPage() {
           transition={{ delay: 0.8 }}
           className="text-[11px] text-text-ghost font-mono tracking-widest uppercase"
         >
-          © 2026 · StandForge Systems
+          © 2026 · GDS Systems
         </motion.p>
       </div>
 
@@ -170,7 +170,7 @@ export default function LoginPage() {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
               <span className="text-xs font-bold tracking-wider text-canvas">GDS</span>
             </div>
-            <span className="text-lg font-medium">StandForge</span>
+            <span className="text-lg font-medium">GDS</span>
           </div>
 
           <div

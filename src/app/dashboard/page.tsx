@@ -353,7 +353,7 @@ export default function DashboardPage() {
             <Surface variant="elevated" padding="xl">
               <EmptyState
                 icon={<Sparkles className="w-6 h-6" />}
-                title="Bem-vindo ao NEXUS ORBIT"
+                title="Bem-vindo ao GDS"
                 description="Comece adicionando clientes à sua carteira e criando agendamentos."
                 action={
                   <div className="flex flex-wrap gap-3 justify-center">

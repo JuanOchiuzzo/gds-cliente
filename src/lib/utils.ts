@@ -171,5 +171,5 @@ export function generateVoucherMessage(appointment: {
   time: string; stand_name: string; stand_address: string; product_name: string;
 }): string {
   const firstName = getFirstName(appointment.client_name);
-  return `Olá ${firstName}! 😊\n\nSua visita está confirmada:\n\n📍 ${appointment.stand_name}\n📌 ${appointment.stand_address}\n🏠 ${appointment.product_name}\n📅 ${appointment.date} às ${appointment.time}\n\n🎫 Seu voucher: *${appointment.voucher_code}*\nApresente à recepcionista ao chegar.\n\n📍 Google Maps: https://maps.google.com/?q=${encodeURIComponent(appointment.stand_address)}\n\nTe esperamos! — StandForge`;
+  return `Olá ${firstName}! 😊\n\nSua visita está confirmada:\n\n📍 ${appointment.stand_name}\n📌 ${appointment.stand_address}\n🏠 ${appointment.product_name}\n📅 ${appointment.date} às ${appointment.time}\n\n🎫 Seu voucher: *${appointment.voucher_code}*\nApresente à recepcionista ao chegar.\n\n📍 Google Maps: https://maps.google.com/?q=${encodeURIComponent(appointment.stand_address)}\n\nTe esperamos! — GDS`;
 }

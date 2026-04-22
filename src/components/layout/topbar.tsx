@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Bell, Command, Sparkles } from 'lucide-react';
+import { Search, Bell, Command } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { CommandPalette } from '@/components/command-palette';
 
@@ -14,10 +14,10 @@ export function Topbar() {
         <div className="flex items-center justify-between px-4 lg:px-5 h-12">
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
+              <span className="text-[9px] font-bold tracking-wider text-canvas">GDS</span>
             </div>
-            <span className="text-[14px] font-bold text-[var(--text)] tracking-tight">StandForge</span>
+            <span className="text-[14px] font-bold text-[var(--text)] tracking-tight">GDS</span>
           </div>
 
           {/* Desktop search */}

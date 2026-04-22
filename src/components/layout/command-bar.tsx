@@ -43,7 +43,7 @@ export function CommandBar() {
         {/* Breadcrumb (desktop) */}
         <nav className="hidden lg:flex items-center gap-1.5 text-[13px] flex-shrink-0">
           <Link href="/dashboard" className="text-text-faint hover:text-text transition-colors">
-            StandForge
+            GDS
           </Link>
           <ChevronRight className="w-3 h-3 text-text-ghost" />
           <AnimatePresence mode="wait">

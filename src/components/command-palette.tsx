@@ -209,7 +209,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                   </div>
                   <span className="flex items-center gap-1 text-solar">
                     <Sparkles className="w-3 h-3" />
-                    NEXUS ORBIT
+                    GDS
                   </span>
                 </div>
               </Command>

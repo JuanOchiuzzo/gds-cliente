@@ -30,7 +30,7 @@ export function ContextPanel() {
           >
             {item && <item.icon className="w-4 h-4 text-solar" />}
             <span className="font-display text-[20px] tracking-tight text-text">
-              {item?.label || 'StandForge'}
+              {item?.label || 'GDS'}
             </span>
           </motion.div>
         </AnimatePresence>
@@ -119,7 +119,7 @@ function getPanelContent(pathname: string) {
       'Segmente por stand/agente',
       'Charts em tempo real',
     ]} />,
-    '/dashboard/ai': <PanelSection title="Nexus AI" items={[
+    '/dashboard/ai': <PanelSection title="GDS AI" items={[
       'Resumos da carteira',
       'Próximas ações',
       'Insights contextuais',

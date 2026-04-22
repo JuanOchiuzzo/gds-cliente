@@ -32,7 +32,7 @@ const nav = [
   { section: 'Outros', items: [
     { href: '/dashboard/calendar', label: 'Calendário', icon: Calendar },
     { href: '/dashboard/reports', label: 'Relatórios', icon: BarChart3 },
-    { href: '/dashboard/ai', label: 'Nexus AI', icon: Sparkles },
+    { href: '/dashboard/ai', label: 'GDS AI', icon: Sparkles },
     { href: '/dashboard/settings', label: 'Configurações', icon: Settings },
   ]},
 ];
@@ -48,10 +48,10 @@ export function Sidebar() {
     <aside className="hidden lg:flex flex-col w-[240px] h-screen fixed left-0 top-0 z-40 bg-[var(--bg-sidebar)]">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-4 py-4">
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-          <Sparkles className="w-3.5 h-3.5 text-white" />
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
+          <span className="text-[9px] font-bold tracking-wider text-canvas">GDS</span>
         </div>
-        <span className="text-[15px] font-bold text-white tracking-tight">StandForge</span>
+        <span className="text-[15px] font-bold text-white tracking-tight">GDS</span>
       </div>
 
       {/* Nav sections */}

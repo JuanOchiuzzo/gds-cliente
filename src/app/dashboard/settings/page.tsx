@@ -198,7 +198,7 @@ export default function SettingsPage() {
             <h3 className="text-sm font-medium text-text">Instalar como app</h3>
           </div>
           <p className="text-sm text-text-soft mb-2">
-            Instale o StandForge no seu dispositivo para acesso rápido.
+            Instale o GDS no seu dispositivo para acesso rápido.
           </p>
           <p className="text-xs text-text-faint">
             Chrome: Menu (⋮) → &ldquo;Adicionar à tela inicial&rdquo;
