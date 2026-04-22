@@ -11,7 +11,6 @@ import {
   TrendingUp,
   Target,
   Sparkles,
-  Medal,
 } from 'lucide-react';
 import { Surface } from '@/components/ui/surface';
 import { Avatar } from '@/components/ui/avatar';
@@ -87,11 +86,6 @@ export default function AgentsPage() {
   const top3 = sorted.slice(0, 3);
   // Ordem do pódio: 2º à esquerda, 1º no centro, 3º à direita
   const podiumOrder: (AgentRow | undefined)[] = [top3[1], top3[0], top3[2]];
-  const medals = [
-    { icon: <Medal className="w-4 h-4" />, label: '2º', color: 'text-aurora-1' },
-    { icon: <Crown className="w-5 h-5" />, label: '1º', color: 'text-solar' },
-    { icon: <Medal className="w-4 h-4" />, label: '3º', color: 'text-aurora-2' },
-  ];
   const ringVariant: Array<'aurora' | 'solar'> = ['aurora', 'solar', 'aurora'];
 
   const maxMetric = Math.max(1, ...sorted.map((a) => (a[sortKey] as number) || 0));
@@ -167,12 +161,10 @@ export default function AgentsPage() {
         <motion.div variants={slideUp}>
           <Surface variant="elevated" padding="lg" className="relative overflow-hidden">
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-[60%] h-48 rounded-full bg-solar/10 blur-[80px]" />
-              <div className="absolute -bottom-20 left-0 w-1/2 h-48 rounded-full bg-aurora-1/5 blur-[80px]" />
-              <div className="absolute -bottom-20 right-0 w-1/2 h-48 rounded-full bg-aurora-2/5 blur-[80px]" />
+              <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[60%] h-52 rounded-full bg-solar/10 blur-[90px]" />
             </div>
 
-            <div className="relative flex items-center justify-between gap-2 mb-6 flex-wrap">
+            <div className="relative flex items-center justify-between gap-2 mb-8 flex-wrap">
               <div className="flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-solar" />
                 <h3 className="text-sm font-medium text-text">Pódio do mês</h3>
@@ -185,146 +177,136 @@ export default function AgentsPage() {
               </p>
             </div>
 
-            <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-4 items-stretch">
+            {/* Pódio olímpico */}
+            <div className="relative grid grid-cols-3 gap-3 sm:gap-6 items-end max-w-3xl mx-auto">
               {podiumOrder.map((agent, idx) => {
-                if (!agent) return <div key={`empty-${idx}`} className="hidden sm:block" />;
+                if (!agent) return <div key={`empty-${idx}`} />;
                 const isFirst = idx === 1;
-                const cardTone = [
-                  'bg-gradient-to-br from-aurora-1/10 via-surface-1 to-surface-1 border-aurora-1/30',
-                  'bg-gradient-to-br from-solar/15 via-surface-1 to-surface-1 border-solar/50 shadow-[0_0_60px_-20px_rgba(245,158,11,0.5)]',
-                  'bg-gradient-to-br from-aurora-2/10 via-surface-1 to-surface-1 border-aurora-2/30',
+                // idx: 0 = 2º lugar, 1 = 1º lugar, 2 = 3º lugar
+                const blockHeight = ['h-36 sm:h-44', 'h-52 sm:h-64', 'h-28 sm:h-36'][idx];
+                const blockTone = [
+                  'bg-gradient-to-b from-aurora-1/25 via-aurora-1/10 to-aurora-1/5 border-aurora-1/40',
+                  'bg-gradient-to-b from-solar/30 via-solar/15 to-solar/5 border-solar/60 shadow-[0_0_50px_-10px_rgba(245,158,11,0.45)]',
+                  'bg-gradient-to-b from-aurora-2/25 via-aurora-2/10 to-aurora-2/5 border-aurora-2/40',
                 ][idx];
+                const rankText = ['2', '1', '3'][idx];
+                const metricNode =
+                  sortKey === 'revenue' ? (
+                    <CurrencyFlow value={agent[sortKey] as number} />
+                  ) : sortKey === 'conversion_rate' ? (
+                    <NumberFlow
+                      value={agent[sortKey] as number}
+                      suffix="%"
+                      format={{ maximumFractionDigits: 1 }}
+                    />
+                  ) : (
+                    <NumberFlow value={agent[sortKey] as number} />
+                  );
 
                 return (
-                  <motion.div
-                    key={agent.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                    className={cn(
-                      'relative rounded-2xl border p-5 flex flex-col items-center text-center overflow-hidden',
-                      cardTone,
-                      isFirst && 'sm:-translate-y-3'
-                    )}
-                  >
-                    {/* Medal badge (top-right) */}
-                    <div
-                      className={cn(
-                        'absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider',
-                        medals[idx].color,
-                        'bg-canvas/80 backdrop-blur-sm border border-border'
-                      )}
+                  <div key={agent.id} className="flex flex-col items-center">
+                    {/* Avatar + nome acima do bloco */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 + idx * 0.1, duration: 0.4 }}
+                      className="flex flex-col items-center mb-3"
                     >
-                      {medals[idx].icon}
-                      <span>{medals[idx].label}</span>
-                    </div>
-
-                    {/* Crown on first */}
-                    {isFirst && (
-                      <motion.div
-                        initial={{ y: -8, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.4, duration: 0.5 }}
-                        className="absolute top-3 left-3"
-                      >
-                        <Crown className="w-5 h-5 text-solar drop-shadow-[0_0_8px_rgba(245,158,11,0.7)]" />
-                      </motion.div>
-                    )}
-
-                    {/* Avatar + ring */}
-                    <div className="relative inline-flex items-center justify-center mt-4">
-                      <Ring
-                        value={Math.min(100, agent.conversion_rate || 0)}
-                        size={isFirst ? 104 : 84}
-                        strokeWidth={isFirst ? 5 : 4}
-                        variant={ringVariant[idx]}
-                        showLabel={false}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Avatar
-                          name={getDisplayName(agent.name, 'Agente')}
-                          src={agent.avatar_url}
-                          size={isFirst ? 'lg' : 'md'}
-                          ring={isFirst ? 'solar' : 'subtle'}
-                        />
+                      <div className="relative">
+                        {isFirst && (
+                          <motion.div
+                            initial={{ y: -6, opacity: 0, rotate: -12 }}
+                            animate={{ y: 0, opacity: 1, rotate: 0 }}
+                            transition={{ delay: 0.5, type: 'spring', stiffness: 220 }}
+                            className="absolute -top-6 left-1/2 -translate-x-1/2 z-10"
+                          >
+                            <Crown className="w-6 h-6 text-solar drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+                          </motion.div>
+                        )}
+                        <div className="relative inline-flex items-center justify-center">
+                          <Ring
+                            value={Math.min(100, agent.conversion_rate || 0)}
+                            size={isFirst ? 96 : 72}
+                            strokeWidth={isFirst ? 4 : 3}
+                            variant={ringVariant[idx]}
+                            showLabel={false}
+                          />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Avatar
+                              name={getDisplayName(agent.name, 'Agente')}
+                              src={agent.avatar_url}
+                              size={isFirst ? 'lg' : 'md'}
+                              ring={isFirst ? 'solar' : 'subtle'}
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-
-                    {/* Name + stand */}
-                    <div className="mt-5 w-full">
                       <p
                         className={cn(
-                          'font-medium text-text truncate',
-                          isFirst ? 'text-base' : 'text-sm'
+                          'mt-3 font-medium text-text text-center truncate max-w-[8rem] sm:max-w-[10rem]',
+                          isFirst ? 'text-sm sm:text-base' : 'text-xs sm:text-sm'
                         )}
                         title={getDisplayName(agent.name, 'Agente')}
                       >
                         {shortName(agent.name)}
                       </p>
-                      {agent.stand_name ? (
-                        <p className="text-[11px] text-text-faint truncate mt-0.5">
+                      {agent.stand_name && (
+                        <p className="text-[10px] text-text-faint text-center truncate max-w-[8rem] sm:max-w-[10rem]">
                           {agent.stand_name.replace(/^Stand\s+/i, '')}
                         </p>
-                      ) : (
-                        <p className="text-[11px] text-text-faint/60 mt-0.5">—</p>
                       )}
-                    </div>
+                    </motion.div>
 
-                    {/* Divider */}
-                    <div className="w-10 h-px bg-border my-4" />
-
-                    {/* Primary metric */}
-                    <div className="w-full">
-                      <p className="text-[10px] uppercase tracking-widest text-text-faint">
-                        {SORTS.find((s) => s.key === sortKey)?.label}
-                      </p>
-                      <p
+                    {/* Bloco do pódio */}
+                    <motion.div
+                      initial={{ scaleY: 0, opacity: 0 }}
+                      animate={{ scaleY: 1, opacity: 1 }}
+                      transition={{
+                        delay: 0.25 + idx * 0.08,
+                        duration: 0.5,
+                        ease: [0.22, 1, 0.36, 1],
+                      }}
+                      style={{ transformOrigin: 'bottom' }}
+                      className={cn(
+                        'relative w-full border rounded-t-xl flex flex-col items-center justify-between py-4 px-2',
+                        blockTone,
+                        blockHeight
+                      )}
+                    >
+                      {/* Número do ranking (topo do bloco) */}
+                      <span
                         className={cn(
-                          'font-display italic font-medium leading-none mt-1.5',
-                          isFirst ? 'text-3xl sm:text-4xl text-solar-gradient' : 'text-2xl sm:text-3xl text-text'
+                          'font-display italic font-bold leading-none select-none',
+                          isFirst ? 'text-5xl sm:text-6xl text-solar-gradient' : 'text-3xl sm:text-4xl',
+                          idx === 0 && 'text-aurora-1',
+                          idx === 2 && 'text-aurora-2'
                         )}
                       >
-                        {sortKey === 'revenue' ? (
-                          <CurrencyFlow value={agent[sortKey] as number} />
-                        ) : sortKey === 'conversion_rate' ? (
-                          <NumberFlow
-                            value={agent[sortKey] as number}
-                            suffix="%"
-                            format={{ maximumFractionDigits: 1 }}
-                          />
-                        ) : (
-                          <NumberFlow value={agent[sortKey] as number} />
-                        )}
-                      </p>
-                    </div>
+                        {rankText}
+                      </span>
 
-                    {/* Sub metrics */}
-                    <div className="mt-5 grid grid-cols-3 gap-2 w-full pt-4 border-t border-border/60">
-                      <div>
-                        <p className="text-xs font-mono text-text">{agent.monthly_sales}</p>
-                        <p className="text-[9px] text-text-faint uppercase tracking-wider mt-0.5">
-                          Mês
+                      {/* Métrica (meio/base) */}
+                      <div className="text-center">
+                        <p
+                          className={cn(
+                            'font-mono font-medium leading-tight',
+                            isFirst ? 'text-lg sm:text-xl text-text' : 'text-sm sm:text-base text-text'
+                          )}
+                        >
+                          {metricNode}
+                        </p>
+                        <p className="text-[9px] sm:text-[10px] uppercase tracking-widest text-text-faint mt-1">
+                          {SORTS.find((s) => s.key === sortKey)?.label}
                         </p>
                       </div>
-                      <div>
-                        <p className="text-xs font-mono text-solar">
-                          {formatPercent(agent.conversion_rate)}
-                        </p>
-                        <p className="text-[9px] text-text-faint uppercase tracking-wider mt-0.5">
-                          Conv.
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-mono text-text">{agent.total_leads}</p>
-                        <p className="text-[9px] text-text-faint uppercase tracking-wider mt-0.5">
-                          Leads
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
+                    </motion.div>
+                  </div>
                 );
               })}
             </div>
+
+            {/* Base / chão */}
+            <div className="relative max-w-3xl mx-auto h-1.5 bg-gradient-to-r from-transparent via-border-strong to-transparent rounded-full" />
           </Surface>
         </motion.div>
       )}
