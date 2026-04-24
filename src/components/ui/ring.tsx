@@ -1,78 +1,68 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { cn, normalizeNumber } from '@/lib/utils';
-
-interface RingProps {
-  value: number; // 0-100
-  size?: number;
-  strokeWidth?: number;
-  className?: string;
-  showLabel?: boolean;
-  label?: string;
-  variant?: 'solar' | 'aurora' | 'success' | 'danger';
-}
+import { cn } from '@/lib/utils';
 
 export function Ring({
   value,
-  size = 44,
-  strokeWidth = 4,
-  className,
-  showLabel = true,
+  size = 48,
+  stroke = 4,
+  gradient = 'iris',
   label,
-  variant = 'solar',
-}: RingProps) {
-  const safeValue = Math.min(Math.max(normalizeNumber(value), 0), 100);
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (safeValue / 100) * circumference;
+  className,
+}: {
+  value: number; // 0-100
+  size?: number;
+  stroke?: number;
+  gradient?: 'iris' | 'cyan' | 'ok' | 'hot';
+  label?: string;
+  className?: string;
+}) {
+  const v = Math.max(0, Math.min(100, value));
+  const r = (size - stroke) / 2;
+  const c = Math.PI * 2 * r;
+  const dash = (v / 100) * c;
 
-  const gradientId = `ring-grad-${variant}`;
-  const colors = {
-    solar: ['#f0d994', '#5bf1c6'],
-    aurora: ['#5bf1c6', '#8fb7ff'],
-    success: ['#5bf1c6', '#5bf1c6'],
-    danger: ['#ff4d61', '#ff4d61'],
-  }[variant];
+  const gradId = `ring-${gradient}`;
+  const colors: Record<string, [string, string]> = {
+    iris: ['#9d8cff', '#60deff'],
+    cyan: ['#60deff', '#2a7fff'],
+    ok: ['#86efac', '#139e6b'],
+    hot: ['#ffb29a', '#ff3e78'],
+  };
+  const [c1, c2] = colors[gradient];
 
   return (
-    <div className={cn('relative inline-flex items-center justify-center', className)}>
+    <div className={cn('relative inline-flex items-center justify-center', className)} style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
         <defs>
-          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={colors[0]} />
-            <stop offset="100%" stopColor={colors[1]} />
+          <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={c1} />
+            <stop offset="100%" stopColor={c2} />
           </linearGradient>
         </defs>
         <circle
           cx={size / 2}
           cy={size / 2}
-          r={radius}
+          r={r}
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth={stroke}
           fill="none"
-          stroke="var(--border-strong)"
-          strokeWidth={strokeWidth}
         />
-        <motion.circle
+        <circle
           cx={size / 2}
           cy={size / 2}
-          r={radius}
-          fill="none"
-          stroke={`url(#${gradientId})`}
-          strokeWidth={strokeWidth}
+          r={r}
+          stroke={`url(#${gradId})`}
+          strokeWidth={stroke}
           strokeLinecap="round"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+          fill="none"
+          strokeDasharray={`${dash} ${c}`}
+          style={{ transition: 'stroke-dasharray 600ms cubic-bezier(0.22,1,0.36,1)' }}
         />
       </svg>
-      {showLabel && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-[11px] font-mono font-medium text-text tabular-nums">
-            {label ?? Math.round(safeValue)}
-          </span>
-        </div>
-      )}
+      <span className="absolute inset-0 flex items-center justify-center text-[11px] font-semibold text-fg">
+        {label ?? `${Math.round(v)}%`}
+      </span>
     </div>
   );
 }

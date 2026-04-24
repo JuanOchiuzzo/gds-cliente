@@ -1,39 +1,29 @@
-'use client';
-
 import Link from 'next/link';
-import { ArrowLeft, Sparkles } from 'lucide-react';
-import { BrandMark } from '@/components/brand/brand-mark';
-import { Button } from '@/components/ui/button';
+import { Compass } from 'lucide-react';
+import { Monogram } from '@/components/brand/brand';
 
 export default function NotFound() {
   return (
-    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-canvas p-6 text-text">
-      <div
-        className="absolute inset-0 bg-cover bg-center opacity-35"
-        style={{ backgroundImage: "url('/brand/gds-native-bg.webp')" }}
-      />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,8,10,0.45),#06080a_72%)]" />
-
-      <div className="relative z-10 max-w-md text-center">
-        <BrandMark size="md" className="mb-8 justify-center" />
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-solar/30 bg-solar/10 px-3 py-1 text-xs font-semibold uppercase text-white">
-          <Sparkles className="h-3 w-3" />
-          Rota indisponível
-        </div>
-        <h1 className="text-[112px] font-semibold leading-none text-solar-gradient">
+    <main className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-6">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-1/3 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-iris/20 blur-[140px]" />
+      </div>
+      <div className="relative flex flex-col items-center text-center">
+        <Monogram size="lg" />
+        <h1 className="mt-6 font-display text-7xl tracking-[-0.03em] text-iris-gradient">
           404
         </h1>
-        <p className="mt-2 text-2xl font-semibold text-text">Página não encontrada.</p>
-        <p className="mx-auto mt-3 max-w-sm text-sm text-text-soft">
-          Volte para o dashboard e continue a operação pelo app.
+        <p className="mt-3 max-w-sm text-sm text-fg-muted">
+          A forja não achou essa rota. Talvez ela ainda não tenha sido esculpida.
         </p>
-        <Link href="/dashboard" className="inline-block mt-8">
-          <Button variant="solar" size="lg">
-            <ArrowLeft className="w-4 h-4" />
-            Voltar ao dashboard
-          </Button>
+        <Link
+          href="/"
+          className="mt-8 inline-flex items-center gap-2 rounded-[14px] border border-line-strong bg-white/[0.04] px-5 py-2.5 text-sm font-semibold text-fg hover:bg-white/[0.08] press"
+        >
+          <Compass className="h-4 w-4" />
+          Voltar ao início
         </Link>
       </div>
-    </div>
+    </main>
   );
 }

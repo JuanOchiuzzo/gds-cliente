@@ -1,86 +1,63 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { cn, normalizeNumber } from '@/lib/utils';
-
-interface SparklineProps {
-  data: number[];
-  width?: number;
-  height?: number;
-  className?: string;
-  variant?: 'solar' | 'aurora' | 'success' | 'danger';
-  showFill?: boolean;
-}
+import { useMemo } from 'react';
+import { cn } from '@/lib/utils';
 
 export function Sparkline({
   data,
-  width = 120,
-  height = 32,
+  width = 160,
+  height = 40,
+  gradient = 'iris',
   className,
-  variant = 'solar',
-  showFill = true,
-}: SparklineProps) {
-  const safeData = data
-    .map((value) => normalizeNumber(value, Number.NaN))
-    .filter((value) => Number.isFinite(value));
+}: {
+  data: number[];
+  width?: number;
+  height?: number;
+  gradient?: 'iris' | 'cyan' | 'ok' | 'hot';
+  className?: string;
+}) {
+  const { path, area, maxY } = useMemo(() => {
+    if (!data.length) return { path: '', area: '', maxY: 0 };
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const range = max - min || 1;
+    const step = width / Math.max(1, data.length - 1);
+    const pts = data.map((v, i) => {
+      const x = i * step;
+      const y = height - 6 - ((v - min) / range) * (height - 12);
+      return [x, y] as const;
+    });
+    const d = pts.map(([x, y], i) => (i === 0 ? `M ${x} ${y}` : `L ${x} ${y}`)).join(' ');
+    const a = `${d} L ${width} ${height} L 0 ${height} Z`;
+    return { path: d, area: a, maxY: pts[pts.length - 1][1] };
+  }, [data, width, height]);
 
-  if (safeData.length < 2) return null;
-
-  const min = Math.min(...safeData);
-  const max = Math.max(...safeData);
-  const range = max - min || 1;
-  const stepX = width / (safeData.length - 1);
-
-  const points = safeData.map((v, i) => {
-    const x = i * stepX;
-    const y = height - ((v - min) / range) * height;
-    return [x, y];
-  });
-
-  const pathD = points.reduce(
-    (acc, [x, y], i) => (i === 0 ? `M ${x} ${y}` : `${acc} L ${x} ${y}`),
-    ''
-  );
-  const fillD = `${pathD} L ${width} ${height} L 0 ${height} Z`;
-  const id = `spark-${variant}`;
-
-  const colors = {
-    solar: ['#f0d994', '#5bf1c6'],
-    aurora: ['#5bf1c6', '#8fb7ff'],
-    success: ['#5bf1c6', '#5bf1c6'],
-    danger: ['#ff4d61', '#ff4d61'],
-  }[variant];
+  const id = `spark-${gradient}`;
+  const colors: Record<string, [string, string]> = {
+    iris: ['#9d8cff', '#60deff'],
+    cyan: ['#60deff', '#2a7fff'],
+    ok: ['#86efac', '#139e6b'],
+    hot: ['#ffb29a', '#ff3e78'],
+  };
+  const [c1, c2] = colors[gradient];
 
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      width={width}
-      height={height}
-      className={cn('overflow-visible', className)}
-      preserveAspectRatio="none"
-    >
+    <svg width={width} height={height} className={cn('overflow-visible', className)}>
       <defs>
-        <linearGradient id={`${id}-stroke`} x1="0%" x2="100%">
-          <stop offset="0%" stopColor={colors[0]} />
-          <stop offset="100%" stopColor={colors[1]} />
+        <linearGradient id={id} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor={c1} />
+          <stop offset="100%" stopColor={c2} />
         </linearGradient>
-        <linearGradient id={`${id}-fill`} x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor={colors[0]} stopOpacity="0.25" />
-          <stop offset="100%" stopColor={colors[0]} stopOpacity="0" />
+        <linearGradient id={`${id}-area`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={c1} stopOpacity={0.36} />
+          <stop offset="100%" stopColor={c1} stopOpacity={0} />
         </linearGradient>
       </defs>
-      {showFill && <path d={fillD} fill={`url(#${id}-fill)`} />}
-      <motion.path
-        d={pathD}
-        fill="none"
-        stroke={`url(#${id}-stroke)`}
-        strokeWidth={1.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        initial={{ pathLength: 0, opacity: 0 }}
-        animate={{ pathLength: 1, opacity: 1 }}
-        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-      />
+      <path d={area} fill={`url(#${id}-area)`} />
+      <path d={path} fill="none" stroke={`url(#${id})`} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+      {data.length > 0 && (
+        <circle cx={width} cy={maxY} r={3} fill="#fff" />
+      )}
     </svg>
   );
 }

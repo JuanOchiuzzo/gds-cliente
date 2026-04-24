@@ -1,83 +1,93 @@
 'use client';
 
-import { forwardRef, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from 'react';
+import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+type InputBase = {
   icon?: ReactNode;
-  suffix?: ReactNode;
-  error?: boolean | string;
+  trailing?: ReactNode;
   label?: string;
-}
+  hint?: string;
+  error?: string;
+};
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, icon, suffix, error, label, type = 'text', ...rest }, ref) => {
-    const errorText = typeof error === 'string' ? error : undefined;
-    const hasError = Boolean(error);
+export interface InputProps
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>,
+    InputBase {}
 
-    return (
-      <div className="w-full space-y-1.5">
-        {label && <label className="text-xs font-semibold text-text-soft">{label}</label>}
-        <div className="relative">
-          {icon && (
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-faint pointer-events-none">
-              {icon}
-            </span>
+const wrapper =
+  'group relative flex items-center gap-2 rounded-[14px] border border-line bg-ink-800 ' +
+  'px-3.5 transition-all duration-200 focus-within:border-iris/60 focus-within:bg-ink-700 ' +
+  'focus-within:shadow-[0_0_0_4px_rgba(129,110,255,0.18)]';
+
+export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  { className, icon, trailing, label, hint, error, id, ...props },
+  ref,
+) {
+  const inputId = id ?? props.name;
+  return (
+    <div className="w-full">
+      {label && (
+        <label htmlFor={inputId} className="mb-1.5 block text-xs font-medium text-fg-muted">
+          {label}
+        </label>
+      )}
+      <div className={cn(wrapper, error && 'border-bad/60 focus-within:border-bad/70 focus-within:shadow-[0_0_0_4px_rgba(255,99,122,0.18)]')}>
+        {icon && (
+          <span className="text-fg-muted group-focus-within:text-iris-hi transition-colors">{icon}</span>
+        )}
+        <input
+          ref={ref}
+          id={inputId}
+          className={cn(
+            'peer w-full h-11 bg-transparent text-sm text-fg placeholder:text-fg-faint outline-none',
+            className,
           )}
-          <input
-            ref={ref}
-            type={type}
-            className={cn(
-              'h-12 w-full rounded-lg border px-3 py-2 text-sm text-text placeholder:text-text-faint',
-              'bg-[rgba(255,255,255,0.065)] shadow-inset backdrop-blur-md',
-              'focus:outline-none focus:border-solar/60 focus:bg-white/[0.1]',
-              'transition-all duration-150',
-              hasError ? 'border-danger' : 'border-white/[0.12] hover:border-white/25',
-              icon && 'pl-9',
-              suffix && 'pr-9',
-              className
-            )}
-            {...rest}
-          />
-          {suffix && (
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-text-faint pointer-events-none">
-              {suffix}
-            </span>
-          )}
-        </div>
-        {errorText && <p className="text-xs text-danger">{errorText}</p>}
+          {...props}
+        />
+        {trailing}
       </div>
-    );
-  }
-);
-Input.displayName = 'Input';
+      {(hint || error) && (
+        <p className={cn('mt-1.5 text-[11px]', error ? 'text-bad' : 'text-fg-muted')}>
+          {error || hint}
+        </p>
+      )}
+    </div>
+  );
+});
 
-export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  error?: boolean | string;
-  label?: string;
-}
+export interface TextareaProps
+  extends TextareaHTMLAttributes<HTMLTextAreaElement>,
+    InputBase {}
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ className, error, label, ...rest }, ref) => {
-    const errorText = typeof error === 'string' ? error : undefined;
-    const hasError = Boolean(error);
+  function Textarea({ className, label, hint, error, id, rows = 4, ...props }, ref) {
+    const tId = id ?? props.name;
     return (
-      <div className="w-full space-y-1.5">
-        {label && <label className="text-xs font-semibold text-text-soft">{label}</label>}
-        <textarea
-          ref={ref}
-          className={cn(
-            'w-full rounded-lg border bg-white/[0.065] px-3 py-2 text-sm text-text placeholder:text-text-faint shadow-inset backdrop-blur-md',
-            'focus:outline-none focus:border-solar/60 focus:bg-white/[0.1]',
-            'transition-all duration-150 resize-none',
-            hasError ? 'border-danger' : 'border-white/[0.12] hover:border-white/25',
-            className
-          )}
-          {...rest}
-        />
-        {errorText && <p className="text-xs text-danger">{errorText}</p>}
+      <div className="w-full">
+        {label && (
+          <label htmlFor={tId} className="mb-1.5 block text-xs font-medium text-fg-muted">
+            {label}
+          </label>
+        )}
+        <div className={cn(wrapper, 'py-2.5 items-start', error && 'border-bad/60')}>
+          <textarea
+            ref={ref}
+            id={tId}
+            rows={rows}
+            className={cn(
+              'w-full bg-transparent text-sm text-fg placeholder:text-fg-faint outline-none resize-none leading-relaxed',
+              className,
+            )}
+            {...props}
+          />
+        </div>
+        {(hint || error) && (
+          <p className={cn('mt-1.5 text-[11px]', error ? 'text-bad' : 'text-fg-muted')}>
+            {error || hint}
+          </p>
+        )}
       </div>
     );
-  }
+  },
 );
-Textarea.displayName = 'Textarea';

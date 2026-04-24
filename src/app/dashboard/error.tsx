@@ -1,11 +1,9 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
-import { AlertTriangle, Home, RefreshCw } from 'lucide-react';
-import { Surface } from '@/components/ui/surface';
-import { Button, buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { AlertTriangle, RotateCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 export default function DashboardError({
   error,
@@ -15,48 +13,27 @@ export default function DashboardError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Dashboard route error', {
-      message: error.message,
-      digest: error.digest,
-      stack: error.stack,
-    });
+    // eslint-disable-next-line no-console
+    console.error(error);
   }, [error]);
 
   return (
-    <div className="min-h-[calc(100dvh-120px)] flex items-center justify-center py-10">
-      <Surface variant="elevated" padding="xl" className="w-full max-w-xl text-center">
-        <div className="mx-auto w-14 h-14 rounded-full bg-danger/10 border border-danger/20 flex items-center justify-center">
-          <AlertTriangle className="w-6 h-6 text-danger" />
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <Card variant="glass" padding="xl" className="max-w-md text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] bg-bad/15 text-bad border border-bad/30">
+          <AlertTriangle className="h-6 w-6" />
         </div>
-
-        <h1 className="mt-5 font-display text-3xl text-text tracking-tight">
-          Algo falhou ao abrir esta página
-        </h1>
-        <p className="mt-2 text-sm text-text-soft">
-          A navegação foi interrompida no cliente. Você pode tentar recarregar este trecho da
-          aplicação sem sair do dashboard.
+        <h2 className="font-display text-xl tracking-tight">
+          Algo derreteu na forja
+        </h2>
+        <p className="mt-2 text-sm text-fg-muted">
+          Este módulo encontrou um erro. Tente recarregar ou volte depois.
         </p>
-
-        {error.digest && (
-          <p className="mt-3 text-[11px] font-mono text-text-faint">
-            erro {error.digest}
-          </p>
-        )}
-
-        <div className="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
-          <Button variant="solar" onClick={reset}>
-            <RefreshCw className="w-4 h-4" />
-            Tentar novamente
-          </Button>
-          <Link
-            href="/dashboard"
-            className={cn(buttonVariants({ variant: 'outline', size: 'md' }))}
-          >
-            <Home className="w-4 h-4" />
-            Voltar ao início
-          </Link>
-        </div>
-      </Surface>
+        <Button className="mt-6" onClick={() => reset()}>
+          <RotateCw className="h-4 w-4" />
+          Tentar novamente
+        </Button>
+      </Card>
     </div>
   );
 }

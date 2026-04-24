@@ -1,60 +1,54 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
-  Search,
-  Plus,
-  Phone,
-  MessageCircle,
-  Trash2,
-  Edit3,
   ArrowRight,
+  Edit3,
   FileText,
+  MessageCircle,
+  Phone,
+  Plus,
+  Search,
+  Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Surface } from '@/components/ui/surface';
-import { Button } from '@/components/ui/button';
-import { Badge, type BadgeProps } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
-import { Input, Textarea } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
+import { Badge, type BadgeVariant } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Chip } from '@/components/ui/chip';
-import { Ring } from '@/components/ui/ring';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { Input, Textarea } from '@/components/ui/input';
+import { Ring } from '@/components/ui/ring';
+import { Select } from '@/components/ui/select';
+import { Sheet, SheetContent, SheetHeader, SheetBody } from '@/components/ui/sheet';
+import { PageHeader } from '@/components/layout/page-header';
+import { PageSkeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/lib/auth-context';
 import { useLeads, type LeadRow } from '@/lib/hooks/use-leads';
 import { useStands } from '@/lib/hooks/use-stands';
-import { useAuth } from '@/lib/auth-context';
-import { fireConfetti } from '@/components/effects/confetti';
-import {
-  formatCurrency,
-  getLeadStageLabel,
-  getLeadSourceLabel,
-  generateWhatsAppLink,
-  getFirstName,
-  timeAgo,
-  isValidEmail,
-  isValidBRPhone,
-  onlyDigits,
-  cn,
-} from '@/lib/utils';
 import { tryConsume, RATE_LIMITS } from '@/lib/rate-limit';
-import { staggerParent, slideUp } from '@/lib/motion';
+import {
+  cn,
+  formatCurrency,
+  generateWhatsAppLink,
+  getLeadSourceLabel,
+  getLeadStageLabel,
+  isValidBRPhone,
+  isValidEmail,
+  onlyDigits,
+  timeAgo,
+} from '@/lib/utils';
 
-const STAGE_VARIANT: Record<string, BadgeProps['variant']> = {
+const STAGE_VARIANT: Record<string, BadgeVariant> = {
   novo: 'info',
-  qualificado: 'aurora',
-  visita_agendada: 'warning',
-  proposta: 'aurora',
-  negociacao: 'solar',
-  fechado: 'success',
-  perdido: 'danger',
+  qualificado: 'iris',
+  visita_agendada: 'warn',
+  proposta: 'cyan',
+  negociacao: 'iris',
+  fechado: 'ok',
+  perdido: 'bad',
 };
 
 const STAGE_ORDER = [
@@ -66,59 +60,90 @@ const STAGE_ORDER = [
   'fechado',
   'perdido',
 ];
-const SOURCE_OPTIONS = ['whatsapp', 'site', 'evento', 'stand', 'indicacao', 'instagram', 'telefone'];
+
+const SOURCE_OPTIONS = [
+  'whatsapp',
+  'site',
+  'evento',
+  'stand',
+  'indicacao',
+  'instagram',
+  'telefone',
+];
+
+type FormShape = {
+  name: string;
+  phone: string;
+  email: string;
+  source: string;
+  stand_id: string;
+  value: string;
+  notes: string;
+};
+
+const EMPTY_FORM: FormShape = {
+  name: '',
+  phone: '',
+  email: '',
+  source: 'stand',
+  stand_id: '',
+  value: '',
+  notes: '',
+};
 
 export default function LeadsPage() {
-  const { leads, loading, loadingMore, hasMore, total, loadMore, create, update, remove } = useLeads();
+  const { leads, loading, total, create, update, remove } = useLeads();
   const { stands } = useStands();
   const { user } = useAuth();
+
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState('all');
   const [selected, setSelected] = useState<LeadRow | null>(null);
-  const [showNew, setShowNew] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
-  const [showStageChange, setShowStageChange] = useState(false);
+  const [sheet, setSheet] = useState<null | 'new' | 'edit' | 'stage' | 'detail'>(null);
+  const [form, setForm] = useState<FormShape>(EMPTY_FORM);
 
-  // Forms
-  const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    source: 'stand',
-    stand_id: '',
-    value: '',
-    notes: '',
-  });
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return leads.filter((l) => {
+      const matchSearch =
+        (l.name || '').toLowerCase().includes(q) || (l.phone || '').includes(search);
+      const matchStage = stageFilter === 'all' || l.stage === stageFilter;
+      return matchSearch && matchStage;
+    });
+  }, [leads, search, stageFilter]);
 
-  const filtered = useMemo(
-    () =>
-      leads.filter((l) => {
-        const matchSearch =
-          (l.name || '').toLowerCase().includes(search.toLowerCase()) ||
-          (l.phone || '').includes(search);
-        const matchStage = stageFilter === 'all' || l.stage === stageFilter;
-        return matchSearch && matchStage;
-      }),
-    [leads, search, stageFilter]
-  );
+  const openDetail = (l: LeadRow) => {
+    setSelected(l);
+    setSheet('detail');
+  };
+
+  const openNew = () => {
+    setForm(EMPTY_FORM);
+    setSheet('new');
+  };
+
+  const openEdit = (l: LeadRow) => {
+    setSelected(l);
+    setForm({
+      name: l.name,
+      phone: l.phone || '',
+      email: l.email || '',
+      source: l.source || 'stand',
+      stand_id: l.stand_id || '',
+      value: String(l.estimated_value || ''),
+      notes: l.notes || '',
+    });
+    setSheet('edit');
+  };
 
   const handleCreate = async () => {
-    if (!form.name.trim()) {
-      toast.error('Nome é obrigatório');
-      return;
-    }
-    if (form.email && !isValidEmail(form.email)) {
-      toast.error('Email inválido');
-      return;
-    }
-    if (form.phone && !isValidBRPhone(form.phone)) {
-      toast.error('Telefone inválido (use DDD + número)');
-      return;
-    }
-    if (!tryConsume(`lead:create:${user?.id ?? 'anon'}`, RATE_LIMITS.createLead)) {
-      toast.error('Muitos leads em pouco tempo. Aguarde um instante.');
-      return;
-    }
+    if (!form.name.trim()) return toast.error('Nome é obrigatório');
+    if (form.email && !isValidEmail(form.email)) return toast.error('Email inválido');
+    if (form.phone && !isValidBRPhone(form.phone))
+      return toast.error('Telefone inválido (DDD + número)');
+    if (!tryConsume(`lead:create:${user?.id ?? 'anon'}`, RATE_LIMITS.createLead))
+      return toast.error('Aguarde um instante antes de criar outro lead.');
+
     await create({
       name: form.name.trim(),
       phone: form.phone ? onlyDigits(form.phone) : null,
@@ -130,33 +155,15 @@ export default function LeadsPage() {
       notes: form.notes || null,
     });
     toast.success('Lead criado');
-    setShowNew(false);
-    setForm({ name: '', phone: '', email: '', source: 'stand', stand_id: '', value: '', notes: '' });
-  };
-
-  const openEdit = (lead: LeadRow) => {
-    setForm({
-      name: lead.name,
-      phone: lead.phone || '',
-      email: lead.email || '',
-      source: lead.source || 'stand',
-      stand_id: lead.stand_id || '',
-      value: String(lead.estimated_value || ''),
-      notes: lead.notes || '',
-    });
-    setShowEdit(true);
+    setSheet(null);
+    setForm(EMPTY_FORM);
   };
 
   const handleEdit = async () => {
     if (!selected || !form.name.trim()) return;
-    if (form.email && !isValidEmail(form.email)) {
-      toast.error('Email inválido');
-      return;
-    }
-    if (form.phone && !isValidBRPhone(form.phone)) {
-      toast.error('Telefone inválido (use DDD + número)');
-      return;
-    }
+    if (form.email && !isValidEmail(form.email)) return toast.error('Email inválido');
+    if (form.phone && !isValidBRPhone(form.phone))
+      return toast.error('Telefone inválido');
     await update(selected.id, {
       name: form.name.trim(),
       phone: form.phone ? onlyDigits(form.phone) : null,
@@ -166,21 +173,15 @@ export default function LeadsPage() {
       notes: form.notes || null,
     });
     toast.success('Lead atualizado');
-    setShowEdit(false);
+    setSheet(null);
     setSelected(null);
   };
 
   const handleStageChange = async (newStage: string) => {
     if (!selected) return;
-    const wasNotClosed = selected.stage !== 'fechado';
     await update(selected.id, { stage: newStage });
-    if (newStage === 'fechado' && wasNotClosed) {
-      fireConfetti();
-      toast.success(`🎉 Venda fechada: ${selected.name}`);
-    } else {
-      toast.success(`Movido para ${getLeadStageLabel(newStage)}`);
-    }
-    setShowStageChange(false);
+    toast.success(`Movido para ${getLeadStageLabel(newStage)}`);
+    setSheet(null);
     setSelected(null);
   };
 
@@ -189,447 +190,314 @@ export default function LeadsPage() {
     if (!confirm(`Excluir ${selected.name}?`)) return;
     await remove(selected.id);
     toast.success('Lead excluído');
+    setSheet(null);
     setSelected(null);
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-border-strong border-t-solar rounded-full animate-spin" />
-      </div>
-    );
-  }
+  if (loading) return <PageSkeleton />;
 
   return (
-    <motion.div
-      variants={staggerParent(0.04)}
-      initial="hidden"
-      animate="visible"
-      className="space-y-6"
-    >
-      {/* Header */}
-      <motion.div variants={slideUp} className="flex items-end justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Leads</h1>
-          <p className="mt-1 text-sm text-text-soft">
-            {filtered.length} de {total || leads.length} total
-          </p>
-        </div>
-        <Button variant="solar" size="md" onClick={() => setShowNew(true)}>
-          <Plus className="w-4 h-4" />
-          <span className="hidden sm:inline">Novo lead</span>
-        </Button>
-      </motion.div>
+    <div className="animate-fade-in">
+      <PageHeader
+        eyebrow="Pipeline · ativos"
+        title={<>Leads</>}
+        description={`${filtered.length} de ${total || leads.length} no funil`}
+        actions={
+          <Button onClick={openNew} size="md">
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Novo lead</span>
+          </Button>
+        }
+      />
 
       {/* Filters */}
-      <motion.div variants={slideUp} className="space-y-3">
+      <div className="space-y-3">
         <Input
-          icon={<Search className="w-4 h-4" />}
+          icon={<Search className="h-4 w-4" />}
           placeholder="Buscar por nome ou telefone…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
           <Chip active={stageFilter === 'all'} onClick={() => setStageFilter('all')}>
-            Todos
+            Todos · {leads.length}
           </Chip>
           {STAGE_ORDER.map((s) => (
-            <Chip
-              key={s}
-              active={stageFilter === s}
-              onClick={() => setStageFilter(s)}
-            >
+            <Chip key={s} active={stageFilter === s} onClick={() => setStageFilter(s)}>
               {getLeadStageLabel(s)}
             </Chip>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      {/* Lead list */}
-      {filtered.length === 0 ? (
-        <Surface variant="elevated" padding="xl">
-          <EmptyState
-            icon={<FileText className="w-6 h-6" />}
-            title={leads.length === 0 ? 'Nenhum lead ainda' : 'Nada encontrado'}
-            description={
-              leads.length === 0
-                ? 'Comece adicionando seu primeiro lead.'
-                : 'Tente ajustar filtros ou busca.'
-            }
-            action={
-              leads.length === 0 ? (
-                <Button variant="solar" onClick={() => setShowNew(true)}>
-                  <Plus className="w-4 h-4" />
-                  Novo lead
-                </Button>
-              ) : null
-            }
-          />
-        </Surface>
-      ) : (
-        <motion.div variants={staggerParent(0.02)} className="space-y-2">
-          {filtered.map((lead) => (
-            <motion.div key={lead.id} variants={slideUp}>
-              <div
-                onClick={() => setSelected(lead)}
-                className="group flex items-center gap-3 p-3 bg-surface-0 border border-border rounded-md hover:border-border-glow hover:bg-surface-1 transition-colors cursor-pointer"
+      {/* List */}
+      <div className="mt-5">
+        {filtered.length === 0 ? (
+          <Card variant="glass" padding="xl">
+            <EmptyState
+              icon={<FileText className="h-5 w-5" />}
+              title={leads.length === 0 ? 'Nenhum lead ainda' : 'Nada encontrado'}
+              description={
+                leads.length === 0
+                  ? 'Comece adicionando seu primeiro lead ao funil.'
+                  : 'Tente ajustar filtros ou busca.'
+              }
+              action={
+                leads.length === 0 ? (
+                  <Button onClick={openNew}>
+                    <Plus className="h-4 w-4" />
+                    Novo lead
+                  </Button>
+                ) : null
+              }
+            />
+          </Card>
+        ) : (
+          <motion.ul
+            initial="hidden"
+            animate="show"
+            variants={{ show: { transition: { staggerChildren: 0.02 } } }}
+            className="space-y-2"
+          >
+            {filtered.map((l) => (
+              <motion.li
+                key={l.id}
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+                }}
               >
-                <Avatar name={lead.name} size="md" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-medium text-text truncate">{lead.name}</h3>
-                    <Badge
-                      variant={STAGE_VARIANT[lead.stage] || 'neutral'}
-                      size="xs"
-                    >
-                      {getLeadStageLabel(lead.stage)}
-                    </Badge>
+                <button
+                  onClick={() => openDetail(l)}
+                  className="group flex w-full items-center gap-3 rounded-[16px] border border-line bg-ink-900 p-3 text-left transition-all press hover:border-line-strong hover:bg-ink-800"
+                >
+                  <Avatar name={l.name} size="md" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="truncate text-sm font-semibold text-fg">{l.name}</h3>
+                      <Badge
+                        variant={STAGE_VARIANT[l.stage] || 'neutral'}
+                        size="xs"
+                      >
+                        {getLeadStageLabel(l.stage)}
+                      </Badge>
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-2 text-[11px] text-fg-muted">
+                      <span className="font-mono">{formatCurrency(l.estimated_value)}</span>
+                      {l.stand_name && <span>· {l.stand_name}</span>}
+                      <span>· {timeAgo(l.updated_at)}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5 text-[11px] text-text-faint">
-                    <span className="font-mono">{formatCurrency(lead.estimated_value)}</span>
-                    {lead.stand_name && <span>· {lead.stand_name}</span>}
-                    <span>· {timeAgo(lead.updated_at)}</span>
+                  {l.ai_score > 0 && (
+                    <Ring
+                      value={l.ai_score}
+                      size={36}
+                      stroke={3}
+                      gradient={l.ai_score >= 70 ? 'iris' : 'cyan'}
+                      label={`${l.ai_score}`}
+                    />
+                  )}
+                </button>
+              </motion.li>
+            ))}
+          </motion.ul>
+        )}
+      </div>
+
+      {/* Detail / Actions sheet */}
+      <Sheet open={sheet === 'detail'} onOpenChange={(o) => !o && setSheet(null)}>
+        <SheetContent>
+          {selected && (
+            <>
+              <SheetHeader
+                title={selected.name}
+                description={`${getLeadSourceLabel(selected.source || 'stand')} · ${timeAgo(selected.updated_at)}`}
+              />
+              <SheetBody>
+                <div className="mb-4 flex items-center justify-between gap-3 rounded-[16px] border border-line bg-white/[0.03] p-3">
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-fg-faint">
+                      Valor estimado
+                    </p>
+                    <p className="mt-1 font-display text-xl">
+                      {formatCurrency(selected.estimated_value)}
+                    </p>
                   </div>
+                  <Badge variant={STAGE_VARIANT[selected.stage] || 'neutral'} size="md">
+                    {getLeadStageLabel(selected.stage)}
+                  </Badge>
                 </div>
 
-                {lead.ai_score > 0 && (
-                  <Ring
-                    value={lead.ai_score}
-                    size={36}
-                    strokeWidth={3}
-                    variant={lead.ai_score >= 70 ? 'solar' : 'aurora'}
-                  />
+                {selected.notes && (
+                  <div className="mb-4 rounded-[14px] border border-line bg-white/[0.02] p-3 text-sm text-fg-soft">
+                    {selected.notes}
+                  </div>
                 )}
 
-                <div className="hidden sm:flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {lead.phone && (
-                    <>
-                      <a
-                        href={generateWhatsAppLink(
-                          lead.phone,
-                          `Olá ${getFirstName(lead.name)}!`
-                        )}
-                        target="_blank"
-                        rel="noopener"
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-8 h-8 rounded-md flex items-center justify-center text-success hover:bg-success/10 transition-colors"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                      </a>
-                      <a
-                        href={`tel:${lead.phone}`}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-8 h-8 rounded-md flex items-center justify-center text-info hover:bg-info/10 transition-colors"
-                      >
-                        <Phone className="w-4 h-4" />
-                      </a>
-                    </>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
-          {hasMore && stageFilter === 'all' && !search && (
-            <div className="pt-3 flex justify-center">
-              <Button
-                variant="outline"
-                onClick={loadMore}
-                disabled={loadingMore}
-              >
-                {loadingMore ? 'Carregando…' : `Carregar mais (${total - leads.length} restantes)`}
-              </Button>
-            </div>
-          )}
-        </motion.div>
-      )}
-
-      {/* Detail dialog */}
-      <Dialog
-        open={!!selected && !showEdit && !showStageChange}
-        onOpenChange={(v) => !v && setSelected(null)}
-      >
-        <DialogContent size="lg">
-          {selected && (
-            <div className="space-y-5">
-              <DialogHeader>
-                <DialogTitle className="flex items-start gap-3">
-                  <Avatar name={selected.name} size="lg" ring="solar" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-display text-2xl text-text">{selected.name}</p>
-                    <div className="flex flex-wrap gap-2 mt-1.5 text-[11px] text-text-soft">
-                      {selected.email && <span>{selected.email}</span>}
-                      {selected.phone && <span>· {selected.phone}</span>}
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      <Badge variant={STAGE_VARIANT[selected.stage]} size="sm">
-                        {getLeadStageLabel(selected.stage)}
-                      </Badge>
-                      {selected.source && (
-                        <Badge variant="neutral" size="sm">
-                          {getLeadSourceLabel(selected.source)}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </DialogTitle>
-              </DialogHeader>
-
-              {/* Quick actions */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {selected.phone && (
-                  <>
-                    <a href={`tel:${selected.phone}`}>
-                      <Button variant="outline" className="w-full flex-col h-auto py-3 border-info/30 text-info hover:bg-info/10">
-                        <Phone className="w-4 h-4 mb-0.5" />
-                        <span className="text-[11px]">Ligar</span>
-                      </Button>
-                    </a>
+                <div className="grid grid-cols-2 gap-2">
+                  {selected.phone && (
                     <a
                       href={generateWhatsAppLink(
                         selected.phone,
-                        `Olá ${getFirstName(selected.name)}!`
+                        `Olá ${selected.name.split(' ')[0]}!`,
                       )}
                       target="_blank"
-                      rel="noopener"
+                      rel="noopener noreferrer"
                     >
-                      <Button variant="outline" className="w-full flex-col h-auto py-3 border-success/30 text-success hover:bg-success/10">
-                        <MessageCircle className="w-4 h-4 mb-0.5" />
-                        <span className="text-[11px]">WhatsApp</span>
+                      <Button block variant="secondary">
+                        <MessageCircle className="h-4 w-4" /> WhatsApp
                       </Button>
                     </a>
-                  </>
-                )}
+                  )}
+                  {selected.phone && (
+                    <a href={`tel:${selected.phone}`}>
+                      <Button block variant="secondary">
+                        <Phone className="h-4 w-4" /> Ligar
+                      </Button>
+                    </a>
+                  )}
+                  <Button block variant="outline" onClick={() => openEdit(selected)}>
+                    <Edit3 className="h-4 w-4" /> Editar
+                  </Button>
+                  <Button
+                    block
+                    variant="outline"
+                    onClick={() => setSheet('stage')}
+                  >
+                    <ArrowRight className="h-4 w-4" /> Mover etapa
+                  </Button>
+                </div>
+
                 <Button
-                  variant="outline"
-                  className="w-full flex-col h-auto py-3 border-aurora-1/30 text-aurora-1 hover:bg-aurora-1/10"
-                  onClick={() => setShowStageChange(true)}
+                  block
+                  variant="ghost"
+                  className="mt-3 text-bad hover:bg-bad/10"
+                  onClick={handleDelete}
                 >
-                  <ArrowRight className="w-4 h-4 mb-0.5" />
-                  <span className="text-[11px]">Mover</span>
+                  <Trash2 className="h-4 w-4" /> Excluir lead
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-full flex-col h-auto py-3"
-                  onClick={() => openEdit(selected)}
-                >
-                  <Edit3 className="w-4 h-4 mb-0.5" />
-                  <span className="text-[11px]">Editar</span>
-                </Button>
-              </div>
-
-              {/* Info grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {[
-                  { label: 'Valor', value: formatCurrency(selected.estimated_value) },
-                  { label: 'Score IA', value: `${selected.ai_score}/100` },
-                  { label: 'Origem', value: getLeadSourceLabel(selected.source || '—') },
-                  { label: 'Stand', value: selected.stand_name || '—' },
-                  { label: 'Agente', value: selected.agent_name || '—' },
-                  { label: 'Atualizado', value: timeAgo(selected.updated_at) },
-                ].map((i) => (
-                  <Surface key={i.label} variant="flat" padding="sm">
-                    <p className="text-[10px] text-text-faint uppercase tracking-wider mb-1">
-                      {i.label}
-                    </p>
-                    <p className="text-sm font-medium text-text truncate">{i.value}</p>
-                  </Surface>
-                ))}
-              </div>
-
-              {selected.notes && (
-                <Surface variant="flat" padding="md">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <FileText className="w-3.5 h-3.5 text-text-faint" />
-                    <span className="text-[10px] text-text-faint uppercase tracking-wider font-medium">
-                      Notas
-                    </span>
-                  </div>
-                  <p className="text-sm text-text-soft">{selected.notes}</p>
-                </Surface>
-              )}
-
-              <button
-                onClick={handleDelete}
-                className="w-full flex items-center justify-center gap-2 h-10 rounded-md bg-danger/10 border border-danger/25 text-danger text-xs font-medium hover:bg-danger/15 transition-colors"
-              >
-                <Trash2 className="w-3.5 h-3.5" /> Excluir lead
-              </button>
-            </div>
+              </SheetBody>
+            </>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
-      {/* Change stage */}
-      <Dialog open={showStageChange} onOpenChange={setShowStageChange}>
-        <DialogContent size="sm">
-          <DialogHeader>
-            <DialogTitle>Mover para…</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2">
-            {STAGE_ORDER.map((stage) => {
-              const isCurrent = selected?.stage === stage;
-              return (
-                <button
-                  key={stage}
-                  onClick={() => !isCurrent && handleStageChange(stage)}
-                  disabled={isCurrent}
-                  className={cn(
-                    'w-full flex items-center gap-3 p-3 rounded-md border text-left transition-colors',
-                    isCurrent
-                      ? 'bg-solar/10 border-solar/30'
-                      : 'bg-surface-1 border-border hover:border-border-glow hover:bg-surface-2'
-                  )}
-                >
-                  <Badge variant={STAGE_VARIANT[stage]} size="sm">
-                    {getLeadStageLabel(stage)}
-                  </Badge>
-                  {isCurrent && (
-                    <span className="text-[10px] text-text-faint ml-auto">atual</span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Stage change */}
+      <Sheet open={sheet === 'stage'} onOpenChange={(o) => !o && setSheet('detail')}>
+        <SheetContent>
+          <SheetHeader title="Mover etapa" description="Escolha a nova fase no funil" />
+          <SheetBody>
+            <ul className="space-y-2 pt-2">
+              {STAGE_ORDER.map((s) => (
+                <li key={s}>
+                  <button
+                    onClick={() => handleStageChange(s)}
+                    className={cn(
+                      'flex w-full items-center justify-between rounded-[14px] border px-4 py-3 text-sm font-medium press',
+                      selected?.stage === s
+                        ? 'border-iris/40 bg-iris/10 text-fg'
+                        : 'border-line bg-white/[0.02] text-fg-soft hover:border-line-strong hover:bg-white/[0.05]',
+                    )}
+                  >
+                    {getLeadStageLabel(s)}
+                    {selected?.stage === s && <Badge variant="iris" size="xs">atual</Badge>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </SheetBody>
+        </SheetContent>
+      </Sheet>
 
-      {/* Edit */}
-      <Dialog open={showEdit} onOpenChange={setShowEdit}>
-        <DialogContent size="md">
-          <DialogHeader>
-            <DialogTitle>Editar lead</DialogTitle>
-          </DialogHeader>
-          <LeadForm
-            form={form}
-            setForm={setForm}
-            stands={stands}
-            onCancel={() => setShowEdit(false)}
-            onSubmit={handleEdit}
-            submitLabel="Salvar"
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* New */}
-      <Dialog open={showNew} onOpenChange={setShowNew}>
-        <DialogContent size="md">
-          <DialogHeader>
-            <DialogTitle>Novo lead</DialogTitle>
-          </DialogHeader>
-          <LeadForm
-            form={form}
-            setForm={setForm}
-            stands={stands}
-            onCancel={() => setShowNew(false)}
-            onSubmit={handleCreate}
-            submitLabel="Salvar lead"
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* Mobile FAB */}
-      <motion.button
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setShowNew(true)}
-        className="lg:hidden fixed bottom-24 right-4 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow"
-        style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+      {/* New / Edit */}
+      <Sheet
+        open={sheet === 'new' || sheet === 'edit'}
+        onOpenChange={(o) => !o && setSheet(null)}
       >
-        <Plus className="w-6 h-6 text-canvas" />
-      </motion.button>
-    </motion.div>
-  );
-}
-
-interface FormShape {
-  name: string;
-  phone: string;
-  email: string;
-  source: string;
-  stand_id: string;
-  value: string;
-  notes: string;
-}
-
-function LeadForm({
-  form,
-  setForm,
-  stands,
-  onCancel,
-  onSubmit,
-  submitLabel,
-}: {
-  form: FormShape;
-  setForm: (f: FormShape) => void;
-  stands: Array<{ id: string; name: string; status: string }>;
-  onCancel: () => void;
-  onSubmit: () => void;
-  submitLabel: string;
-}) {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Input
-          label="Nome"
-          placeholder="Nome completo"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
-        <Input
-          label="Telefone"
-          placeholder="(11) 99999-0000"
-          value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        />
-        <Input
-          label="Email"
-          placeholder="email@exemplo.com"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <Input
-          label="Valor estimado"
-          type="number"
-          placeholder="500000"
-          value={form.value}
-          onChange={(e) => setForm({ ...form, value: e.target.value })}
-        />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <Select
-          label="Origem"
-          value={form.source}
-          onChange={(v) => setForm({ ...form, source: v })}
-          options={SOURCE_OPTIONS.map((s) => ({ value: s, label: getLeadSourceLabel(s) }))}
-        />
-        {stands.length > 0 && (
-          <Select
-            label="Stand"
-            value={form.stand_id}
-            onChange={(v) => setForm({ ...form, stand_id: v })}
-            options={[
-              { value: '', label: '—' },
-              ...stands
-                .filter((s) => s.status === 'ativo')
-                .map((s) => ({ value: s.id, label: s.name })),
-            ]}
+        <SheetContent>
+          <SheetHeader
+            title={sheet === 'new' ? 'Novo lead' : 'Editar lead'}
+            description={sheet === 'new' ? 'Adicione um lead ao seu funil' : 'Atualize os dados do lead'}
           />
-        )}
-      </div>
-      <Textarea
-        label="Notas"
-        rows={3}
-        placeholder="Observações…"
-        value={form.notes}
-        onChange={(e) => setForm({ ...form, notes: e.target.value })}
-      />
-      <div className="flex gap-2 pt-2">
-        <Button variant="outline" className="flex-1" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button variant="solar" className="flex-1" onClick={onSubmit}>
-          {submitLabel}
-        </Button>
-      </div>
+          <SheetBody>
+            <div className="space-y-3 pt-2">
+              <Input
+                label="Nome"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Nome completo"
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  label="Telefone"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  placeholder="(11) 99999-9999"
+                />
+                <Input
+                  label="Valor (R$)"
+                  type="number"
+                  value={form.value}
+                  onChange={(e) => setForm({ ...form, value: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
+              <Input
+                label="Email"
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="cliente@email.com"
+              />
+              <Select
+                label="Origem"
+                value={form.source}
+                onChange={(e) => setForm({ ...form, source: e.target.value })}
+              >
+                {SOURCE_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {getLeadSourceLabel(s)}
+                  </option>
+                ))}
+              </Select>
+              <Select
+                label="Stand"
+                value={form.stand_id}
+                onChange={(e) => setForm({ ...form, stand_id: e.target.value })}
+              >
+                <option value="">— Nenhum —</option>
+                {stands.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </Select>
+              <Textarea
+                label="Notas"
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                placeholder="Contexto, preferências, histórico…"
+              />
+
+              <div className="flex gap-2 pt-3">
+                <Button
+                  block
+                  variant="secondary"
+                  onClick={() => setSheet(null)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  block
+                  onClick={sheet === 'new' ? handleCreate : handleEdit}
+                >
+                  {sheet === 'new' ? 'Criar' : 'Salvar'}
+                </Button>
+              </div>
+            </div>
+          </SheetBody>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

@@ -3,20 +3,21 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowRight, Fingerprint, Lock, Mail, ShieldCheck, User } from 'lucide-react';
+import {
+  ArrowRight,
+  Fingerprint,
+  Lock,
+  Mail,
+  ShieldCheck,
+  Sparkles,
+  User,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import { BrandMark } from '@/components/brand/brand-mark';
+import { Brand, Monogram } from '@/components/brand/brand';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/auth-context';
 import { cn } from '@/lib/utils';
-import { spring } from '@/lib/motion';
-
-const previewRows = [
-  { label: 'Leads em alta', value: '18', tone: 'text-solar' },
-  { label: 'Visitas hoje', value: '7', tone: 'text-success' },
-  { label: 'Fila ativa', value: '3', tone: 'text-info' },
-];
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,13 +28,14 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  if (authLoading) return <AuthBootScreen />;
+  if (authLoading) return <BootScreen />;
   if (user) {
     router.push('/dashboard');
     return null;
   }
 
-  const handleSubmit = async () => {
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!email || !password) {
       toast.error('Preencha email e senha');
       return;
@@ -47,185 +49,222 @@ export default function LoginPage() {
       const { error } = await signUp(email, password, fullName);
       if (error) toast.error(error);
       else {
-        toast.success('Conta criada! Verifique seu email.');
+        toast.success('Conta criada — verifique seu email');
         setIsSignUp(false);
         setPassword('');
       }
     } else {
       const { error } = await signIn(email, password);
       if (error) {
-        error.includes('Email not confirmed')
-          ? toast.error('Confirme seu email primeiro.')
-          : toast.error(error);
+        if (error.includes('Email not confirmed'))
+          toast.error('Confirme seu email primeiro.');
+        else toast.error(error);
       } else router.push('/dashboard');
     }
     setLoading(false);
   };
 
-  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    handleSubmit();
-  };
-
   return (
-    <main className="relative min-h-[100dvh] overflow-hidden bg-canvas text-text">
-      <div className="absolute inset-0 bg-[url('/brand/gds-native-bg.webp')] bg-cover bg-center" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_12%,rgba(91,241,198,0.16),transparent_28%),linear-gradient(180deg,rgba(6,8,10,0.16)_0%,rgba(6,8,10,0.62)_44%,#06080a_100%)]" />
-      <div className="absolute inset-0 bg-grid opacity-20" />
+    <main className="relative min-h-[100dvh] overflow-hidden">
+      {/* Background */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-grid opacity-[0.35]" />
+        <div className="absolute -left-40 -top-40 h-[520px] w-[520px] rounded-full bg-iris/25 blur-[140px]" />
+        <div className="absolute -right-40 top-1/4 h-[520px] w-[520px] rounded-full bg-cyanx/20 blur-[140px]" />
+        <div className="absolute inset-x-0 bottom-0 h-[280px] bg-gradient-to-t from-ink-950 via-ink-950/80 to-transparent" />
+      </div>
 
-      <section className="relative z-10 mx-auto grid min-h-[100dvh] w-full max-w-[1180px] grid-cols-1 px-5 pb-[max(22px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] lg:grid-cols-[1fr_420px] lg:items-center lg:gap-14 lg:px-8">
+      <section
+        className="relative z-10 mx-auto grid min-h-[100dvh] w-full max-w-[1180px] grid-cols-1 px-5 lg:grid-cols-[1fr_440px] lg:items-center lg:gap-16 lg:px-8"
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top), 20px)',
+          paddingBottom: 'max(env(safe-area-inset-bottom), 28px)',
+        }}
+      >
+        {/* Hero side (desktop) */}
         <div className="hidden lg:block">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={spring}
-            className="space-y-8"
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           >
-            <BrandMark size="lg" />
-            <div className="max-w-[560px]">
-              <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-text-soft backdrop-blur-md">
-                <ShieldCheck className="h-3.5 w-3.5 text-success" />
-                CRM nativo para operação imobiliária
-              </p>
-              <h1 className="text-[64px] font-semibold leading-[0.98] text-white">
-                Controle o stand como uma sala de comando.
-              </h1>
-              <p className="mt-5 max-w-[460px] text-base leading-7 text-text-soft">
-                Fila, carteira, visitas, leads e IA em um fluxo desenhado para uso diário no celular.
-              </p>
+            <Brand size="lg" href={null} />
+            <h1 className="mt-12 font-display text-[64px] leading-[0.98] tracking-[-0.03em]">
+              Forja de vendas
+              <br />
+              <span className="text-iris-gradient">sob comando</span>
+            </h1>
+            <p className="mt-6 max-w-md text-base text-fg-soft">
+              O CRM nativo para stands imobiliários. Fila em tempo real,
+              agenda compartilhada, carteira privada e IA que estuda seus leads
+              enquanto você dorme.
+            </p>
+
+            <div className="mt-10 grid max-w-lg grid-cols-3 gap-3">
+              {[
+                { label: 'Leads ativos', value: '284' },
+                { label: 'Visitas · hoje', value: '17' },
+                { label: 'Plantão · ao vivo', value: '3' },
+              ].map((s) => (
+                <motion.div
+                  key={s.label}
+                  initial={{ opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.5 }}
+                  className="rounded-[18px] border border-line bg-white/[0.04] p-4"
+                >
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-fg-faint">
+                    {s.label}
+                  </p>
+                  <p className="mt-2 font-display text-3xl text-fg">{s.value}</p>
+                </motion.div>
+              ))}
             </div>
 
-            <div className="grid max-w-[520px] grid-cols-3 gap-3">
-              {previewRows.map((row) => (
-                <div key={row.label} className="native-panel rounded-lg p-4">
-                  <p className={cn('text-3xl font-semibold', row.tone)}>{row.value}</p>
-                  <p className="mt-1 text-xs text-text-faint">{row.label}</p>
-                </div>
-              ))}
+            <div className="mt-8 flex items-center gap-2 text-xs text-fg-muted">
+              <ShieldCheck className="h-4 w-4 text-ok" />
+              Supabase Auth · TLS 1.3 · Row Level Security ativo
             </div>
           </motion.div>
         </div>
 
-        <div className="flex min-h-[100dvh] flex-col lg:min-h-0">
-          <motion.header
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={spring}
-            className="flex items-center justify-between lg:hidden"
-          >
-            <BrandMark size="md" />
-            <span className="brand-chip rounded-full px-3 py-1 text-[10px] font-semibold uppercase text-text-soft">
-              Native
+        {/* Form side */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col"
+        >
+          <div className="lg:hidden mb-8 flex items-center justify-between">
+            <Brand size="md" href={null} />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-fg-muted">
+              <Sparkles className="h-3 w-3 text-iris-hi" />
+              2026
             </span>
-          </motion.header>
+          </div>
 
-          <div className="flex-1 lg:hidden" />
-
-          <motion.div
-            initial={{ opacity: 0, y: 18, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={spring}
-            className="native-panel rounded-lg p-4 lg:p-5"
-          >
-            <div className="mb-5 flex items-start justify-between gap-4">
-              <div>
-                <p className="flex items-center gap-2 text-xs font-semibold uppercase text-success">
-                  <Fingerprint className="h-4 w-4" />
-                  Acesso protegido
-                </p>
-                <h2 className="mt-2 text-[32px] font-semibold leading-tight text-white">
-                  {isSignUp ? 'Criar acesso' : 'Entrar no GDS'}
+          <div className="glass-strong relative overflow-hidden rounded-[26px] p-6 lg:p-7">
+            <div className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-iris/20 blur-3xl" />
+            <div className="relative">
+              <div className="mb-6">
+                <h2 className="font-display text-2xl tracking-tight">
+                  {isSignUp ? 'Crie sua conta' : 'Entre no comando'}
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-text-soft">
+                <p className="mt-1 text-sm text-fg-muted">
                   {isSignUp
-                    ? 'Sua operação começa com um perfil seguro.'
-                    : 'Continue sua rotina comercial em modo aplicativo.'}
+                    ? 'Comece a forjar sua operação hoje.'
+                    : 'Bem-vindo de volta.'}
                 </p>
               </div>
-            </div>
 
-            <div className="mb-4 grid grid-cols-2 gap-1 rounded-full border border-white/[0.1] bg-white/[0.055] p-1">
-              {[
-                { label: 'Entrar', value: false },
-                { label: 'Criar', value: true },
-              ].map((item) => (
-                <button
-                  key={item.label}
-                  type="button"
-                  onClick={() => setIsSignUp(item.value)}
-                  className={cn(
-                    'h-10 rounded-full text-sm font-semibold transition-all',
-                    isSignUp === item.value
-                      ? 'bg-white text-canvas shadow-sm'
-                      : 'text-text-faint hover:text-text'
-                  )}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
-            <form className="space-y-3" onSubmit={handleFormSubmit}>
-              {isSignUp && (
+              <form onSubmit={submit} className="space-y-3">
+                {isSignUp && (
+                  <Input
+                    name="fullName"
+                    icon={<User className="h-4 w-4" />}
+                    placeholder="Nome completo"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    autoComplete="name"
+                  />
+                )}
                 <Input
-                  icon={<User className="h-4 w-4" />}
-                  autoComplete="name"
-                  placeholder="Nome completo"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
+                  name="email"
+                  type="email"
+                  icon={<Mail className="h-4 w-4" />}
+                  placeholder="nome@empresa.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                 />
-              )}
-              <Input
-                icon={<Mail className="h-4 w-4" />}
-                autoComplete="email"
-                type="email"
-                inputMode="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <Input
-                icon={<Lock className="h-4 w-4" />}
-                autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                type="password"
-                placeholder="Senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+                <Input
+                  name="password"
+                  type="password"
+                  icon={<Lock className="h-4 w-4" />}
+                  placeholder="Senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                />
 
-              <Button
-                variant="solar"
-                size="lg"
-                className="h-12 w-full text-[15px]"
-                loading={loading}
-                type="submit"
+                <Button
+                  type="submit"
+                  block
+                  size="lg"
+                  loading={loading}
+                  className="mt-5"
+                >
+                  {isSignUp ? 'Criar conta' : 'Entrar'}
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </form>
+
+              <div className="my-5 flex items-center gap-3">
+                <span className="h-px flex-1 bg-line" />
+                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-fg-faint">
+                  ou
+                </span>
+                <span className="h-px flex-1 bg-line" />
+              </div>
+
+              <button
+                disabled
+                className="flex w-full items-center justify-center gap-2 rounded-[14px] border border-line bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-fg-muted opacity-70"
               >
-                {isSignUp ? 'Criar acesso' : 'Entrar'}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </form>
-          </motion.div>
-        </div>
+                <Fingerprint className="h-4 w-4" />
+                Biometria (em breve)
+              </button>
+
+              <p className="mt-6 text-center text-sm text-fg-muted">
+                {isSignUp ? 'Já tem conta?' : 'Primeira vez aqui?'}{' '}
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="font-semibold text-iris-hi hover:text-iris"
+                >
+                  {isSignUp ? 'Entrar' : 'Criar conta'}
+                </button>
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-5 text-center text-[11px] text-fg-faint">
+            Ao continuar, você aceita os termos de uso e a política de privacidade.
+          </p>
+        </motion.div>
       </section>
     </main>
   );
 }
 
-function AuthBootScreen() {
+function BootScreen() {
   return (
-    <main className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-canvas text-text">
-      <div className="absolute inset-0 bg-[url('/brand/gds-native-bg.webp')] bg-cover bg-center opacity-60" />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,8,10,0.36),#06080a_74%)]" />
-      <div className="relative z-10 flex flex-col items-center gap-4">
-        <BrandMark size="lg" />
-        <div className="h-1 w-28 overflow-hidden rounded-full bg-white/[0.08]">
-          <motion.div
-            className="h-full w-1/2 rounded-full bg-solar-gradient"
-            animate={{ x: ['-100%', '220%'] }}
-            transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-iris/30 blur-[160px]" />
+      </div>
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="relative flex flex-col items-center"
+      >
+        <Monogram size="xl" />
+        <p className="mt-5 text-xs font-semibold uppercase tracking-[0.3em] text-fg-muted">
+          Standforge
+        </p>
+        <div className="mt-6 flex items-center gap-1.5">
+          <span className={cn('h-1.5 w-1.5 rounded-full bg-iris animate-pulse')} />
+          <span
+            className={cn('h-1.5 w-1.5 rounded-full bg-iris animate-pulse')}
+            style={{ animationDelay: '120ms' }}
+          />
+          <span
+            className={cn('h-1.5 w-1.5 rounded-full bg-iris animate-pulse')}
+            style={{ animationDelay: '240ms' }}
           />
         </div>
-      </div>
-    </main>
+      </motion.div>
+    </div>
   );
 }

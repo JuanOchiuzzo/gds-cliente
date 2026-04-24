@@ -1,70 +1,78 @@
 'use client';
 
 import { forwardRef } from 'react';
-import { motion, type HTMLMotionProps } from 'framer-motion';
-import { cva, cn, type VariantProps } from '@/lib/cva';
-import { spring } from '@/lib/motion';
-import { Loader2 } from 'lucide-react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '@/lib/utils';
 
-const buttonVariants = cva(
-  'relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-lg font-semibold whitespace-nowrap select-none transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed',
+const button = cva(
+  'relative inline-flex items-center justify-center gap-2 font-medium whitespace-nowrap select-none ' +
+    'transition-[transform,background,box-shadow,border-color,color] duration-200 ease-spring press ' +
+    'disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-none',
   {
     variants: {
       variant: {
-        solar:
-          'bg-solar-gradient text-[#06110f] shadow-md hover:shadow-glow',
-        aurora:
-          'bg-aurora-gradient text-[#06110f] shadow-md hover:shadow-glow',
         primary:
-          'bg-white text-canvas border border-white hover:bg-white/90 shadow-sm',
-        ghost:
-          'bg-transparent text-text-soft hover:bg-white/[0.07] hover:text-text',
-        subtle:
-          'bg-white/[0.07] text-text-soft border border-white/[0.1] hover:bg-white/[0.12] hover:text-text',
-        outline:
-          'bg-transparent text-text border border-white/[0.18] hover:border-solar/50 hover:bg-white/[0.07]',
-        danger:
-          'bg-danger/90 text-white hover:bg-danger',
-        neon:
-          'bg-solar-gradient text-[#06110f] shadow-md hover:shadow-glow',
+          'text-white bg-[linear-gradient(135deg,#9d8cff,#5a46e0_55%,#4638b8)] ' +
+          'shadow-[0_10px_30px_rgba(129,110,255,0.35),inset_0_1px_0_rgba(255,255,255,0.25)] ' +
+          'hover:brightness-110',
         secondary:
-          'native-panel text-text hover:border-solar/40',
+          'text-fg bg-white/[0.06] border border-line-strong hover:bg-white/[0.1] hover:border-white/20',
+        ghost:
+          'text-fg-soft hover:text-fg hover:bg-white/[0.06]',
+        outline:
+          'text-fg border border-line-strong hover:bg-white/[0.04] hover:border-white/20',
+        danger:
+          'text-white bg-[linear-gradient(135deg,#ff8a9c,#ff4d66_55%,#d63148)] ' +
+          'shadow-[0_10px_24px_rgba(255,77,102,0.35)] hover:brightness-110',
+        glass:
+          'text-fg bg-white/[0.08] backdrop-blur-xl border border-white/15 hover:bg-white/[0.14]',
       },
       size: {
-        xs: 'h-8 px-2.5 text-xs',
-        sm: 'h-9 px-3 text-[13px]',
-        md: 'h-11 px-4 text-sm',
-        lg: 'h-12 px-5 text-[15px]',
-        icon: 'h-11 w-11',
-        'icon-sm': 'h-9 w-9',
-        'icon-lg': 'h-12 w-12',
+        xs: 'h-7 px-2.5 text-xs rounded-[8px]',
+        sm: 'h-9 px-3.5 text-sm rounded-[10px]',
+        md: 'h-11 px-4 text-sm rounded-[12px]',
+        lg: 'h-12 px-5 text-base rounded-[14px]',
+        xl: 'h-14 px-6 text-base rounded-[16px]',
+        icon: 'h-10 w-10 rounded-[12px]',
+        'icon-sm': 'h-8 w-8 rounded-[10px]',
+      },
+      block: {
+        true: 'w-full',
       },
     },
     defaultVariants: { variant: 'primary', size: 'md' },
-  }
+  },
 );
 
 export interface ButtonProps
-  extends Omit<HTMLMotionProps<'button'>, 'ref'>,
-    VariantProps<typeof buttonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof button> {
+  asChild?: boolean;
   loading?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ variant, size, className, loading, disabled, children, ...rest }, ref) => (
-    <motion.button
-      ref={ref}
-      whileTap={disabled || loading ? undefined : { scale: 0.96 }}
-      whileHover={disabled || loading ? undefined : { y: -1 }}
-      transition={spring}
-      disabled={disabled || loading}
-      className={cn(buttonVariants({ variant, size }), className)}
-      {...rest}
-    >
-      {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{children}</>}
-    </motion.button>
-  )
+  function Button(
+    { className, variant, size, block, asChild, loading, disabled, children, ...props },
+    ref,
+  ) {
+    const Comp = asChild ? Slot : 'button';
+    return (
+      <Comp
+        ref={ref}
+        className={cn(button({ variant, size, block }), className)}
+        disabled={disabled || loading}
+        {...props}
+      >
+        {loading ? (
+          <span
+            aria-hidden
+            className="h-4 w-4 rounded-full border-[1.8px] border-white/30 border-t-white animate-spin"
+          />
+        ) : null}
+        {children}
+      </Comp>
+    );
+  },
 );
-Button.displayName = 'Button';
-
-export { buttonVariants };

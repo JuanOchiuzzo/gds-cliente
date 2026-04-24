@@ -1,16 +1,6 @@
 'use client';
 
-import NumberFlowPrimitive, { type Format } from '@number-flow/react';
-import { cn, normalizeNumber } from '@/lib/utils';
-
-interface NumberFlowProps {
-  value: number;
-  prefix?: string;
-  suffix?: string;
-  format?: Format;
-  className?: string;
-  locales?: string;
-}
+import NumberFlowLib from '@number-flow/react';
 
 export function NumberFlow({
   value,
@@ -18,38 +8,20 @@ export function NumberFlow({
   suffix,
   format,
   className,
-  locales = 'pt-BR',
-}: NumberFlowProps) {
-  const safeValue = normalizeNumber(value);
-
-  return (
-    <NumberFlowPrimitive
-      value={safeValue}
-      prefix={prefix}
-      suffix={suffix}
-      format={format}
-      locales={locales}
-      className={cn('tabular-nums', className)}
-    />
-  );
-}
-
-export function CurrencyFlow({
-  value,
-  className,
 }: {
   value: number;
+  prefix?: string;
+  suffix?: string;
+  format?: Intl.NumberFormatOptions;
   className?: string;
 }) {
   return (
-    <NumberFlow
+    <NumberFlowLib
       value={value}
-      format={{
-        style: 'currency',
-        currency: 'BRL',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }}
+      prefix={prefix}
+      suffix={suffix}
+      format={format as never}
+      locales="pt-BR"
       className={className}
     />
   );

@@ -1,77 +1,75 @@
 'use client';
 
-import { forwardRef, type HTMLAttributes } from 'react';
-import { cva, cn, type VariantProps } from '@/lib/cva';
-import { getInitials } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 
-const avatarVariants = cva(
-  'relative inline-flex items-center justify-center overflow-hidden rounded-lg font-semibold select-none shadow-inset',
-  {
-    variants: {
-      size: {
-        xs: 'w-6 h-6 text-[10px]',
-        sm: 'w-8 h-8 text-xs',
-        md: 'w-10 h-10 text-xs',
-        lg: 'w-12 h-12 text-sm',
-        xl: 'w-16 h-16 text-base',
-        '2xl': 'w-20 h-20 text-lg',
-      },
-      ring: {
-        none: '',
-        solar: 'ring-2 ring-solar ring-offset-2 ring-offset-canvas',
-        aurora: 'ring-2 ring-aurora-1 ring-offset-2 ring-offset-canvas',
-        success: 'ring-2 ring-success ring-offset-2 ring-offset-canvas',
-        subtle: 'ring-1 ring-white/20',
-      },
-    },
-    defaultVariants: { size: 'md', ring: 'none' },
-  }
-);
+type Size = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
-export interface AvatarProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'size'>,
-    VariantProps<typeof avatarVariants> {
-  src?: string | null;
-  name?: string;
-  status?: 'online' | 'offline' | 'busy';
-}
-
-const statusColors = {
-  online: 'bg-success',
-  offline: 'bg-text-faint',
-  busy: 'bg-warning',
+const SIZE: Record<Size, string> = {
+  xs: 'h-6 w-6 text-[10px] rounded-[8px]',
+  sm: 'h-8 w-8 text-xs rounded-[10px]',
+  md: 'h-10 w-10 text-sm rounded-[12px]',
+  lg: 'h-12 w-12 text-base rounded-[14px]',
+  xl: 'h-16 w-16 text-lg rounded-[18px]',
 };
 
-export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
-  ({ size, ring, src, name = '', status, className, ...rest }, ref) => {
-    const initials = getInitials(name);
-    const bgGradient = 'bg-gradient-to-br from-aurora-1 via-solar to-surface-2 text-[#06110f]';
+const HUES = [
+  'from-[#9d8cff] to-[#5a46e0]',
+  'from-[#60deff] to-[#2a7fff]',
+  'from-[#ff7a59] to-[#ff3e78]',
+  'from-[#4ade80] to-[#139e6b]',
+  'from-[#fbbf24] to-[#d97706]',
+  'from-[#ff8bd0] to-[#a533a1]',
+];
 
-    return (
-      <div className="relative inline-block flex-shrink-0" ref={ref}>
-        <div className={cn(avatarVariants({ size, ring }), !src && bgGradient, className)} {...rest}>
-          {src ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={src} alt={name} className="w-full h-full object-cover" />
-          ) : (
-            <span>{initials}</span>
-          )}
-        </div>
-        {status && (
-          <span
-            className={cn(
-              'absolute bottom-0 right-0 rounded-full ring-2 ring-canvas',
-              statusColors[status],
-              size === 'xs' || size === 'sm'
-                ? 'w-2 h-2'
-                : size === 'xl' || size === '2xl'
-                ? 'w-3.5 h-3.5'
-                : 'w-2.5 h-2.5'
-            )}
-          />
+function hash(s: string) {
+  let n = 0;
+  for (let i = 0; i < s.length; i++) n = (n * 31 + s.charCodeAt(i)) >>> 0;
+  return n;
+}
+
+export function Avatar({
+  name,
+  src,
+  size = 'md',
+  className,
+  dot,
+}: {
+  name?: string | null;
+  src?: string | null;
+  size?: Size;
+  className?: string;
+  dot?: 'ok' | 'warn' | 'bad' | null;
+}) {
+  const initials = getInitials(name || '?');
+  const hue = HUES[hash(name || 'x') % HUES.length];
+
+  return (
+    <div className={cn('relative shrink-0', className)}>
+      <div
+        className={cn(
+          'relative flex items-center justify-center overflow-hidden border border-white/10 font-semibold text-white',
+          SIZE[size],
+          !src && 'bg-gradient-to-br',
+          !src && hue,
+        )}
+      >
+        {src ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={src} alt={name || ''} className="h-full w-full object-cover" />
+        ) : (
+          <span className="tracking-tight">{initials}</span>
         )}
       </div>
-    );
-  }
-);
-Avatar.displayName = 'Avatar';
+      {dot && (
+        <span
+          className={cn(
+            'absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-ink-900',
+            dot === 'ok' && 'bg-ok',
+            dot === 'warn' && 'bg-warn',
+            dot === 'bad' && 'bg-bad',
+          )}
+        />
+      )}
+    </div>
+  );
+}
