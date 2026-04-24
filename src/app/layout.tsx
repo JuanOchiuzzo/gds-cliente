@@ -16,12 +16,12 @@ export const metadata: Metadata = {
       { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
     shortcut: '/icon-192.png',
-    apple: '/icon-192.png',
+    apple: '/apple-touch-icon.png',
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#b40016',
+  themeColor: '#06080a',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,

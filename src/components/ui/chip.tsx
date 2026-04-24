@@ -6,16 +6,16 @@ import { cva, cn, type VariantProps } from '@/lib/cva';
 import { spring } from '@/lib/motion';
 
 const chipVariants = cva(
-  'inline-flex items-center gap-1.5 rounded-full font-semibold whitespace-nowrap transition-colors cursor-pointer select-none border',
+  'inline-flex items-center gap-1.5 rounded-full border font-semibold whitespace-nowrap transition-all cursor-pointer select-none',
   {
     variants: {
       variant: {
         default:
-          'bg-white/[0.055] text-text-soft border-white/[0.12] hover:text-text hover:border-white/25',
+          'bg-white/[0.06] text-text-soft border-white/[0.12] shadow-inset backdrop-blur-md hover:text-text hover:border-solar/40 hover:bg-white/[0.1]',
         active:
-          'bg-white text-canvas border-white shadow-sm',
+          'bg-solar-gradient text-[#06110f] border-transparent shadow-glow',
         ghost:
-          'bg-transparent text-text-soft border-transparent hover:bg-white/[0.06] hover:text-text',
+          'bg-transparent text-text-soft border-transparent hover:bg-white/[0.07] hover:text-text',
       },
       size: {
         sm: 'h-7 px-3 text-xs',

@@ -44,17 +44,17 @@ export function Select({
 
   return (
     <div className="space-y-1.5 w-full">
-      {label && <label className="text-xs font-medium text-text-soft">{label}</label>}
+      {label && <label className="text-xs font-semibold text-text-soft">{label}</label>}
       <div ref={ref} className={cn('relative', className)}>
         <button
           type="button"
           disabled={disabled}
           onClick={() => setOpen(!open)}
           className={cn(
-            'w-full h-11 flex items-center justify-between px-3 text-sm text-left bg-white/[0.055] border rounded-lg transition-colors',
+            'flex h-12 w-full items-center justify-between rounded-lg border bg-white/[0.065] px-3 text-left text-sm shadow-inset backdrop-blur-md transition-all',
             'disabled:opacity-40 disabled:cursor-not-allowed',
             open
-              ? 'border-solar bg-white/[0.08]'
+              ? 'border-solar/60 bg-white/[0.1]'
               : 'border-white/[0.12] hover:border-white/25',
             selected ? 'text-text' : 'text-text-faint'
           )}
@@ -74,7 +74,7 @@ export function Select({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -6, scale: 0.98 }}
               transition={spring}
-              className="absolute z-50 w-full mt-1 bg-surface-1 border border-white/[0.12] rounded-lg shadow-lg overflow-hidden max-h-60 overflow-y-auto"
+              className="native-panel absolute z-50 mt-1 max-h-60 w-full overflow-hidden overflow-y-auto rounded-lg p-1 shadow-lg"
             >
               {options.map((o) => (
                 <button

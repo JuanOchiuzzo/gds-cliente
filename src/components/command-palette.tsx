@@ -15,7 +15,6 @@ import {
   Flame,
 } from 'lucide-react';
 import { NAV_ITEMS } from '@/components/layout/nav-config';
-import { cn } from '@/lib/utils';
 import { spring } from '@/lib/motion';
 import { useLeads } from '@/lib/hooks/use-leads';
 import { useWallet } from '@/lib/hooks/use-wallet';
@@ -66,14 +65,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
               transition={spring}
               className="w-full max-w-2xl"
             >
-              <Command
-                className={cn(
-                  'overflow-hidden rounded-t-lg shadow-xl sm:rounded-lg',
-                  'bg-surface-0/95 backdrop-blur-2xl',
-                  'border border-white/[0.12]'
-                )}
-                loop
-              >
+              <Command className="native-panel overflow-hidden rounded-t-lg shadow-xl sm:rounded-lg" loop>
                 <div className="flex items-center gap-3 px-4 border-b border-white/[0.08]">
                   <Search className="w-4 h-4 text-text-faint flex-shrink-0" />
                   <Command.Input
@@ -100,9 +92,9 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                         key={item.href}
                         value={`nav ${item.label}`}
                         onSelect={() => go(item.href)}
-                        className="group flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer text-[13px] text-text-soft"
+                        className="group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-text-soft"
                       >
-                        <div className="w-7 h-7 rounded-md bg-white/[0.055] border border-white/[0.1] flex items-center justify-center group-data-[selected=true]:bg-solar/15 group-data-[selected=true]:border-solar/30 transition-colors">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.055] transition-colors group-data-[selected=true]:border-solar/30 group-data-[selected=true]:bg-solar/15">
                           <item.icon className="w-3.5 h-3.5 text-text-soft group-data-[selected=true]:text-solar" />
                         </div>
                         <span className="flex-1">{item.label}</span>
@@ -123,9 +115,9 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                           key={`lead-${lead.id}`}
                           value={`lead ${lead.name} ${lead.phone ?? ''}`}
                           onSelect={() => go('/dashboard/leads')}
-                          className="group flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer text-[13px] text-text-soft"
+                          className="group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-text-soft"
                         >
-                          <div className="w-7 h-7 rounded-md bg-white/[0.08] border border-white/[0.16] flex items-center justify-center">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/[0.16] bg-white/[0.08]">
                             <User className="w-3.5 h-3.5 text-aurora-1" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -151,9 +143,9 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                           key={`client-${client.id}`}
                           value={`client ${client.name} ${client.phone ?? ''}`}
                           onSelect={() => go('/dashboard/wallet')}
-                          className="group flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer text-[13px] text-text-soft"
+                          className="group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-text-soft"
                         >
-                          <div className="w-7 h-7 rounded-md bg-hot/10 border border-hot/25 flex items-center justify-center">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-hot/25 bg-hot/10">
                             <Flame className="w-3.5 h-3.5 text-hot" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -178,9 +170,9 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                         key={a.label}
                         value={`action ${a.label}`}
                         onSelect={() => go(a.href)}
-                        className="group flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer text-[13px] text-text-soft"
+                        className="group flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-[13px] text-text-soft"
                       >
-                        <div className="w-7 h-7 rounded-md bg-solar/10 border border-solar/25 flex items-center justify-center">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg border border-solar/25 bg-solar/10">
                           <a.icon className="w-3.5 h-3.5 text-solar" />
                         </div>
                         <span className="flex-1">{a.label}</span>

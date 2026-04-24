@@ -17,9 +17,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className="w-full space-y-1.5">
-        {label && (
-          <label className="text-xs font-medium text-text-soft">{label}</label>
-        )}
+        {label && <label className="text-xs font-semibold text-text-soft">{label}</label>}
         <div className="relative">
           {icon && (
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-text-faint pointer-events-none">
@@ -30,9 +28,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             type={type}
             className={cn(
-              'w-full h-11 bg-white/[0.055] rounded-lg border px-3 py-2 text-sm text-text placeholder:text-text-faint',
-              'focus:outline-none focus:border-solar focus:bg-white/[0.08]',
-              'transition-colors duration-150',
+              'h-12 w-full rounded-lg border px-3 py-2 text-sm text-text placeholder:text-text-faint',
+              'bg-[rgba(255,255,255,0.065)] shadow-inset backdrop-blur-md',
+              'focus:outline-none focus:border-solar/60 focus:bg-white/[0.1]',
+              'transition-all duration-150',
               hasError ? 'border-danger' : 'border-white/[0.12] hover:border-white/25',
               icon && 'pl-9',
               suffix && 'pr-9',
@@ -64,15 +63,13 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
     const hasError = Boolean(error);
     return (
       <div className="w-full space-y-1.5">
-        {label && (
-          <label className="text-xs font-medium text-text-soft">{label}</label>
-        )}
+        {label && <label className="text-xs font-semibold text-text-soft">{label}</label>}
         <textarea
           ref={ref}
           className={cn(
-            'w-full bg-white/[0.055] rounded-lg border px-3 py-2 text-sm text-text placeholder:text-text-faint',
-            'focus:outline-none focus:border-solar focus:bg-white/[0.08]',
-            'transition-colors duration-150 resize-none',
+            'w-full rounded-lg border bg-white/[0.065] px-3 py-2 text-sm text-text placeholder:text-text-faint shadow-inset backdrop-blur-md',
+            'focus:outline-none focus:border-solar/60 focus:bg-white/[0.1]',
+            'transition-all duration-150 resize-none',
             hasError ? 'border-danger' : 'border-white/[0.12] hover:border-white/25',
             className
           )}

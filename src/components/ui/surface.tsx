@@ -6,16 +6,24 @@ import { cva, cn, type VariantProps } from '@/lib/cva';
 import { spring } from '@/lib/motion';
 
 const surfaceVariants = cva(
-  'relative isolate rounded-lg border transition-colors duration-200',
+  'relative isolate rounded-lg border transition-all duration-200',
   {
     variants: {
       variant: {
-        flat: 'bg-surface-0 border-white/[0.08]',
-        elevated: 'bg-surface-1 border-white/[0.12] shadow-md',
-        glow: 'bg-surface-0 border-solar/40 shadow-glow',
-        aurora: 'bg-surface-0 border-transparent aurora-border',
-        ghost: 'bg-transparent border-white/[0.08]',
-        glass: 'glass',
+        flat:
+          'bg-[rgba(11,15,18,0.72)] border-white/[0.08] shadow-inset backdrop-blur-md',
+        elevated:
+          'native-panel',
+        glow:
+          'bg-[linear-gradient(180deg,rgba(91,241,198,0.13),rgba(11,15,18,0.78))] border-solar/40 shadow-glow backdrop-blur-xl',
+        aurora:
+          'bg-[rgba(11,15,18,0.78)] border-transparent aurora-border shadow-md backdrop-blur-xl',
+        ghost:
+          'bg-transparent border-white/[0.08]',
+        glass:
+          'glass',
+        slate:
+          'bg-[linear-gradient(180deg,rgba(255,255,255,0.065),rgba(255,255,255,0.025))] border-white/[0.1] shadow-sm',
       },
       padding: {
         none: 'p-0',
@@ -25,7 +33,8 @@ const surfaceVariants = cva(
         xl: 'p-8',
       },
       interactive: {
-        true: 'cursor-pointer hover:border-white/25 hover:bg-surface-2',
+        true:
+          'cursor-pointer hover:-translate-y-0.5 hover:border-solar/40 hover:bg-white/[0.08] hover:shadow-glow',
         false: '',
       },
     },

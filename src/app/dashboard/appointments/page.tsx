@@ -111,7 +111,7 @@ export default function AppointmentsPage() {
     >
       <motion.div variants={slideUp} className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Agendamentos</h1>
+          <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Agendamentos</h1>
           <p className="mt-1 text-sm text-text-soft">{appointments.length} agendamentos</p>
         </div>
         <Button variant="solar" onClick={() => setShowNew(true)}>
@@ -177,7 +177,7 @@ export default function AppointmentsPage() {
           {selected && (
             <>
               <DialogHeader>
-                <DialogTitle className="font-display italic text-2xl">
+                <DialogTitle className="font-display text-2xl">
                   {selected.client_name}
                 </DialogTitle>
               </DialogHeader>

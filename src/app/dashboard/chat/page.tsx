@@ -48,7 +48,7 @@ export default function ChatPage() {
       className="space-y-4 h-[calc(100dvh-120px)] flex flex-col"
     >
       <motion.div variants={slideUp} initial="hidden" animate="visible">
-        <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Chat</h1>
+        <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Chat</h1>
         <p className="mt-1 text-sm text-text-soft">Comunicação da equipe em tempo real</p>
       </motion.div>
 

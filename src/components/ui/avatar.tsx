@@ -5,7 +5,7 @@ import { cva, cn, type VariantProps } from '@/lib/cva';
 import { getInitials } from '@/lib/utils';
 
 const avatarVariants = cva(
-  'relative inline-flex items-center justify-center overflow-hidden rounded-lg font-semibold select-none',
+  'relative inline-flex items-center justify-center overflow-hidden rounded-lg font-semibold select-none shadow-inset',
   {
     variants: {
       size: {
@@ -19,7 +19,7 @@ const avatarVariants = cva(
       ring: {
         none: '',
         solar: 'ring-2 ring-solar ring-offset-2 ring-offset-canvas',
-        aurora: 'ring-2 ring-white ring-offset-2 ring-offset-canvas',
+        aurora: 'ring-2 ring-aurora-1 ring-offset-2 ring-offset-canvas',
         success: 'ring-2 ring-success ring-offset-2 ring-offset-canvas',
         subtle: 'ring-1 ring-white/20',
       },
@@ -45,7 +45,7 @@ const statusColors = {
 export const Avatar = forwardRef<HTMLDivElement, AvatarProps>(
   ({ size, ring, src, name = '', status, className, ...rest }, ref) => {
     const initials = getInitials(name);
-    const bgGradient = 'bg-gradient-to-br from-solar-hot to-surface-2 text-white';
+    const bgGradient = 'bg-gradient-to-br from-aurora-1 via-solar to-surface-2 text-[#06110f]';
 
     return (
       <div className="relative inline-block flex-shrink-0" ref={ref}>

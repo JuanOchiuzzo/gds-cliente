@@ -1,13 +1,13 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ChevronRight, Command as CommandIcon, Search } from 'lucide-react';
+import { Command as CommandIcon, Search, Sparkles } from 'lucide-react';
+import { BrandMark } from '@/components/brand/brand-mark';
 import { CommandPalette } from '@/components/command-palette';
 import { NotificationsButton } from '@/components/layout/notifications-button';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { findNavItem } from './nav-config';
 
@@ -18,7 +18,7 @@ export function CommandBar() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setCmdOpen((v) => !v);
       }
@@ -29,83 +29,66 @@ export function CommandBar() {
 
   return (
     <>
-      <header
-        className={cn(
-          'sticky top-0 z-20 border-b border-white/[0.08]',
-          'bg-canvas/90 backdrop-blur-xl supports-[backdrop-filter]:bg-canvas/75'
-        )}
-      >
-        <div className="mx-auto flex h-16 w-full max-w-[560px] items-center gap-3 px-4 sm:px-5 lg:max-w-none lg:px-6">
-          <Link href="/dashboard" className="flex items-center gap-2 lg:hidden">
-            <Image
-              src="/brand/gds-app-mark.webp"
-              alt="GDS"
-              width={36}
-              height={36}
-              className="h-9 w-9 rounded-lg border border-white/12 shadow-glow"
-              priority
-            />
-          </Link>
-
-          <div className="min-w-0 flex-1">
-            <nav className="hidden items-center gap-1.5 text-[13px] lg:flex">
-              <Link href="/dashboard" className="text-text-faint transition-colors hover:text-text">
-                GDS
-              </Link>
-              <ChevronRight className="h-3 w-3 text-text-ghost" />
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={item?.href}
-                  initial={{ opacity: 0, y: -3 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 3 }}
-                  transition={{ duration: 0.18 }}
-                  className="font-medium text-text"
-                >
-                  {item?.label || 'Dashboard'}
-                </motion.span>
-              </AnimatePresence>
-            </nav>
-
-            <div className="lg:hidden">
-              <p className="text-[10px] font-semibold uppercase text-text-faint">GDS Premium</p>
-              <AnimatePresence mode="wait">
-                <motion.h1
-                  key={item?.href}
-                  initial={{ opacity: 0, y: -2 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 2 }}
-                  transition={{ duration: 0.18 }}
-                  className="truncate text-lg font-semibold leading-tight text-text"
-                >
-                  {item?.label || 'Dashboard'}
-                </motion.h1>
-              </AnimatePresence>
-            </div>
+      <header className="sticky top-0 z-30 px-4 pt-[max(12px,env(safe-area-inset-top))] sm:px-5 lg:px-8 lg:pt-5">
+        <div
+          className={cn(
+            'mx-auto flex h-[62px] w-full max-w-[560px] items-center gap-3 rounded-lg border border-white/[0.12]',
+            'bg-[rgba(6,8,10,0.72)] px-3 shadow-lg shadow-black/25 backdrop-blur-2xl',
+            'lg:max-w-[1240px] lg:px-4'
+          )}
+        >
+          <div className="lg:hidden">
+            <BrandMark size="sm" showWordmark={false} />
           </div>
 
-          <motion.button
-            whileTap={{ scale: 0.96 }}
-            onClick={() => setCmdOpen(true)}
-            className="hidden h-9 w-72 items-center gap-2 rounded-md border border-white/[0.12] bg-white/[0.055] px-3 text-[13px] text-text-faint transition-colors hover:border-white/25 hover:text-text md:flex"
-          >
-            <Search className="h-3.5 w-3.5" />
-            <span className="flex-1 text-left">Buscar ou ir para...</span>
-            <kbd className="flex h-5 items-center gap-0.5 rounded-sm bg-white/[0.08] px-1.5 font-mono text-[10px] text-text-soft">
-              <CommandIcon className="h-2.5 w-2.5" />K
-            </kbd>
-          </motion.button>
+          <div className="min-w-0 flex-1">
+            <p className="hidden text-[11px] font-semibold uppercase text-text-faint lg:block">
+              GDS Command
+            </p>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={item?.href}
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 4 }}
+                transition={{ duration: 0.18 }}
+                className="min-w-0"
+              >
+                <h1 className="truncate text-[18px] font-semibold leading-tight text-text lg:text-2xl">
+                  {item?.label || 'Dashboard'}
+                </h1>
+              </motion.div>
+            </AnimatePresence>
+          </div>
 
-          <motion.button
-            whileTap={{ scale: 0.92 }}
+          <button
+            onClick={() => setCmdOpen(true)}
+            className="hidden h-11 w-[min(420px,38vw)] items-center gap-3 rounded-lg border border-white/[0.12] bg-white/[0.06] px-3 text-sm text-text-faint shadow-inset transition-colors hover:border-solar/40 hover:text-text md:flex"
+          >
+            <Search className="h-4 w-4" />
+            <span className="flex-1 text-left">Pesquisar no CRM</span>
+            <kbd className="flex h-6 items-center gap-1 rounded bg-white/[0.08] px-2 font-mono text-[10px] text-text-soft">
+              <CommandIcon className="h-3 w-3" /> K
+            </kbd>
+          </button>
+
+          <Badge variant="aurora" size="sm" className="hidden h-8 gap-1.5 px-2.5 md:inline-flex">
+            <Sparkles className="h-3.5 w-3.5" />
+            AI
+          </Badge>
+
+          <button
             onClick={() => setCmdOpen(true)}
             aria-label="Buscar"
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.055] text-text-soft md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.12] bg-white/[0.06] text-text-soft shadow-inset md:hidden"
           >
             <Search className="h-[18px] w-[18px]" />
-          </motion.button>
+          </button>
 
-          <NotificationsButton iconSize={16} className="h-10 w-10" />
+          <NotificationsButton
+            iconSize={17}
+            className="h-10 w-10 rounded-lg border border-white/[0.12] bg-white/[0.06] text-text-soft shadow-inset hover:border-solar/40 hover:bg-white/[0.1]"
+          />
         </div>
       </header>
       <CommandPalette open={cmdOpen} onOpenChange={setCmdOpen} />

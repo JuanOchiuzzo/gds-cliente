@@ -22,8 +22,8 @@ export function SalesChart({ data }: { data: SalesData[] }) {
       <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="colorVendas" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#FF2338" stopOpacity={0.35} />
-            <stop offset="95%" stopColor="#FF2338" stopOpacity={0} />
+            <stop offset="5%" stopColor="#5BF1C6" stopOpacity={0.35} />
+            <stop offset="95%" stopColor="#5BF1C6" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="colorMeta" x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor="#FFFFFF" stopOpacity={0.18} />
@@ -56,7 +56,7 @@ export function SalesChart({ data }: { data: SalesData[] }) {
         <Area
           type="monotone"
           dataKey="vendas"
-          stroke="#FF2338"
+          stroke="#5BF1C6"
           strokeWidth={2}
           fill="url(#colorVendas)"
           animationDuration={1500}

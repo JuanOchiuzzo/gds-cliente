@@ -69,7 +69,7 @@ export default function CalendarPage() {
       type: form.type,
       start_time: startTime.toISOString(),
       end_time: endTime.toISOString(),
-      color: '#FF2338',
+      color: '#5BF1C6',
     });
     toast.success('Evento criado');
     setShowNew(false);
@@ -96,7 +96,7 @@ export default function CalendarPage() {
         className="flex flex-col sm:flex-row sm:items-end justify-between gap-4"
       >
         <div>
-          <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Calendário</h1>
+          <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Calendário</h1>
           <p className="mt-1 text-sm text-text-soft capitalize">
             {format(currentDate, "MMMM 'de' yyyy", { locale: ptBR })}
           </p>

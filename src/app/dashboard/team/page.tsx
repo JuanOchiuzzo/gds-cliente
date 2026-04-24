@@ -89,7 +89,7 @@ export default function TeamPage() {
       className="space-y-6"
     >
       <motion.div variants={slideUp}>
-        <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Equipe</h1>
+        <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Equipe</h1>
         <p className="mt-1 text-sm text-text-soft">
           {users.length} usuário{users.length !== 1 ? 's' : ''} · gestão de permissões
         </p>

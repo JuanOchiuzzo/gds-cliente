@@ -76,7 +76,7 @@ export default function StandsPage() {
     >
       <motion.div variants={slideUp} className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Stands</h1>
+          <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Stands</h1>
           <p className="mt-1 text-sm text-text-soft">{stands.length} pontos de venda</p>
         </div>
         <Button variant="solar" onClick={() => setShowNew(true)}>
@@ -133,7 +133,7 @@ export default function StandsPage() {
                     <Building2 className="w-5 h-5 text-solar" />
                   </div>
                   <div className="flex-1">
-                    <p className="font-display italic text-2xl text-text">{selected.name}</p>
+                    <p className="font-display text-2xl text-text">{selected.name}</p>
                     {selected.city && (
                       <p className="text-xs text-text-soft mt-0.5 flex items-center gap-1">
                         <MapPin className="w-3 h-3" /> {selected.city}, {selected.state}

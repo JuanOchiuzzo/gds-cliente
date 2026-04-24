@@ -51,7 +51,7 @@ export const DialogContent = forwardRef<
       className={cn(
         'fixed left-1/2 top-auto bottom-0 z-50 -translate-x-1/2 w-full sm:top-1/2 sm:bottom-auto sm:-translate-y-1/2 sm:w-[calc(100%-2rem)]',
         sizeMap[size],
-        'bg-surface-0 border border-white/[0.12] rounded-t-lg sm:rounded-lg shadow-xl p-5 sm:p-6',
+        'native-panel rounded-t-lg border-x-0 border-b-0 p-5 shadow-xl sm:rounded-lg sm:border sm:p-6',
         'data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-4 sm:data-[state=open]:zoom-in-95',
         'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom-4 sm:data-[state=closed]:zoom-out-95',
         className
@@ -61,7 +61,7 @@ export const DialogContent = forwardRef<
       {children}
       {!hideClose && (
         <DialogPrimitive.Close
-          className="absolute right-4 top-4 w-8 h-8 rounded-lg flex items-center justify-center text-text-faint hover:bg-white/[0.08] hover:text-text transition-colors"
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-lg text-text-faint transition-colors hover:bg-white/[0.08] hover:text-text"
           aria-label="Fechar"
         >
           <X className="w-4 h-4" />

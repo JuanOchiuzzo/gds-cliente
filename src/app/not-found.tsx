@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft, Sparkles } from 'lucide-react';
+import { BrandMark } from '@/components/brand/brand-mark';
 import { Button } from '@/components/ui/button';
 
 export default function NotFound() {
@@ -9,11 +10,12 @@ export default function NotFound() {
     <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden bg-canvas p-6 text-text">
       <div
         className="absolute inset-0 bg-cover bg-center opacity-35"
-        style={{ backgroundImage: "url('/brand/gds-mobile-splash.webp')" }}
+        style={{ backgroundImage: "url('/brand/gds-native-bg.webp')" }}
       />
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,9,11,0.55),#08090b_72%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(6,8,10,0.45),#06080a_72%)]" />
 
       <div className="relative z-10 max-w-md text-center">
+        <BrandMark size="md" className="mb-8 justify-center" />
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-solar/30 bg-solar/10 px-3 py-1 text-xs font-semibold uppercase text-white">
           <Sparkles className="h-3 w-3" />
           Rota indisponível

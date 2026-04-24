@@ -22,7 +22,7 @@ export function DrawerContent({
       <VaulDrawer.Content
         className={cn(
           'fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] rounded-t-lg',
-          'bg-surface-0 border-t border-x border-white/[0.12] shadow-xl',
+          'native-panel border-x-0 border-b-0 shadow-xl',
           'flex flex-col outline-none',
           className
         )}

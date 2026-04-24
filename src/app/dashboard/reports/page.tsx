@@ -129,7 +129,7 @@ export default function ReportsPage() {
     >
       <motion.div variants={slideUp} className="flex items-end justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Relatórios</h1>
+          <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Relatórios</h1>
           <p className="mt-1 text-sm text-text-soft">
             Período: <span className="text-text">{currentRangeLabel}</span>
           </p>

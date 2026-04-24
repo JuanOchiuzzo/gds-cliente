@@ -29,9 +29,9 @@ export function Ring({
 
   const gradientId = `ring-grad-${variant}`;
   const colors = {
-    solar: ['#ffffff', '#ff2338'],
-    aurora: ['#ffffff', '#aeb5c1'],
-    success: ['#34d399', '#34d399'],
+    solar: ['#f0d994', '#5bf1c6'],
+    aurora: ['#5bf1c6', '#8fb7ff'],
+    success: ['#5bf1c6', '#5bf1c6'],
     danger: ['#ff4d61', '#ff4d61'],
   }[variant];
 

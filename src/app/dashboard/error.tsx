@@ -29,7 +29,7 @@ export default function DashboardError({
           <AlertTriangle className="w-6 h-6 text-danger" />
         </div>
 
-        <h1 className="mt-5 font-display italic text-3xl text-text tracking-tight">
+        <h1 className="mt-5 font-display text-3xl text-text tracking-tight">
           Algo falhou ao abrir esta página
         </h1>
         <p className="mt-2 text-sm text-text-soft">

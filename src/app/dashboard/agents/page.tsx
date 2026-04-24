@@ -71,7 +71,7 @@ export default function AgentsPage() {
   if (agents.length === 0) {
     return (
       <div className="space-y-6">
-        <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Ranking</h1>
+        <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Ranking</h1>
         <Surface variant="elevated" padding="xl">
           <EmptyState
             icon={<Users className="w-6 h-6" />}
@@ -101,9 +101,9 @@ export default function AgentsPage() {
       <motion.div variants={slideUp}>
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div>
-            <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight flex items-center gap-3">
+            <h1 className="font-display text-3xl lg:text-4xl tracking-tight flex items-center gap-3">
               Ranking
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-solar/10 border border-solar/30 text-solar text-[11px] font-mono uppercase tracking-widest not-italic">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-solar/30 bg-solar/10 px-2 py-0.5 font-mono text-[11px] uppercase text-solar">
                 <Sparkles className="w-3 h-3" /> Equipe
               </span>
             </h1>
@@ -184,7 +184,7 @@ export default function AgentsPage() {
                 const blockHeight = ['h-36 sm:h-44', 'h-52 sm:h-64', 'h-28 sm:h-36'][idx];
                 const blockTone = [
                   'bg-gradient-to-b from-aurora-1/25 via-aurora-1/10 to-aurora-1/5 border-aurora-1/40',
-                  'bg-gradient-to-b from-solar/30 via-solar/15 to-solar/5 border-solar/60 shadow-[0_0_50px_-10px_rgba(255,35,56,0.45)]',
+                  'bg-gradient-to-b from-solar/30 via-solar/15 to-solar/5 border-solar/60 shadow-[0_0_50px_-10px_rgba(91,241,198,0.45)]',
                   'bg-gradient-to-b from-aurora-2/25 via-aurora-2/10 to-aurora-2/5 border-aurora-2/40',
                 ][idx];
                 const rankText = ['2', '1', '3'][idx];
@@ -218,7 +218,7 @@ export default function AgentsPage() {
                             transition={{ delay: 0.5, type: 'spring', stiffness: 220 }}
                             className="absolute -top-6 left-1/2 -translate-x-1/2 z-10"
                           >
-                            <Crown className="w-6 h-6 text-solar drop-shadow-[0_0_10px_rgba(255,35,56,0.8)]" />
+                            <Crown className="w-6 h-6 text-solar drop-shadow-[0_0_10px_rgba(91,241,198,0.8)]" />
                           </motion.div>
                         )}
                         <div className="relative inline-flex items-center justify-center">
@@ -274,7 +274,7 @@ export default function AgentsPage() {
                       {/* Número do ranking (topo do bloco) */}
                       <span
                         className={cn(
-                          'font-display italic font-bold leading-none select-none',
+                          'font-display font-bold leading-none select-none',
                           isFirst ? 'text-5xl sm:text-6xl text-solar-gradient' : 'text-3xl sm:text-4xl',
                           idx === 0 && 'text-aurora-1',
                           idx === 2 && 'text-aurora-2'

@@ -124,7 +124,7 @@ export default function PlantaoPage() {
     >
       <motion.div variants={slideUp} className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Plantão</h1>
+          <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Plantão</h1>
           <p className="mt-1 text-sm text-text-soft">Fila de atendimento por stand</p>
         </div>
         {isAdmin && (

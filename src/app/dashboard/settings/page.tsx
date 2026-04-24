@@ -103,7 +103,7 @@ export default function SettingsPage() {
       className="space-y-6 max-w-3xl"
     >
       <motion.div variants={slideUp}>
-        <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Configurações</h1>
+        <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Configurações</h1>
         <p className="mt-1 text-sm text-text-soft">Gerencie sua conta e preferências</p>
       </motion.div>
 

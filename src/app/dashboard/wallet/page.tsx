@@ -189,7 +189,7 @@ export default function WalletPage() {
     >
       <motion.div variants={slideUp} className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Carteira</h1>
+          <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Carteira</h1>
           <p className="mt-1 text-sm text-text-soft flex items-center gap-1.5">
             <Lock className="w-3 h-3" />
             Dados privados · só você vê
@@ -434,7 +434,7 @@ export default function WalletPage() {
                 <DialogTitle className="flex items-start gap-3">
                   <Avatar name={selectedClient.name} size="lg" ring="solar" />
                   <div className="flex-1 min-w-0">
-                    <p className="font-display italic text-2xl text-text">{selectedClient.name}</p>
+                    <p className="font-display text-2xl text-text">{selectedClient.name}</p>
                     <div className="text-[11px] text-text-soft mt-0.5 space-x-2">
                       {selectedClient.phone && <span>{selectedClient.phone}</span>}
                       {selectedClient.email && <span>· {selectedClient.email}</span>}

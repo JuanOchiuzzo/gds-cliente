@@ -210,7 +210,7 @@ export default function LeadsPage() {
       {/* Header */}
       <motion.div variants={slideUp} className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="font-display italic text-3xl lg:text-4xl tracking-tight">Leads</h1>
+          <h1 className="font-display text-3xl lg:text-4xl tracking-tight">Leads</h1>
           <p className="mt-1 text-sm text-text-soft">
             {filtered.length} de {total || leads.length} total
           </p>
@@ -355,7 +355,7 @@ export default function LeadsPage() {
                 <DialogTitle className="flex items-start gap-3">
                   <Avatar name={selected.name} size="lg" ring="solar" />
                   <div className="flex-1 min-w-0">
-                    <p className="font-display italic text-2xl text-text">{selected.name}</p>
+                    <p className="font-display text-2xl text-text">{selected.name}</p>
                     <div className="flex flex-wrap gap-2 mt-1.5 text-[11px] text-text-soft">
                       {selected.email && <span>{selected.email}</span>}
                       {selected.phone && <span>· {selected.phone}</span>}
