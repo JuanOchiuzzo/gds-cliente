@@ -118,7 +118,7 @@ export default function AgentsPage() {
       {/* Totals strip */}
       <motion.div variants={slideUp} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <Surface variant="elevated" padding="md" className="relative overflow-hidden">
-          <div className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-solar/10 blur-[40px]" />
+          <div className="absolute inset-x-0 top-0 h-1 bg-solar" />
           <div className="flex items-center gap-2 text-text-faint mb-1.5">
             <TrendingUp className="w-3.5 h-3.5 text-solar" />
             <span className="text-[10px] uppercase tracking-widest">Receita total</span>
@@ -160,9 +160,7 @@ export default function AgentsPage() {
       {top3.length >= 3 && (
         <motion.div variants={slideUp}>
           <Surface variant="elevated" padding="lg" className="relative overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[60%] h-52 rounded-full bg-solar/10 blur-[90px]" />
-            </div>
+            <div className="absolute inset-x-0 top-0 h-1 bg-solar pointer-events-none" />
 
             <div className="relative flex items-center justify-between gap-2 mb-8 flex-wrap">
               <div className="flex items-center gap-2">
@@ -186,7 +184,7 @@ export default function AgentsPage() {
                 const blockHeight = ['h-36 sm:h-44', 'h-52 sm:h-64', 'h-28 sm:h-36'][idx];
                 const blockTone = [
                   'bg-gradient-to-b from-aurora-1/25 via-aurora-1/10 to-aurora-1/5 border-aurora-1/40',
-                  'bg-gradient-to-b from-solar/30 via-solar/15 to-solar/5 border-solar/60 shadow-[0_0_50px_-10px_rgba(245,158,11,0.45)]',
+                  'bg-gradient-to-b from-solar/30 via-solar/15 to-solar/5 border-solar/60 shadow-[0_0_50px_-10px_rgba(255,35,56,0.45)]',
                   'bg-gradient-to-b from-aurora-2/25 via-aurora-2/10 to-aurora-2/5 border-aurora-2/40',
                 ][idx];
                 const rankText = ['2', '1', '3'][idx];
@@ -220,7 +218,7 @@ export default function AgentsPage() {
                             transition={{ delay: 0.5, type: 'spring', stiffness: 220 }}
                             className="absolute -top-6 left-1/2 -translate-x-1/2 z-10"
                           >
-                            <Crown className="w-6 h-6 text-solar drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
+                            <Crown className="w-6 h-6 text-solar drop-shadow-[0_0_10px_rgba(255,35,56,0.8)]" />
                           </motion.div>
                         )}
                         <div className="relative inline-flex items-center justify-center">

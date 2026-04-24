@@ -84,7 +84,7 @@ export function Sidebar() {
       {/* User + Logout */}
       <div className="px-3 py-3 border-t border-white/[0.06]">
         <div className="flex items-center gap-2.5 px-2 mb-2">
-          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-[10px] font-bold text-white">
+          <div className="w-7 h-7 rounded-lg bg-solar-gradient flex items-center justify-center text-[10px] font-bold text-white">
             {profile?.full_name?.charAt(0) || 'U'}
           </div>
           <div className="flex-1 min-w-0">

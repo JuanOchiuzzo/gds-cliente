@@ -44,18 +44,18 @@ export function Select({
 
   return (
     <div className="space-y-1.5 w-full">
-      {label && <label className="text-xs font-medium text-text-soft tracking-wide">{label}</label>}
+      {label && <label className="text-xs font-medium text-text-soft">{label}</label>}
       <div ref={ref} className={cn('relative', className)}>
         <button
           type="button"
           disabled={disabled}
           onClick={() => setOpen(!open)}
           className={cn(
-            'w-full h-10 flex items-center justify-between px-3 text-sm text-left bg-surface-1 border rounded-md transition-colors',
+            'w-full h-11 flex items-center justify-between px-3 text-sm text-left bg-white/[0.055] border rounded-lg transition-colors',
             'disabled:opacity-40 disabled:cursor-not-allowed',
             open
-              ? 'border-solar bg-surface-2'
-              : 'border-border-strong hover:border-border-glow',
+              ? 'border-solar bg-white/[0.08]'
+              : 'border-white/[0.12] hover:border-white/25',
             selected ? 'text-text' : 'text-text-faint'
           )}
         >
@@ -74,7 +74,7 @@ export function Select({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -6, scale: 0.98 }}
               transition={spring}
-              className="absolute z-50 w-full mt-1 bg-surface-1 border border-border-strong rounded-md shadow-lg overflow-hidden max-h-60 overflow-y-auto"
+              className="absolute z-50 w-full mt-1 bg-surface-1 border border-white/[0.12] rounded-lg shadow-lg overflow-hidden max-h-60 overflow-y-auto"
             >
               {options.map((o) => (
                 <button
@@ -87,8 +87,8 @@ export function Select({
                   className={cn(
                     'w-full flex items-center justify-between px-3 py-2 text-sm text-left transition-colors',
                     o.value === value
-                      ? 'bg-solar/10 text-solar'
-                      : 'text-text-soft hover:bg-surface-2 hover:text-text'
+                      ? 'bg-solar/15 text-white'
+                      : 'text-text-soft hover:bg-white/[0.06] hover:text-text'
                   )}
                 >
                   <span className="truncate">{o.label}</span>

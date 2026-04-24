@@ -9,8 +9,8 @@ export function FunnelChart({ data }: { data: FunnelStage[] }) {
       <BarChart data={data} layout="vertical" margin={{ left: 0, right: 24 }}>
         <defs>
           <linearGradient id="funnelGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.9} />
-            <stop offset="100%" stopColor="#EF4444" stopOpacity={0.6} />
+            <stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.9} />
+            <stop offset="100%" stopColor="#FF2338" stopOpacity={0.72} />
           </linearGradient>
         </defs>
         <XAxis type="number" hide />
@@ -31,7 +31,7 @@ export function FunnelChart({ data }: { data: FunnelStage[] }) {
             fontSize: '12px',
             boxShadow: 'var(--shadow-md)',
           }}
-          cursor={{ fill: 'rgba(245, 158, 11, 0.08)' }}
+          cursor={{ fill: 'rgba(255, 35, 56, 0.1)' }}
         />
         <Bar dataKey="value" radius={[0, 8, 8, 0]} animationDuration={1200}>
           {data.map((entry, i) => (

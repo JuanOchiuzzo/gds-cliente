@@ -25,8 +25,8 @@ export function ProgressBar({
     (pct >= 100 ? 'success' : pct >= 70 ? 'solar' : pct >= 40 ? 'aurora' : 'danger');
 
   const gradients = {
-    solar: 'from-solar to-solar-hot',
-    aurora: 'from-aurora-1 via-aurora-2 to-aurora-3',
+    solar: 'from-white to-solar',
+    aurora: 'from-white to-aurora-2',
     success: 'from-success to-success',
     danger: 'from-danger to-danger',
   };

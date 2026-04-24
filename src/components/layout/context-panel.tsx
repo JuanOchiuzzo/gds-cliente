@@ -15,10 +15,10 @@ export function ContextPanel() {
     <aside
       className={cn(
         'hidden xl:flex flex-col fixed left-[72px] top-0 bottom-0 z-30 w-[260px]',
-        'bg-surface-0/40 backdrop-blur-sm border-r border-border'
+        'bg-surface-0/75 backdrop-blur-xl border-r border-white/[0.08]'
       )}
     >
-      <div className="h-14 flex items-center px-5 border-b border-border">
+      <div className="h-16 flex items-center px-5 border-b border-white/[0.08]">
         <AnimatePresence mode="wait">
           <motion.div
             key={item?.href}
@@ -29,7 +29,7 @@ export function ContextPanel() {
             className="flex items-center gap-2.5"
           >
             {item && <item.icon className="w-4 h-4 text-solar" />}
-            <span className="font-display text-[20px] tracking-tight text-text">
+            <span className="font-display text-[20px] text-text">
               {item?.label || 'GDS'}
             </span>
           </motion.div>
@@ -147,7 +147,7 @@ function PanelSection({ title, items }: { title: string; items: string[] }) {
             transition={{ delay: i * 0.04 }}
             className="flex items-start gap-2 text-[13px] text-text-soft"
           >
-            <span className="mt-1.5 w-1 h-1 rounded-full bg-solar flex-shrink-0" />
+            <span className="mt-1.5 w-1 h-4 rounded-full bg-solar flex-shrink-0" />
             <span>{item}</span>
           </motion.li>
         ))}

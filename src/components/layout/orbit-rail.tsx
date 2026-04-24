@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { LogOut, Sparkles } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { spring } from '@/lib/motion';
 import { NAV_ITEMS } from './nav-config';
@@ -25,18 +26,18 @@ export function OrbitRail() {
   };
 
   return (
-    <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 z-40 w-[72px] bg-canvas border-r border-border">
+    <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 z-40 w-[72px] bg-[#0b0c10] border-r border-white/[0.08]">
       {/* Logo */}
       <Link
         href="/dashboard"
-        className="h-14 flex items-center justify-center border-b border-border group"
+        className="h-16 flex items-center justify-center border-b border-white/[0.08] group"
       >
         <motion.div
-          whileHover={{ rotate: 12, scale: 1.05 }}
+          whileHover={{ scale: 1.05 }}
           transition={spring}
-          className="w-9 h-9 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow"
+          className="h-10 w-10 overflow-hidden rounded-lg border border-white/12 shadow-glow"
         >
-          <span className="text-[11px] font-bold tracking-wider text-canvas">GDS</span>
+          <Image src="/brand/gds-app-mark.webp" alt="GDS" width={40} height={40} className="h-full w-full object-cover" />
         </motion.div>
       </Link>
 
@@ -70,21 +71,21 @@ export function OrbitRail() {
                       className={cn(
                         'relative w-11 h-11 flex items-center justify-center rounded-lg transition-colors',
                         active
-                          ? 'text-text'
-                          : 'text-text-faint hover:text-text hover:bg-surface-1'
+                          ? 'text-canvas'
+                          : 'text-text-faint hover:text-text hover:bg-white/[0.055]'
                       )}
                     >
                       {active && (
                         <motion.span
                           layoutId="rail-active-bg"
-                          className="absolute inset-0 rounded-lg bg-surface-2 border border-border-strong"
+                          className="absolute inset-0 rounded-lg bg-white text-canvas"
                           transition={spring}
                         />
                       )}
                       {active && (
                         <motion.span
                           layoutId="rail-active-indicator"
-                          className="absolute left-0 w-[3px] h-5 rounded-r-full bg-gradient-to-b from-solar to-solar-hot"
+                          className="absolute left-0 w-[3px] h-5 rounded-r-full bg-solar"
                           transition={spring}
                         />
                       )}
@@ -99,7 +100,7 @@ export function OrbitRail() {
       </nav>
 
       {/* User */}
-      <div className="border-t border-border py-3 flex flex-col items-center gap-2">
+      <div className="border-t border-white/[0.08] py-3 flex flex-col items-center gap-2">
         <Popover>
           <PopoverTrigger asChild>
             <button className="relative group">

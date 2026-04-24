@@ -58,7 +58,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
             onClick={() => onOpenChange(false)}
             className="absolute inset-0 bg-canvas/80 backdrop-blur-xl"
           />
-          <div className="relative flex items-start justify-center pt-[14vh] px-4">
+          <div className="relative flex min-h-full items-end justify-center px-0 sm:items-start sm:px-4 sm:pt-[14vh]">
             <motion.div
               initial={{ opacity: 0, scale: 0.96, y: -8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -68,13 +68,13 @@ export function CommandPalette({ open, onOpenChange }: Props) {
             >
               <Command
                 className={cn(
-                  'overflow-hidden rounded-xl shadow-xl',
+                  'overflow-hidden rounded-t-lg shadow-xl sm:rounded-lg',
                   'bg-surface-0/95 backdrop-blur-2xl',
-                  'border border-border-strong'
+                  'border border-white/[0.12]'
                 )}
                 loop
               >
-                <div className="flex items-center gap-3 px-4 border-b border-border">
+                <div className="flex items-center gap-3 px-4 border-b border-white/[0.08]">
                   <Search className="w-4 h-4 text-text-faint flex-shrink-0" />
                   <Command.Input
                     value={value}
@@ -82,7 +82,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                     placeholder="Buscar páginas, leads, clientes ou ações…"
                     className="flex-1 h-14 bg-transparent text-[15px] text-text placeholder:text-text-faint outline-none"
                   />
-                  <kbd className="hidden sm:flex items-center gap-1 h-6 px-2 rounded bg-surface-2 text-[10px] text-text-soft font-mono">
+                  <kbd className="hidden sm:flex items-center gap-1 h-6 px-2 rounded bg-white/[0.08] text-[10px] text-text-soft font-mono">
                     <CommandIcon className="w-2.5 h-2.5" />K
                   </kbd>
                 </div>
@@ -102,7 +102,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                         onSelect={() => go(item.href)}
                         className="group flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer text-[13px] text-text-soft"
                       >
-                        <div className="w-7 h-7 rounded-md bg-surface-1 border border-border flex items-center justify-center group-data-[selected=true]:bg-solar/15 group-data-[selected=true]:border-solar/30 transition-colors">
+                        <div className="w-7 h-7 rounded-md bg-white/[0.055] border border-white/[0.1] flex items-center justify-center group-data-[selected=true]:bg-solar/15 group-data-[selected=true]:border-solar/30 transition-colors">
                           <item.icon className="w-3.5 h-3.5 text-text-soft group-data-[selected=true]:text-solar" />
                         </div>
                         <span className="flex-1">{item.label}</span>
@@ -125,7 +125,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                           onSelect={() => go('/dashboard/leads')}
                           className="group flex items-center gap-3 px-3 py-2 rounded-md cursor-pointer text-[13px] text-text-soft"
                         >
-                          <div className="w-7 h-7 rounded-md bg-aurora-1/10 border border-aurora-1/25 flex items-center justify-center">
+                          <div className="w-7 h-7 rounded-md bg-white/[0.08] border border-white/[0.16] flex items-center justify-center">
                             <User className="w-3.5 h-3.5 text-aurora-1" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -136,7 +136,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                               </p>
                             )}
                           </div>
-                          <span className="text-[10px] text-text-faint uppercase tracking-wider">
+                          <span className="text-[10px] text-text-faint uppercase">
                             {lead.stage}
                           </span>
                         </Command.Item>
@@ -164,7 +164,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                               </p>
                             )}
                           </div>
-                          <span className="text-[10px] text-text-faint uppercase tracking-wider">
+                          <span className="text-[10px] text-text-faint uppercase">
                             {client.temperature}
                           </span>
                         </Command.Item>
@@ -184,7 +184,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                           <a.icon className="w-3.5 h-3.5 text-solar" />
                         </div>
                         <span className="flex-1">{a.label}</span>
-                        <span className="text-[10px] text-text-faint uppercase tracking-wider">
+                        <span className="text-[10px] text-text-faint uppercase">
                           {a.hint}
                         </span>
                       </Command.Item>
@@ -192,21 +192,7 @@ export function CommandPalette({ open, onOpenChange }: Props) {
                   </Command.Group>
                 </Command.List>
 
-                <div className="flex items-center justify-between px-4 py-2 border-t border-border bg-surface-1/50 text-[11px] text-text-faint">
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1">
-                      <kbd className="font-mono px-1.5 py-0.5 bg-surface-2 rounded text-[10px]">↑↓</kbd>
-                      navegar
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <kbd className="font-mono px-1.5 py-0.5 bg-surface-2 rounded text-[10px]">⏎</kbd>
-                      abrir
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <kbd className="font-mono px-1.5 py-0.5 bg-surface-2 rounded text-[10px]">esc</kbd>
-                      fechar
-                    </span>
-                  </div>
+                <div className="flex items-center justify-end px-4 py-2 border-t border-white/[0.08] bg-white/[0.035] text-[11px] text-text-faint">
                   <span className="flex items-center gap-1 text-solar">
                     <Sparkles className="w-3 h-3" />
                     GDS

@@ -154,7 +154,7 @@ export default function ReportsPage() {
           {/* Hero KPIs */}
           <motion.div variants={slideUp} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <Surface variant="elevated" padding="md" className="relative overflow-hidden">
-              <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-solar/10 blur-[40px]" />
+              <div className="absolute inset-x-0 top-0 h-1 bg-solar" />
               <p className="text-[11px] text-text-faint uppercase tracking-wider mb-2">Receita fechada</p>
               <p className="text-2xl font-medium text-solar-gradient">
                 <CurrencyFlow value={totalRevenue} />

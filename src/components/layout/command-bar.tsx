@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Command as CommandIcon, Sparkles, ChevronRight } from 'lucide-react';
-import { findNavItem } from './nav-config';
-import { cn } from '@/lib/utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronRight, Command as CommandIcon, Search } from 'lucide-react';
 import { CommandPalette } from '@/components/command-palette';
 import { NotificationsButton } from '@/components/layout/notifications-button';
+import { cn } from '@/lib/utils';
+import { findNavItem } from './nav-config';
 
 export function CommandBar() {
   const pathname = usePathname();
@@ -30,62 +31,82 @@ export function CommandBar() {
     <>
       <header
         className={cn(
-          'sticky top-0 z-20 h-14 flex items-center gap-3 px-4 lg:px-6',
-          'bg-canvas/80 backdrop-blur-xl border-b border-border'
+          'sticky top-0 z-20 border-b border-white/[0.08]',
+          'bg-canvas/90 backdrop-blur-xl supports-[backdrop-filter]:bg-canvas/75'
         )}
       >
-        {/* Mobile logo */}
-        <Link href="/dashboard" className="lg:hidden flex items-center gap-2 flex-shrink-0">
-          <div className="w-8 h-8 rounded-md bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
-            <span className="text-[10px] font-bold tracking-wider text-canvas">GDS</span>
-          </div>
-        </Link>
-
-        {/* Breadcrumb (desktop) */}
-        <nav className="hidden lg:flex items-center gap-1.5 text-[13px] flex-shrink-0">
-          <Link href="/dashboard" className="text-text-faint hover:text-text transition-colors">
-            GDS
+        <div className="mx-auto flex h-16 w-full max-w-[560px] items-center gap-3 px-4 sm:px-5 lg:max-w-none lg:px-6">
+          <Link href="/dashboard" className="flex items-center gap-2 lg:hidden">
+            <Image
+              src="/brand/gds-app-mark.webp"
+              alt="GDS"
+              width={36}
+              height={36}
+              className="h-9 w-9 rounded-lg border border-white/12 shadow-glow"
+              priority
+            />
           </Link>
-          <ChevronRight className="w-3 h-3 text-text-ghost" />
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={item?.href}
-              initial={{ opacity: 0, y: -3 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 3 }}
-              transition={{ duration: 0.2 }}
-              className="text-text font-medium"
-            >
-              {item?.label || 'Dashboard'}
-            </motion.span>
-          </AnimatePresence>
-        </nav>
 
-        <div className="flex-1" />
+          <div className="min-w-0 flex-1">
+            <nav className="hidden items-center gap-1.5 text-[13px] lg:flex">
+              <Link href="/dashboard" className="text-text-faint transition-colors hover:text-text">
+                GDS
+              </Link>
+              <ChevronRight className="h-3 w-3 text-text-ghost" />
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={item?.href}
+                  initial={{ opacity: 0, y: -3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 3 }}
+                  transition={{ duration: 0.18 }}
+                  className="font-medium text-text"
+                >
+                  {item?.label || 'Dashboard'}
+                </motion.span>
+              </AnimatePresence>
+            </nav>
 
-        {/* Search */}
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setCmdOpen(true)}
-          className="hidden md:flex items-center gap-2 h-9 px-3 bg-surface-1 border border-border-strong rounded-md text-text-faint text-[13px] hover:border-border-glow transition-colors w-72"
-        >
-          <Search className="w-3.5 h-3.5" />
-          <span className="flex-1 text-left">Buscar ou ir para…</span>
-          <kbd className="flex items-center gap-0.5 px-1.5 h-5 rounded bg-surface-3 text-[10px] text-text-soft font-mono">
-            <CommandIcon className="w-2.5 h-2.5" />K
-          </kbd>
-        </motion.button>
+            <div className="lg:hidden">
+              <p className="text-[10px] font-semibold uppercase text-text-faint">GDS Premium</p>
+              <AnimatePresence mode="wait">
+                <motion.h1
+                  key={item?.href}
+                  initial={{ opacity: 0, y: -2 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 2 }}
+                  transition={{ duration: 0.18 }}
+                  className="truncate text-lg font-semibold leading-tight text-text"
+                >
+                  {item?.label || 'Dashboard'}
+                </motion.h1>
+              </AnimatePresence>
+            </div>
+          </div>
 
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setCmdOpen(true)}
-          className="md:hidden w-9 h-9 rounded-md flex items-center justify-center text-text-soft hover:bg-surface-1"
-        >
-          <Search className="w-4 h-4" />
-        </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setCmdOpen(true)}
+            className="hidden h-9 w-72 items-center gap-2 rounded-md border border-white/[0.12] bg-white/[0.055] px-3 text-[13px] text-text-faint transition-colors hover:border-white/25 hover:text-text md:flex"
+          >
+            <Search className="h-3.5 w-3.5" />
+            <span className="flex-1 text-left">Buscar ou ir para...</span>
+            <kbd className="flex h-5 items-center gap-0.5 rounded-sm bg-white/[0.08] px-1.5 font-mono text-[10px] text-text-soft">
+              <CommandIcon className="h-2.5 w-2.5" />K
+            </kbd>
+          </motion.button>
 
-        {/* Notifications */}
-        <NotificationsButton iconSize={16} className="w-9 h-9 flex items-center justify-center" />
+          <motion.button
+            whileTap={{ scale: 0.92 }}
+            onClick={() => setCmdOpen(true)}
+            aria-label="Buscar"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.055] text-text-soft md:hidden"
+          >
+            <Search className="h-[18px] w-[18px]" />
+          </motion.button>
+
+          <NotificationsButton iconSize={16} className="h-10 w-10" />
+        </div>
       </header>
       <CommandPalette open={cmdOpen} onOpenChange={setCmdOpen} />
     </>

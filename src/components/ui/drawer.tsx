@@ -18,16 +18,16 @@ export function DrawerContent({
 }) {
   return (
     <DrawerPortal>
-      <VaulDrawer.Overlay className="fixed inset-0 z-50 bg-canvas/80 backdrop-blur-md" />
+      <VaulDrawer.Overlay className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md" />
       <VaulDrawer.Content
         className={cn(
-          'fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] rounded-t-2xl',
-          'bg-surface-0 border-t border-x border-border-strong shadow-xl',
+          'fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] rounded-t-lg',
+          'bg-surface-0 border-t border-x border-white/[0.12] shadow-xl',
           'flex flex-col outline-none',
           className
         )}
       >
-        <div className="mx-auto mt-2.5 mb-1.5 h-1 w-10 rounded-full bg-border-strong" />
+        <div className="mx-auto mt-2.5 mb-1.5 h-1 w-10 rounded-full bg-white/20" />
         {children}
       </VaulDrawer.Content>
     </DrawerPortal>

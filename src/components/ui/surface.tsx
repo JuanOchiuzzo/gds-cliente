@@ -10,11 +10,11 @@ const surfaceVariants = cva(
   {
     variants: {
       variant: {
-        flat: 'bg-surface-0 border-border',
-        elevated: 'bg-surface-1 border-border-strong shadow-md',
-        glow: 'bg-surface-0 border-border-strong shadow-glow',
+        flat: 'bg-surface-0 border-white/[0.08]',
+        elevated: 'bg-surface-1 border-white/[0.12] shadow-md',
+        glow: 'bg-surface-0 border-solar/40 shadow-glow',
         aurora: 'bg-surface-0 border-transparent aurora-border',
-        ghost: 'bg-transparent border-border',
+        ghost: 'bg-transparent border-white/[0.08]',
         glass: 'glass',
       },
       padding: {
@@ -25,7 +25,7 @@ const surfaceVariants = cva(
         xl: 'p-8',
       },
       interactive: {
-        true: 'cursor-pointer hover:border-border-glow hover:bg-surface-1',
+        true: 'cursor-pointer hover:border-white/25 hover:bg-surface-2',
         false: '',
       },
     },

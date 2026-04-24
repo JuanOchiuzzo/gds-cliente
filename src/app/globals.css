@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 /* ============================================================
-   NEXUS ORBIT — Tech Noir Premium
-   Obsidian Void + Solar Flare + Aurora Iridescence
+   GDS MOBILE PREMIUM
+   Crimson + White + Graphite system for a mobile-first CRM
    ============================================================ */
 
 @property --angle {
@@ -15,68 +15,81 @@
 
 :root {
   /* Canvas / Surfaces */
-  --canvas: #0A0B0D;
-  --surface-0: #101215;
-  --surface-1: #16191D;
-  --surface-2: #1D2127;
-  --surface-3: #262B33;
+  --canvas: #08090b;
+  --surface-0: #0f1013;
+  --surface-1: #16181d;
+  --surface-2: #20242b;
+  --surface-3: #2b3039;
+
+  /* Legacy aliases used by older components */
+  --bg: var(--canvas);
+  --bg-card: var(--surface-0);
+  --bg-hover: var(--surface-1);
+  --bg-sidebar: #0b0c0f;
+  --accent: #ff2338;
+  --accent-soft: rgba(255, 35, 56, 0.12);
+  --accent-glow: rgba(255, 35, 56, 0.34);
+  --gradient-start: #ff2338;
+  --gradient-end: #a90017;
+  --radius: 8px;
+  --radius-xl: 8px;
 
   /* Borders */
-  --border: #1E2229;
-  --border-strong: #2A2F39;
-  --border-glow: #3A4150;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --border-glow: rgba(255, 255, 255, 0.26);
 
   /* Text */
-  --text: #FAFAF9;
-  --text-soft: #B8B3AB;
-  --text-faint: #6B665E;
-  --text-ghost: #3F3B35;
+  --text: #ffffff;
+  --text-soft: #d8dbe2;
+  --text-muted: #a7adba;
+  --text-faint: #707783;
+  --text-ghost: #454b55;
 
-  /* Solar Flare — primary */
-  --solar: #F59E0B;
-  --solar-hot: #EF4444;
-  --solar-deep: #B45309;
-  --solar-glow: rgba(245, 158, 11, 0.18);
-  --solar-soft: rgba(245, 158, 11, 0.08);
+  /* Primary brand. Class names stay solar for compatibility. */
+  --solar: #ff2338;
+  --solar-hot: #b40016;
+  --solar-deep: #7f0010;
+  --solar-glow: rgba(255, 35, 56, 0.34);
+  --solar-soft: rgba(255, 35, 56, 0.12);
 
-  /* Aurora — secondary iridescent */
-  --aurora-1: #A78BFA;
-  --aurora-2: #22D3EE;
-  --aurora-3: #F472B6;
+  /* Secondary aliases. Kept neutral/white instead of purple/blue. */
+  --aurora-1: #ffffff;
+  --aurora-2: #c7ccd6;
+  --aurora-3: #8f97a6;
 
   /* Semantic */
-  --success: #10D9A0;
-  --warning: #F59E0B;
-  --danger: #F43F5E;
-  --info: #60A5FA;
+  --success: #34d399;
+  --warning: #f7c948;
+  --danger: #ff4d61;
+  --info: #f4f6fb;
 
   /* Temperature */
-  --hot: #F97316;
-  --warm: #FBBF24;
-  --cold: #60A5FA;
+  --hot: #ff394c;
+  --warm: #f7c948;
+  --cold: #9aa3b2;
 
   /* Radii */
-  --r-xs: 6px;
-  --r-sm: 8px;
-  --r: 12px;
-  --r-lg: 16px;
-  --r-xl: 24px;
-  --r-2xl: 32px;
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r: 8px;
+  --r-lg: 8px;
+  --r-xl: 8px;
+  --r-2xl: 8px;
   --r-pill: 999px;
 
   /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.5), 0 8px 16px rgba(0, 0, 0, 0.25);
-  --shadow-xl: 0 48px 120px rgba(0, 0, 0, 0.65), 0 16px 32px rgba(0, 0, 0, 0.3);
-  --shadow-glow: 0 0 48px var(--solar-glow);
-  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.34);
+  --shadow-sm: 0 6px 14px rgba(0, 0, 0, 0.22);
+  --shadow-md: 0 14px 38px rgba(0, 0, 0, 0.34);
+  --shadow-lg: 0 28px 76px rgba(0, 0, 0, 0.46);
+  --shadow-xl: 0 40px 110px rgba(0, 0, 0, 0.62);
+  --shadow-glow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 14px 42px rgba(255, 35, 56, 0.24);
+  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 
-  /* Fonts (set via next/font, fallback here) */
-  --font-sans: var(--font-geist-sans), 'Inter', system-ui, sans-serif;
-  --font-serif: var(--font-instrument-serif), 'Georgia', serif;
-  --font-mono: var(--font-geist-mono), 'JetBrains Mono', monospace;
+  --font-sans: var(--font-inter), Inter, system-ui, sans-serif;
+  --font-serif: var(--font-inter), Inter, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 html,
@@ -88,8 +101,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  font-feature-settings: 'ss01', 'cv11';
-  letter-spacing: -0.011em;
+  font-feature-settings: 'cv11', 'tnum';
+  letter-spacing: 0;
 }
 
 body {
@@ -97,45 +110,44 @@ body {
   position: relative;
 }
 
-/* ── Ambient aurora backdrop (subtle, fixed) ── */
 body::before {
   content: '';
   position: fixed;
-  inset: -20%;
+  inset: 0;
   z-index: -2;
-  background:
-    radial-gradient(ellipse 45% 35% at 12% 10%, rgba(245, 158, 11, 0.08), transparent 55%),
-    radial-gradient(ellipse 50% 40% at 88% 20%, rgba(167, 139, 250, 0.05), transparent 60%),
-    radial-gradient(ellipse 40% 50% at 50% 95%, rgba(34, 211, 238, 0.04), transparent 65%);
-  filter: blur(40px);
-  animation: aurora-drift 40s ease-in-out infinite alternate;
   pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 35, 56, 0.12) 0%, transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055) 0 1px, transparent 1px 100%),
+    var(--canvas);
+  background-size: auto, 28px 28px, auto;
 }
 
-@keyframes aurora-drift {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(-2%, 1%) rotate(1deg); }
-  100% { transform: translate(1%, -1%) rotate(-1deg); }
-}
-
-/* ── Grain overlay (premium texture) ── */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 9999;
   pointer-events: none;
-  opacity: 0.03;
+  opacity: 0.025;
   mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* ── Typography ── */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tracking-tighter,
+.tracking-tight {
+  letter-spacing: 0 !important;
+}
+
 .font-display {
-  font-family: var(--font-serif);
-  font-style: italic;
-  letter-spacing: -0.025em;
-  line-height: 1.05;
+  font-family: var(--font-sans);
+  font-style: normal;
+  letter-spacing: 0;
+  line-height: 1.04;
 }
 
 .font-mono {
@@ -144,42 +156,43 @@ body::after {
   font-feature-settings: 'tnum', 'zero';
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: var(--text);
-  letter-spacing: -0.022em;
-  font-weight: 500;
+  letter-spacing: 0;
+  font-weight: 650;
 }
 
-/* ── Scrollbars (custom minimal) ── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: var(--border-strong);
   border-radius: var(--r-pill);
-  transition: background 150ms;
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-glow); }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* ── Selection ── */
 ::selection {
   background: var(--solar);
-  color: var(--canvas);
+  color: #ffffff;
 }
 
-/* ── Focus ring (global minimal) ── */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--canvas), 0 0 0 4px var(--solar);
+  box-shadow: 0 0 0 2px var(--canvas), 0 0 0 4px rgba(255, 35, 56, 0.72);
   border-radius: var(--r-sm);
 }
 
-/* ── Form controls reset ── */
 input,
 textarea,
 select,
@@ -206,7 +219,7 @@ input[type="month"] {
 input[type="date"]::-webkit-calendar-picker-indicator,
 input[type="time"]::-webkit-calendar-picker-indicator,
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: pointer;
   filter: invert(1);
 }
@@ -220,7 +233,6 @@ input[type="number"] { -moz-appearance: textfield; }
 input[type="file"] { display: none; }
 textarea { resize: none; }
 
-/* ── Keyframes library ── */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -228,16 +240,16 @@ textarea { resize: none; }
 
 @keyframes pulse-solar {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
+    box-shadow: 0 0 0 0 rgba(255, 35, 56, 0.45);
   }
   50% {
-    box-shadow: 0 0 0 12px rgba(245, 158, 11, 0);
+    box-shadow: 0 0 0 12px rgba(255, 35, 56, 0);
   }
 }
 
 @keyframes pulse-soft {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
+  50% { opacity: 0.58; }
 }
 
 @keyframes float {
@@ -255,51 +267,40 @@ textarea { resize: none; }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes scale-in {
-  from { opacity: 0; transform: scale(0.96); }
+  from { opacity: 0; transform: scale(0.97); }
   to { opacity: 1; transform: scale(1); }
 }
 
-/* ── Utility classes ── */
 .animate-shimmer {
   background-size: 200% 100%;
   animation: shimmer 2.2s linear infinite;
 }
 
-.animate-pulse-solar {
-  animation: pulse-solar 2.4s ease-out infinite;
-}
-
-.animate-pulse-soft {
-  animation: pulse-soft 2.5s ease-in-out infinite;
-}
-
+.animate-pulse-solar { animation: pulse-solar 2.4s ease-out infinite; }
+.animate-pulse-soft { animation: pulse-soft 2.5s ease-in-out infinite; }
 .animate-float { animation: float 5s ease-in-out infinite; }
-
 .animate-slide-up { animation: slide-up 400ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-
 .animate-scale-in { animation: scale-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-/* ── Solar gradient text ── */
 .text-solar-gradient {
-  background: linear-gradient(135deg, var(--solar) 0%, var(--solar-hot) 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #ff6a78 34%, var(--solar) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .text-aurora-gradient {
-  background: linear-gradient(135deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #c9ced8 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-/* ── Aurora border (conic animated) ── */
 .aurora-border {
   position: relative;
   isolation: isolate;
@@ -316,11 +317,11 @@ textarea { resize: none; }
   padding: 1px;
   background: conic-gradient(
     from var(--angle),
-    var(--aurora-1),
-    var(--aurora-2),
-    var(--aurora-3),
-    var(--solar),
-    var(--aurora-1)
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 35, 56, 0.86),
+    rgba(255, 255, 255, 0.45),
+    rgba(180, 0, 22, 0.86),
+    rgba(255, 255, 255, 0.2)
   );
   animation: rotate-aurora 8s linear infinite;
   mask:
@@ -332,7 +333,7 @@ textarea { resize: none; }
   mask-composite: exclude;
   -webkit-mask-composite: xor;
   opacity: 0;
-  transition: opacity 300ms;
+  transition: opacity 220ms;
 }
 
 .aurora-border:hover::before,
@@ -340,50 +341,59 @@ textarea { resize: none; }
   opacity: 1;
 }
 
-/* ── Glass surface (blur + border) ── */
 .glass {
-  background: color-mix(in srgb, var(--surface-0) 70%, transparent);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: color-mix(in srgb, var(--surface-0) 82%, transparent);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
   border: 1px solid var(--border-strong);
 }
 
-/* ── Solar gradient fill ── */
 .bg-solar-gradient {
-  background: linear-gradient(135deg, var(--solar) 0%, var(--solar-hot) 100%);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, transparent 28%),
+    linear-gradient(135deg, var(--solar) 0%, var(--solar-hot) 100%);
 }
 
 .bg-aurora-gradient {
-  background: linear-gradient(135deg, var(--aurora-1), var(--aurora-2), var(--aurora-3));
+  background: linear-gradient(135deg, #ffffff 0%, #aeb5c1 100%);
 }
 
-/* ── Grid pattern (optional backdrop) ── */
 .bg-grid {
   background-image:
     linear-gradient(var(--border) 1px, transparent 1px),
     linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 32px 32px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 88%);
 }
 
-/* ── Sonner toast ── */
+.mobile-app-frame {
+  min-height: 100dvh;
+  background:
+    linear-gradient(180deg, rgba(255, 35, 56, 0.15) 0%, transparent 22%),
+    var(--canvas);
+}
+
+.brand-chip {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: var(--shadow-inset);
+}
+
 .sf-toast {
   background: var(--surface-1) !important;
   border: 1px solid var(--border-strong) !important;
   color: var(--text) !important;
-  border-radius: var(--r-lg) !important;
+  border-radius: var(--r) !important;
   box-shadow: var(--shadow-lg) !important;
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(18px);
 }
 
-/* ── Leaflet dark ── */
 .leaflet-container {
   background: var(--canvas) !important;
-  border-radius: var(--r-lg);
+  border-radius: var(--r);
 }
-.leaflet-tile { filter: hue-rotate(180deg) invert(0.95) saturate(0.6) brightness(0.9); }
+.leaflet-tile { filter: grayscale(0.85) invert(0.96) saturate(0.35) brightness(0.72); }
 
-/* ── cmdk ── */
 [cmdk-root] { background: transparent; }
 [cmdk-input] {
   background: transparent !important;
@@ -401,17 +411,12 @@ textarea { resize: none; }
   color: var(--text);
 }
 
-/* ── Recharts dark tweaks ── */
 .recharts-cartesian-grid-horizontal line,
 .recharts-cartesian-grid-vertical line {
   stroke: var(--border) !important;
 }
 .recharts-tooltip-wrapper { outline: none !important; }
 
-/* ── Utility: no tap highlight ── */
-* { -webkit-tap-highlight-color: transparent; }
-
-/* ── Utility: hide scrollbar on carousel-like containers ── */
 .snap-x-scroll {
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;

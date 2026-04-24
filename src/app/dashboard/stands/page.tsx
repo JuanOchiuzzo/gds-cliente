@@ -266,7 +266,7 @@ function StandCard({ stand, onClick }: { stand: StandRow; onClick: () => void })
       className="cursor-pointer"
     >
       <Surface variant="elevated" padding="lg" className="relative overflow-hidden h-full hover:border-border-glow">
-        <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-solar/10 blur-[60px] pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-1 bg-solar pointer-events-none" />
         <div className="relative">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">

@@ -1,14 +1,16 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Sparkles, Mail, Lock, User, ArrowRight } from 'lucide-react';
-import { useAuth } from '@/lib/auth-context';
+import { ArrowRight, Lock, Mail, ShieldCheck, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { spring, slideUp, staggerParent } from '@/lib/motion';
+import { useAuth } from '@/lib/auth-context';
+import { cn } from '@/lib/utils';
+import { spring } from '@/lib/motion';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -60,135 +62,91 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-canvas text-text relative overflow-hidden flex">
-      {/* Animated aurora backdrop + grid pattern */}
-      <div className="pointer-events-none absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-grid opacity-[0.25]" />
-        <motion.div
-          animate={{
-            background: [
-              'radial-gradient(ellipse 60% 50% at 20% 30%, rgba(245, 158, 11, 0.18), transparent 60%)',
-              'radial-gradient(ellipse 60% 50% at 70% 20%, rgba(167, 139, 250, 0.12), transparent 60%)',
-              'radial-gradient(ellipse 60% 50% at 20% 30%, rgba(245, 158, 11, 0.18), transparent 60%)',
-            ],
-          }}
-          transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
-          className="absolute inset-0"
-        />
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] rounded-full bg-aurora-1/10 blur-[120px]" />
-        <div className="absolute top-0 left-0 w-[500px] h-[500px] rounded-full bg-solar/10 blur-[100px]" />
-        {/* Floating orbs */}
-        <motion.div
-          animate={{ y: [0, -20, 0], x: [0, 8, 0] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-          className="absolute top-1/4 left-[30%] w-2 h-2 rounded-full bg-solar blur-sm"
-        />
-        <motion.div
-          animate={{ y: [0, 16, 0], x: [0, -10, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1.5 }}
-          className="absolute top-[60%] left-[20%] w-1.5 h-1.5 rounded-full bg-aurora-2 blur-[1px]"
-        />
-        <motion.div
-          animate={{ y: [0, -24, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
-          className="absolute top-[40%] right-[40%] w-1.5 h-1.5 rounded-full bg-aurora-1 blur-[1px]"
-        />
-      </div>
+    <main className="relative min-h-[100dvh] overflow-hidden bg-canvas text-text">
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/brand/gds-login-bg.webp')" }}
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,9,11,0.12)_0%,rgba(8,9,11,0.78)_48%,#08090b_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(8,9,11,0.24),rgba(8,9,11,0.02),rgba(8,9,11,0.34))]" />
 
-      {/* Left — editorial */}
-      <div className="relative z-10 hidden lg:flex flex-col justify-between w-[58%] p-14 xl:p-20">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
+      <section className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-[440px] flex-col px-5 pb-[max(22px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))] lg:max-w-[460px]">
+        <motion.header
+          initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="flex items-center gap-2.5"
-        >
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
-            <span className="text-xs font-bold tracking-wider text-canvas">GDS</span>
-          </div>
-          <span className="text-lg font-medium tracking-tight">GDS</span>
-          <span className="ml-3 px-2 py-0.5 text-[10px] font-mono text-solar border border-solar/30 bg-solar/5 rounded-full tracking-widest uppercase">
-            Premium
-          </span>
-        </motion.div>
-
-        <motion.div
-          variants={staggerParent(0.12, 0.2)}
-          initial="hidden"
-          animate="visible"
-          className="space-y-8 max-w-xl"
-        >
-          <motion.h1
-            variants={slideUp}
-            className="font-display italic text-[56px] xl:text-[72px] leading-[0.95] tracking-tight"
-          >
-            Onde negócios<br />
-            imobiliários<br />
-            <span className="text-solar-gradient not-italic font-sans font-medium">ganham órbita.</span>
-          </motion.h1>
-          <motion.p variants={slideUp} className="text-text-soft text-[17px] leading-relaxed max-w-md">
-            Carteira viva, fila de plantão em tempo real, vouchers compartilháveis e IA que entende
-            o seu mercado — tudo em uma interface que você nunca viu antes.
-          </motion.p>
-
-          <motion.div variants={slideUp} className="flex items-center gap-6 text-[13px] text-text-faint">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse-soft" />
-              Realtime Supabase
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-solar animate-pulse-soft" />
-              Mobile-first PWA
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-aurora-2 animate-pulse-soft" />
-              IA contextual
-            </div>
-          </motion.div>
-        </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="text-[11px] text-text-ghost font-mono tracking-widest uppercase"
-        >
-          © 2026 · GDS Systems
-        </motion.p>
-      </div>
-
-      {/* Right — form */}
-      <div className="relative z-10 flex-1 flex items-center justify-center p-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97, y: 12 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={spring}
-          className="w-full max-w-[380px]"
+          className="flex items-center justify-between"
         >
-          {/* Mobile logo */}
-          <div className="lg:hidden flex items-center gap-2.5 justify-center mb-10">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
-              <span className="text-xs font-bold tracking-wider text-canvas">GDS</span>
+          <div className="flex items-center gap-3">
+            <Image
+              src="/brand/gds-app-mark.webp"
+              alt="GDS"
+              width={44}
+              height={44}
+              priority
+              className="h-11 w-11 rounded-lg border border-white/15 shadow-glow"
+            />
+            <div>
+              <p className="text-base font-semibold leading-none text-white">GDS</p>
+              <p className="mt-1 text-[10px] font-semibold uppercase text-white/60">Premium CRM</p>
             </div>
-            <span className="text-lg font-medium">GDS</span>
           </div>
+          <span className="brand-chip rounded-full px-3 py-1 text-[10px] font-semibold uppercase text-white/80">
+            Mobile
+          </span>
+        </motion.header>
 
-          <div
-            className="relative p-8 rounded-2xl bg-surface-0/70 backdrop-blur-xl border border-border-strong shadow-xl"
-          >
-            <div className="mb-8">
-              <h2 className="font-display italic text-3xl tracking-tight mb-1.5">
-                {isSignUp ? 'Crie sua conta' : 'Bem-vindo de volta.'}
-              </h2>
-              <p className="text-sm text-text-soft">
-                {isSignUp ? 'Um novo ciclo começa aqui.' : 'Continue de onde parou.'}
+        <div className="flex-1" />
+
+        <motion.div
+          initial={{ opacity: 0, y: 18, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={spring}
+          className="space-y-5"
+        >
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.07] px-3 py-1.5 text-xs font-medium text-white/80 backdrop-blur-md">
+              <ShieldCheck className="h-3.5 w-3.5 text-solar" />
+              Acesso seguro
+            </div>
+            <div>
+              <h1 className="text-[40px] font-semibold leading-[1.03] text-white sm:text-[44px]">
+                {isSignUp ? 'Crie seu acesso.' : 'Entre no painel.'}
+              </h1>
+              <p className="mt-2 max-w-[320px] text-sm leading-6 text-white/70">
+                {isSignUp
+                  ? 'Cadastre sua conta para gerenciar leads, plantões e visitas.'
+                  : 'Carteira, agenda e operação comercial em uma experiência mobile.'}
               </p>
             </div>
+          </div>
 
-            <form className="space-y-4" onSubmit={handleFormSubmit}>
+          <div className="rounded-lg border border-white/15 bg-[rgba(11,12,16,0.88)] p-4 shadow-xl backdrop-blur-xl">
+            <div className="mb-4 grid grid-cols-2 gap-1 rounded-md bg-white/[0.06] p-1">
+              {[
+                { label: 'Entrar', value: false },
+                { label: 'Criar conta', value: true },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => setIsSignUp(item.value)}
+                  className={cn(
+                    'h-10 rounded-sm text-sm font-semibold transition-colors',
+                    isSignUp === item.value
+                      ? 'bg-white text-canvas shadow-sm'
+                      : 'text-white/60 hover:text-white'
+                  )}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <form className="space-y-3" onSubmit={handleFormSubmit}>
               {isSignUp && (
                 <Input
-                  icon={<User className="w-4 h-4" />}
+                  icon={<User className="h-4 w-4" />}
                   autoComplete="name"
                   placeholder="Nome completo"
                   value={fullName}
@@ -196,19 +154,20 @@ export default function LoginPage() {
                 />
               )}
               <Input
-                icon={<Mail className="w-4 h-4" />}
+                icon={<Mail className="h-4 w-4" />}
                 autoComplete="email"
                 type="email"
+                inputMode="email"
                 placeholder="seu@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
               />
               <Input
-                icon={<Lock className="w-4 h-4" />}
+                icon={<Lock className="h-4 w-4" />}
                 autoComplete={isSignUp ? 'new-password' : 'current-password'}
                 type="password"
-                placeholder="••••••••"
+                placeholder="Senha"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
@@ -217,29 +176,17 @@ export default function LoginPage() {
               <Button
                 variant="solar"
                 size="lg"
-                className="w-full group"
+                className="h-12 w-full text-[15px]"
                 loading={loading}
                 type="submit"
               >
-                {isSignUp ? 'Criar conta' : 'Entrar'}
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                {isSignUp ? 'Criar acesso' : 'Entrar'}
+                <ArrowRight className="h-4 w-4" />
               </Button>
             </form>
-
-            <div className="mt-6 pt-6 border-t border-border text-center">
-              <p className="text-sm text-text-soft">
-                {isSignUp ? 'Já tem conta?' : 'Novo por aqui?'}{' '}
-                <button
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="text-solar font-medium hover:underline underline-offset-4"
-                >
-                  {isSignUp ? 'Entrar' : 'Criar conta'}
-                </button>
-              </p>
-            </div>
           </div>
         </motion.div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

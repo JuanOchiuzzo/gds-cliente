@@ -22,12 +22,12 @@ export function SalesChart({ data }: { data: SalesData[] }) {
       <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id="colorVendas" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.35} />
-            <stop offset="95%" stopColor="#F59E0B" stopOpacity={0} />
+            <stop offset="5%" stopColor="#FF2338" stopOpacity={0.35} />
+            <stop offset="95%" stopColor="#FF2338" stopOpacity={0} />
           </linearGradient>
           <linearGradient id="colorMeta" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#A78BFA" stopOpacity={0.25} />
-            <stop offset="95%" stopColor="#A78BFA" stopOpacity={0} />
+            <stop offset="5%" stopColor="#FFFFFF" stopOpacity={0.18} />
+            <stop offset="95%" stopColor="#FFFFFF" stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -56,7 +56,7 @@ export function SalesChart({ data }: { data: SalesData[] }) {
         <Area
           type="monotone"
           dataKey="vendas"
-          stroke="#F59E0B"
+          stroke="#FF2338"
           strokeWidth={2}
           fill="url(#colorVendas)"
           animationDuration={1500}
@@ -64,7 +64,7 @@ export function SalesChart({ data }: { data: SalesData[] }) {
         <Area
           type="monotone"
           dataKey="meta"
-          stroke="#A78BFA"
+          stroke="#FFFFFF"
           strokeWidth={2}
           strokeDasharray="5 5"
           fill="url(#colorMeta)"

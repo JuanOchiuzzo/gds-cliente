@@ -2,7 +2,7 @@
 
 import confetti from 'canvas-confetti';
 
-const SOLAR_COLORS = ['#F59E0B', '#EF4444', '#F97316', '#FBBF24', '#FFFFFF'];
+const SOLAR_COLORS = ['#FF2338', '#B40016', '#FFFFFF', '#F4F6FB'];
 
 export function fireConfetti() {
   const duration = 2500;

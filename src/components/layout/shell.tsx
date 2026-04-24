@@ -9,13 +9,13 @@ import { PageTransition } from './page-transition';
 
 export function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="relative min-h-[100dvh] bg-canvas text-text">
+    <div className="mobile-app-frame relative min-h-[100dvh] text-text">
       <OrbitRail />
       <ContextPanel />
 
-      <div className="lg:pl-[72px] xl:pl-[332px] flex flex-col min-h-[100dvh]">
+      <div className="flex min-h-[100dvh] flex-col lg:pl-[72px] xl:pl-[332px]">
         <CommandBar />
-        <main className="flex-1 px-4 lg:px-6 pt-4 pb-28 lg:pb-8">
+        <main className="mx-auto w-full max-w-[560px] flex-1 px-4 pb-28 pt-4 sm:px-5 lg:max-w-[1400px] lg:px-6 lg:pb-8">
           <PageTransition>{children}</PageTransition>
         </main>
       </div>

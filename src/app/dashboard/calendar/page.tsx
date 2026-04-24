@@ -69,7 +69,7 @@ export default function CalendarPage() {
       type: form.type,
       start_time: startTime.toISOString(),
       end_time: endTime.toISOString(),
-      color: '#F59E0B',
+      color: '#FF2338',
     });
     toast.success('Evento criado');
     setShowNew(false);

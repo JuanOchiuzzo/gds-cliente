@@ -95,30 +95,23 @@ export default function AIPage() {
       animate={{ opacity: 1 }}
       className="flex flex-col h-[calc(100dvh-120px)] relative"
     >
-      {/* Ambient background */}
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <motion.div
-          animate={{
-            background: [
-              'radial-gradient(ellipse 60% 50% at 30% 30%, rgba(245, 158, 11, 0.12), transparent 60%)',
-              'radial-gradient(ellipse 60% 50% at 70% 40%, rgba(167, 139, 250, 0.1), transparent 60%)',
-              'radial-gradient(ellipse 60% 50% at 30% 30%, rgba(245, 158, 11, 0.12), transparent 60%)',
-            ],
-          }}
-          transition={{ duration: 20, repeat: Infinity }}
-          className="absolute inset-0"
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-20"
+          style={{ backgroundImage: "url('/brand/gds-mobile-splash.webp')" }}
         />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,9,11,0.35),#08090b_70%)]" />
       </div>
 
       <div className="flex items-center gap-3 mb-4">
         <div className="relative">
-          <div className="absolute inset-0 rounded-md bg-solar blur-lg opacity-60 animate-pulse-solar" />
-          <div className="relative w-10 h-10 rounded-md bg-gradient-to-br from-solar to-solar-hot flex items-center justify-center shadow-glow">
-            <span className="text-[11px] font-bold tracking-wider text-canvas">GDS</span>
+          <div className="absolute inset-0 rounded-lg bg-solar blur-lg opacity-60 animate-pulse-solar" />
+          <div className="relative w-10 h-10 rounded-lg bg-solar-gradient flex items-center justify-center shadow-glow">
+            <span className="text-[11px] font-bold text-white">AI</span>
           </div>
         </div>
         <div>
-          <h1 className="font-display italic text-2xl tracking-tight text-text">GDS AI</h1>
+          <h1 className="text-2xl font-semibold text-text">GDS AI</h1>
           <p className="text-[11px] text-text-faint">
             Assistente contextual baseado nos seus dados
           </p>
@@ -132,12 +125,12 @@ export default function AIPage() {
               <motion.div
                 animate={{ y: [0, -8, 0], rotate: [0, 4, -4, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                className="w-20 h-20 rounded-2xl bg-gradient-to-br from-solar/20 to-aurora-1/20 border border-solar/30 flex items-center justify-center"
+                className="w-20 h-20 rounded-lg bg-solar/15 border border-solar/30 flex items-center justify-center"
               >
                 <Sparkles className="w-10 h-10 text-solar" />
               </motion.div>
               <div className="text-center px-4">
-                <h2 className="font-display italic text-2xl text-text">Como posso ajudar?</h2>
+                <h2 className="text-2xl font-semibold text-text">Como posso ajudar?</h2>
                 <p className="text-sm text-text-soft mt-2 max-w-md">
                   Consulto seus dados reais da carteira, leads e agendamentos.
                 </p>
@@ -171,7 +164,7 @@ export default function AIPage() {
                     'text-[13px] leading-relaxed whitespace-pre-wrap p-4 border rounded-lg',
                     msg.role === 'user'
                       ? 'bg-solar/10 border-solar/30 text-text rounded-tr-sm'
-                      : 'bg-surface-1 border-border-strong text-text-soft rounded-tl-sm'
+                      : 'bg-white/[0.055] border-white/[0.12] text-text-soft rounded-tl-sm'
                   )}
                 >
                   {msg.content}
@@ -181,7 +174,7 @@ export default function AIPage() {
           </AnimatePresence>
 
           {loading && (
-            <div className="flex items-center gap-2 p-3 mr-auto bg-surface-1 border border-border rounded-lg rounded-tl-sm max-w-[85%]">
+            <div className="flex items-center gap-2 p-3 mr-auto bg-white/[0.055] border border-white/[0.12] rounded-lg rounded-tl-sm max-w-[85%]">
               <div className="flex gap-1">
                 {[0, 1, 2].map((i) => (
                   <motion.div
@@ -197,20 +190,20 @@ export default function AIPage() {
           )}
         </div>
 
-        <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-white/[0.08]">
           <div className="flex items-center gap-2">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
               placeholder="Pergunte sobre seus dados…"
-              className="flex-1 h-11 px-4 bg-surface-1 border border-border-strong rounded-md text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-solar focus:bg-surface-2 transition-colors"
+              className="flex-1 h-11 px-4 bg-white/[0.055] border border-white/[0.12] rounded-lg text-sm text-text placeholder:text-text-faint focus:outline-none focus:border-solar focus:bg-white/[0.08] transition-colors"
             />
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => sendMessage(input)}
               disabled={!input.trim() || loading}
-              className="w-11 h-11 rounded-md bg-gradient-to-br from-solar to-solar-hot text-canvas disabled:opacity-40 flex items-center justify-center hover:shadow-glow transition-shadow"
+              className="w-11 h-11 rounded-lg bg-solar-gradient text-white disabled:opacity-40 flex items-center justify-center hover:shadow-glow transition-shadow"
             >
               <ArrowUp className="w-5 h-5" />
             </motion.button>
