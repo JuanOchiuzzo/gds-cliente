@@ -102,20 +102,20 @@ export default function DashboardPage() {
                 </Link>
               </div>
 
-              <div className="mt-8 grid grid-cols-[1fr_auto] items-end gap-4">
-                <div>
+              <div className="mt-8 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4">
+                <div className="min-w-0">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-fg-faint">
                     Pulso comercial
                   </p>
-                  <div className="mt-1 flex items-end gap-3">
-                    <span className="font-display text-[64px] leading-none text-fg">
+                  <div className="mt-1 flex items-end gap-2">
+                    <span className="font-display text-[48px] leading-none text-fg sm:text-[64px]">
                       <NumberFlow value={clients.length} />
                     </span>
-                    <span className="pb-2 text-xs text-fg-muted">clientes</span>
+                    <span className="pb-1.5 text-xs text-fg-muted">clientes</span>
                   </div>
                   <Sparkline data={sparkData} width={180} height={42} gradient="iris" />
                 </div>
-                <Ring value={momentum} size={104} stroke={8} label={`${momentum}%`} />
+                <Ring value={momentum} size={96} stroke={8} label={`${momentum}%`} />
               </div>
             </div>
           </Card>
@@ -163,11 +163,11 @@ export default function DashboardPage() {
             { href: '/dashboard/ai', label: 'Perguntar', icon: Sparkles },
           ].map((a) => (
             <Link key={a.href} href={a.href}>
-              <Card variant="solid" padding="sm" interactive className="h-[76px] flex items-center gap-3 px-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,rgba(157,140,255,0.25),rgba(96,222,255,0.15))] border border-white/10">
+              <Card variant="solid" padding="sm" interactive className="min-h-[76px] flex items-center gap-3 px-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-[linear-gradient(135deg,rgba(157,140,255,0.25),rgba(96,222,255,0.15))] border border-white/10">
                   <a.icon className="h-[18px] w-[18px] text-iris-hi" />
                 </span>
-                <span className="text-sm font-semibold text-fg">{a.label}</span>
+                <span className="truncate text-sm font-semibold text-fg">{a.label}</span>
               </Card>
             </Link>
           ))}
@@ -369,7 +369,7 @@ function MetricTile({
   };
   return (
     <Link href={href}>
-      <Card variant="solid" padding="md" interactive className="h-[92px]">
+      <Card variant="solid" padding="md" interactive className="flex min-h-[108px] flex-col justify-between gap-2">
         <div className="flex items-start justify-between">
           <span
             className={cn(
@@ -380,13 +380,15 @@ function MetricTile({
             {icon}
           </span>
         </div>
-        <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-fg-faint">
-          {label}
-        </p>
-        <p className="font-display text-2xl text-fg">
-          <NumberFlow value={value} />
-          {suffix}
-        </p>
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-fg-faint">
+            {label}
+          </p>
+          <p className="mt-0.5 truncate font-display text-2xl leading-tight text-fg">
+            <NumberFlow value={value} />
+            {suffix}
+          </p>
+        </div>
       </Card>
     </Link>
   );
