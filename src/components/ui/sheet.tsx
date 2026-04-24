@@ -62,7 +62,27 @@ export function SheetBody({
   className?: string;
 }) {
   return (
-    <div className={cn('px-5 pb-[max(env(safe-area-inset-bottom),20px)] overflow-y-auto max-h-[75dvh]', className)}>
+    <div className={cn('px-5 pb-5 overflow-y-auto max-h-[70dvh]', className)}>
+      {children}
+    </div>
+  );
+}
+
+export function SheetFooter({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        'flex items-center justify-end gap-2 border-t border-line px-5 py-3',
+        className,
+      )}
+      style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 14px)' }}
+    >
       {children}
     </div>
   );
